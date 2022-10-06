@@ -1,2 +1,4 @@
 # DPMS
 Demo Party Management System For Sceners
+
+ I'm  computing passionated since 1984. In 1998 I organized RadyKal Party en Granada, España and I'm visit every years another Amiga Parties around Spain. The last years I've collaborated with Posadas Party and Capacitor Party. I began to develop a web application to manage the next Capacitor Party but the pandemic cancelled the project. Last summer (2022), Posadas Party celebrated a new edition and we needed a tool to the people could vote the competitions. We use wuhu, a well known Party Management System (PMS) written in PHP. I liked me them its functions and how manages the data to the competitions and its "beamer" system. But its register system it's too simple and insecure. Wuhu it's though more like a intranet application used only for the event day.
