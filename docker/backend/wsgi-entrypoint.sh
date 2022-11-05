@@ -4,7 +4,7 @@
 # ls -la
 
 
-until cd /app/DPMS/
+until cd /app/backend/
 do
     echo "Waiting for server volume..."
 done
