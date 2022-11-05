@@ -9,7 +9,7 @@ services:
         entrypoint: /app/docker/backend/wsgi-entrypoint.sh
         image: django_backend_party
         depends_on:
-            - postgres_party
+            - postgres
         volumes:
             - .:/app
         ports:
@@ -18,7 +18,7 @@ services:
             - ./.envs/.django
             - ./.envs/.postgres
 
-    postgres_party:
+    postgres:
         build:
             context: .
             dockerfile: ./docker/postgres/Dockerfile
