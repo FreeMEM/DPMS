@@ -3,7 +3,7 @@
 import environ
 
 ROOT_DIR = environ.Path(__file__) - 3
-APPS_DIR = ROOT_DIR.path('cride')
+APPS_DIR = ROOT_DIR.path('dpms')
 
 env = environ.Env()
 
@@ -139,7 +139,7 @@ ADMINS = [
 MANAGERS = ADMINS
 
 # Celery
-# INSTALLED_APPS += ['cride.taskapp.celery.CeleryAppConfig']
+# INSTALLED_APPS += ['dpms.taskapp.celery.CeleryAppConfig']
 # if USE_TZ:
 #     CELERY_TIMEZONE = TIME_ZONE
 # CELERY_BROKER_URL = env('CELERY_BROKER_URL')
