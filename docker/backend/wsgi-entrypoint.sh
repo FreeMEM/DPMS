@@ -31,7 +31,8 @@ try:
         host="${POSTGRES_HOST}",
         port="${POSTGRES_PORT}",
     )
-except psycopg2.OperationalError:
+except psycopg2.OperationalError as e:
+    print(e)
     sys.exit(-1)
 sys.exit(0)
 
