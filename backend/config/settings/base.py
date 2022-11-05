@@ -134,18 +134,18 @@ EMAIL_BACKEND = env('DJANGO_EMAIL_BACKEND', default='django.core.mail.backends.s
 # Admin
 ADMIN_URL = 'admin/'
 ADMINS = [
-    ("""Pablo Trinidad""", 'pablotrinidad@ciencias.unam.mx'),
+    ("""Francisco A. Tapias""", 'freemem@freemem.space'),
 ]
 MANAGERS = ADMINS
 
 # Celery
-INSTALLED_APPS += ['cride.taskapp.celery.CeleryAppConfig']
-if USE_TZ:
-    CELERY_TIMEZONE = TIME_ZONE
-CELERY_BROKER_URL = env('CELERY_BROKER_URL')
-CELERY_RESULT_BACKEND = CELERY_BROKER_URL
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERYD_TASK_TIME_LIMIT = 5 * 60
-CELERYD_TASK_SOFT_TIME_LIMIT = 60
+# INSTALLED_APPS += ['cride.taskapp.celery.CeleryAppConfig']
+# if USE_TZ:
+#     CELERY_TIMEZONE = TIME_ZONE
+# CELERY_BROKER_URL = env('CELERY_BROKER_URL')
+# CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+# CELERY_ACCEPT_CONTENT = ['json']
+# CELERY_TASK_SERIALIZER = 'json'
+# CELERY_RESULT_SERIALIZER = 'json'
+# CELERYD_TASK_TIME_LIMIT = 5 * 60
+# CELERYD_TASK_SOFT_TIME_LIMIT = 60
