@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+    backend_party:
+        restart: unless-stopped
+        build:
+            context: .
+            dockerfile: ./docker/backend/development.Dockerfile
+        entrypoint: /app/docker/backend/wsgi-entrypoint.sh
+        image: django_backend_party
+        depends_on:
+            - postgres_party
+        volumes:
+            - .:/app
+        ports:
+            - "8000:8000"
+        env_file:
+            - ./.envs/.django
+            - ./.envs/.postgres
+
+    postgres_party:
+        build:
+            context: .
+            dockerfile: ./docker/postgres/Dockerfile
+        image: postgres_db_party_backend
+        volumes:
+            - postgres_party_volume:/var/lib/postgresql/data
+            - postgres_party_volume_backups:/backups
+        env_file:
+            - ./.envs/.postgres
+
+volumes:
+    postgres_party_volume: {}
+    postgres_party_volume_backups: {}
