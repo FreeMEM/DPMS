@@ -1,0 +1,49 @@
+# Base
+pytz
+python-slugify
+Pillow
+psycopg2
+
+
+# Django
+Django
+
+# Environment
+django-environ
+
+# Django REST Framework
+djangorestframework
+djangorestframework-recursive
+django-filter
+
+
+
+# JWT
+pyjwt
+
+# Passwords security
+#argon2-cffi==20.1.0
+argon2-cffi
+
+# Static files
+whitenoise==5.2.0
+
+# Cors Headers
+django-cors-headers
+
+# Swagger
+drf-yasg
+
+#Tools
+django-extensions
+
+# Pandas
+#pandas
+#numpy
+#openpyxl
+utm
+
+beautifulsoup4
+lxml
+
+django-admin-rangefilter

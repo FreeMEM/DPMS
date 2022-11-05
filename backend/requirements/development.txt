@@ -1,0 +1,11 @@
+-r ./base.txt
+
+# Debugging
+ipdb
+
+# Tools
+django-extensions
+
+
+# Code quality
+flake8
