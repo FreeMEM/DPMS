@@ -45,6 +45,10 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    "rest_framework",
+    "rest_framework.authtoken",
+    "drf_yasg",
+    "corsheaders",
 ]
 LOCAL_APPS = [
     "dpms.users.apps.UsersAppConfig",
@@ -88,9 +92,9 @@ MIDDLEWARE = [
 # Static files
 STATIC_ROOT = str(ROOT_DIR('staticfiles'))
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    str(APPS_DIR.path('static')),
-]
+# STATICFILES_DIRS = [
+#     str(APPS_DIR.path('static')),
+# ]
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
