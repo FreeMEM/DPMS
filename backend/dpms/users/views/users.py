@@ -79,21 +79,20 @@ class UserViewSet(
         extended_data = UserModelSerializer(user).data
         data = {
             "user": extended_data,
-            # "menu": menuserializer.data,
             "access_token": token,
-            "jwt_access_token": jwt_access_token,
+            # "jwt_access_token": jwt_access_token,
         }
         return Response(data, status=status.HTTP_202_ACCEPTED)
 
-    # @action(detail=False, methods=["post"])
-    # def signup(self, request):
-    #     """User sign up."""
-    #     serializer = UserSignUpSerializer(data=request.data)
+    @action(detail=False, methods=["post"])
+    def signup(self, request):
+        """User sign up."""
+        serializer = UserSignUpSerializer(data=request.data)
 
-    #     serializer.is_valid(raise_exception=True)
-    #     user = serializer.save()
-    #     data = UserModelSerializer(user).data
-    #     return Response(data, status=status.HTTP_201_CREATED)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        data = UserModelSerializer(user).data
+        return Response(data, status=status.HTTP_201_CREATED)
 
     # @action(detail=False, methods=["post"])
     # def verify(self, request):
