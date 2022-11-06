@@ -57,30 +57,25 @@ class UserModelSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "email",
-            "profile"
+            "profile",
         )
 
 
 class UserSignUpSerializer(serializers.Serializer):
-    """User Signup serializer
-
-    Handle sign up data validation and user/profile creation
+    """
+        User Signup serializer
+        Handle sign up data validation and user/profile creation
     """
 
     # Account
     email = serializers.EmailField(
-        validators=[
-            UniqueValidator(queryset=User.objects.all())
-        ],  # Valida que sea único dentro del modelo User
+        validators=[UniqueValidator(queryset=User.objects.all())],  # Valida que sea único dentro del modelo User
     )
 
-    # Nickname
     username = serializers.CharField(
         min_length=4,
         max_length=20,
-        validators=[
-            UniqueValidator(queryset=User.objects.all())
-        ],  # Valida que sea único dentro del modelo User
+        validators=[UniqueValidator(queryset=User.objects.all())],  # Valida que sea único dentro del modelo User
     )
 
     # Password
@@ -103,8 +98,8 @@ class UserSignUpSerializer(serializers.Serializer):
     def create(self, data):
         data.pop("password_confirmation")
         user = User.objects.create_user(**data, is_verified=False)
-        Profile.objects.create(user=user)
-        self.send_confirmation_email(user)
+        profile=Profile.objects.create(user=user)
+        # self.send_confirmation_email(user)
         return user
 
     def send_confirmation_email(self, user):
@@ -133,7 +128,7 @@ class UserSignUpSerializer(serializers.Serializer):
             "type": "email_confirmation",
         }
         token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
-        return token.decode()
+        return token
 
 
 class UserLoginSerializer(serializers.Serializer):
@@ -168,6 +163,7 @@ class UserLoginSerializer(serializers.Serializer):
         return self.context["user"], token.key, jwt_access_token
 
     def gen_jwt_access_token(self):
+        
         """Create JWT token that the user can use to verify  its account."""
         exp_date = timezone.now() + timedelta(days=30)
         payload = {
@@ -175,9 +171,8 @@ class UserLoginSerializer(serializers.Serializer):
             "type": "expiration date",
             "username": self.context["user"].username,
         }
-        # print(payload)
         token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
-        return token.decode()
+        return token
 
 
 class AccountVerificationSerializer(serializers.Serializer):
