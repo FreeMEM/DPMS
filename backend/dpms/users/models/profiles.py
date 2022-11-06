@@ -13,7 +13,7 @@ from dpms.utils.models import BaseModel
 class Profile(BaseModel):
     """Profile model
 
-    A profile hold's a user's public data like biography, picture, and statistics
+    A profile hold's a user's public data like biography, picture, statistics and compatible wuhu fields
 
     """
 
@@ -25,7 +25,7 @@ class Profile(BaseModel):
 
     avatar = models.ImageField(
         "avatar profile",
-        upload_to="users/picture",
+        upload_to="users/pictures/",
         blank=True,
         null=True,
     )
