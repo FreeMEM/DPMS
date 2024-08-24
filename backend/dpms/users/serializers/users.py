@@ -4,18 +4,17 @@
 from django.core.mail import EmailMultiAlternatives
 from django.contrib.auth import authenticate, password_validation
 from django.template.loader import render_to_string
+from django.db import IntegrityError
 from django.conf import settings
 
 # Utilities
 from django.utils import timezone
 from datetime import timedelta
 import jwt
-
-# from django.core.validators import RegexValidator
+import logging
 
 # Serializers
 from dpms.users.serializers.profiles import ProfileModelSerializer
-
 
 # Django REST Framework
 from rest_framework.authtoken.models import Token
@@ -25,6 +24,8 @@ from rest_framework import serializers
 # Models
 from dpms.users.models import User, Profile
 
+logger = logging.getLogger(__name__)
+
 
 class ResumedUserModelSerializer(serializers.ModelSerializer):
     """Resumed User model serializer"""
@@ -33,7 +34,7 @@ class ResumedUserModelSerializer(serializers.ModelSerializer):
         """Meta class"""
 
         model = User
-        fields = ("username", "email", "first_name", "last_name")
+        fields = ("email", "first_name", "last_name")
 
 
 class UserModelSerializer(serializers.ModelSerializer):
@@ -48,7 +49,6 @@ class UserModelSerializer(serializers.ModelSerializer):
 
         model = User
         fields = (
-            "username",
             "first_name",
             "last_name",
             "email",
@@ -62,11 +62,20 @@ class UserSignUpSerializer(serializers.Serializer):
     Handle sign up data validation and user/profile creation
     """
 
+    class Meta:
+        model = User
+        fields = ["email", "password"]
+
     # Account
     email = serializers.EmailField(
         validators=[
             UniqueValidator(queryset=User.objects.all())
         ],  # Valida que sea único dentro del modelo User
+    )
+    username = serializers.CharField(
+        min_length=2,
+        max_length=50,
+        validators=[UniqueValidator(queryset=User.objects.all())],
     )
 
     # Password
@@ -87,11 +96,18 @@ class UserSignUpSerializer(serializers.Serializer):
         return data
 
     def create(self, data):
-        data.pop("password_confirmation")
-        user = User.objects.create_user(**data, is_verified=False)
-        Profile.objects.create(user=user)
-        self.send_confirmation_email(user)
-        return user
+        try:
+            data.pop("password_confirmation")
+            logger.info("Data>>>>>>>>>>>>>>>>>> ", data)
+            user = User.objects.create_user(**data, is_verified=False)
+            # logger.info(user)
+            Profile.objects.create(user=user)
+            self.send_confirmation_email(user)
+            return user
+        except IntegrityError:
+            raise serializers.ValidationError("A user with that email already exists.")
+        except Exception as e:
+            raise serializers.ValidationError(f"An error occurred: {str(e)}")
 
     def send_confirmation_email(self, user):
         """Send account verification link to given user."""
@@ -104,14 +120,12 @@ class UserSignUpSerializer(serializers.Serializer):
             "emails/users/account_verification.html",
             {"token": verification_token, "user": user},
         )
-        # print(content)
         msg = EmailMultiAlternatives(subject, content, from_email, [user.email])
         msg.attach_alternative(content, "text/html")
-
         # msg.send()
 
     def gen_verification_token(self, user):
-        """Create JWT token that the user can use to verify  its account."""
+        """Create JWT token that the user can use to verify its account."""
         exp_date = timezone.now() + timedelta(days=3)
         payload = {
             "user": user.email,
@@ -145,20 +159,18 @@ class UserLoginSerializer(serializers.Serializer):
     def create(self, data):
         """Generate or retrieve a new token"""
         jwt_access_token = self.gen_jwt_access_token()
-        # token, created = Token.objects.get_or_create(user=self.context["user"])
-
         if not self.context["user"].allow_concurrence:
             Token.objects.get(user=self.context["user"]).delete()
         token, created = Token.objects.get_or_create(user=self.context["user"])
         return self.context["user"], token.key, jwt_access_token
 
     def gen_jwt_access_token(self):
-        """Create JWT token that the user can use to verify  its account."""
+        """Create JWT token that the user can use to verify its account."""
         exp_date = timezone.now() + timedelta(days=30)
         payload = {
             "exp": int(exp_date.timestamp()),
             "type": "expiration date",
-            "username": self.context["user"].username,
+            "email": self.context["user"].email,
         }
         token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
         return token
@@ -187,6 +199,6 @@ class AccountVerificationSerializer(serializers.Serializer):
     def save(self):
         """Update user's verified status."""
         payload = self.context["payload"]
-        user = User.objects.get(username=payload["user"])
+        user = User.objects.get(email=payload["user"])
         user.is_verified = True
         user.save()
