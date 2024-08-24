@@ -98,9 +98,8 @@ class UserSignUpSerializer(serializers.Serializer):
     def create(self, data):
         try:
             data.pop("password_confirmation")
-            logger.info("Data>>>>>>>>>>>>>>>>>> ", data)
+            logger.info(">> signup: %s", data["email"])
             user = User.objects.create_user(**data, is_verified=False)
-            # logger.info(user)
             Profile.objects.create(user=user)
             self.send_confirmation_email(user)
             return user
@@ -122,7 +121,7 @@ class UserSignUpSerializer(serializers.Serializer):
         )
         msg = EmailMultiAlternatives(subject, content, from_email, [user.email])
         msg.attach_alternative(content, "text/html")
-        # msg.send()
+        msg.send()
 
     def gen_verification_token(self, user):
         """Create JWT token that the user can use to verify its account."""

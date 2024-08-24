@@ -59,7 +59,7 @@ LOGGING = {
         "console3": {"class": "logging.StreamHandler", "formatter": "vverbose"},
     },
     "loggers": {
-        "arboles": {
+        "dpms": {
             "handlers": ["console2"],
             "level": LOG_LEVEL,
         },
