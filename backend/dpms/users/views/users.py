@@ -1,26 +1,21 @@
 """ Users views."""
 
 # Django Rest framework
-# from rest_framework.views import APIView
-
 from rest_framework.response import Response
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
-
-from pprint import pprint
 
 # Serializers
 from dpms.users.serializers import (
     UserLoginSerializer,
     UserModelSerializer,
     UserSignUpSerializer,
-    # AccountVerificationSerializer,
+    AccountVerificationSerializer,
     ProfileModelSerializer,
 )
 
 # Models
 from dpms.users.models import User
-
 
 # Permissions
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -34,8 +29,6 @@ import jwt
 # Django
 from django.conf import settings
 
-# Serializers
-
 
 class UserViewSet(
     mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet
@@ -45,7 +38,6 @@ class UserViewSet(
     Handle sign up, login and account verification
     """
 
-    # lookup_value_regex = "[0-9.]+"
     queryset = User.objects.filter(is_active=True)
     serializer_class = UserModelSerializer
 
@@ -81,7 +73,7 @@ class UserViewSet(
         data = {
             "user": extended_data,
             "access_token": token,
-            # "jwt_access_token": jwt_access_token,
+            "jwt_access_token": jwt_access_token,
         }
         return Response(data, status=status.HTTP_202_ACCEPTED)
 
@@ -89,7 +81,6 @@ class UserViewSet(
     def signup(self, request):
         """User sign up."""
         serializer = UserSignUpSerializer(data=request.data)
-
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         data = UserModelSerializer(user).data
@@ -98,19 +89,18 @@ class UserViewSet(
     @action(detail=False, methods=["post"])
     def verify(self, request):
         """Account verification"""
-
         serializer = AccountVerificationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        data = {"message": "Congratulations and wellcome to Capacitor Party community"}
+        data = {"message": "Congratulations and welcome to Capacitor Party community"}
         return Response(data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["put", "patch"])
-    def profile(self, request, *args, **kargs):
+    def profile(self, request, *args, **kwargs):
         """Update user profile data"""
         user = self.get_object()
         profile = user.profile
-        partial = request.method == "PATH"
+        partial = request.method == "PATCH"
         serializer = ProfileModelSerializer(profile, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         serializer.save()

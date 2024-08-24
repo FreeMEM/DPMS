@@ -3,44 +3,46 @@
 # Django
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
-from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 # Utilities
 from dpms.utils.models import BaseModel
 
+# Managers
+from dpms.users.models.managers import UserManager
+
 
 class User(BaseModel, AbstractUser):
-    """User model
-
-    Extend from Django's Abstract User, change the username field
-    to email and add some extra fields
-    """
+    """User model"""
 
     email = models.EmailField(
-        "email address",
+        _("email address"),
         unique=True,
-        error_messages={"unique": "A user with that email already exists."},
+        error_messages={"unique": _("A user with that email already exists.")},
     )
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ["username"]
 
     is_verified = models.BooleanField(
-        "Verified",
+        _("Verified"),
         default=False,
-        help_text="Set to true when the user have verified its email address",
+        help_text=_("Set to true when the user has verified their email address"),
     )
 
     allow_concurrence = models.BooleanField(
-        "Concurrencia permitida",
+        _("Concurrencia permitida"),
         default=False,
-        help_text="allows you to be logged in on several devices at the same time with the same user",
+        help_text=_(
+            "Allows you to be logged in on several devices at the same time with the same user"
+        ),
     )
 
+    objects = UserManager()
+
     def __str__(self):
-        """Return nickname"""
-        return self.username
+        """Return email"""
+        return self.email
 
     def get_short_name(self):
-        return self.username
+        return self.email
