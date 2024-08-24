@@ -1,6 +1,5 @@
 """ User model """
 
-
 # Django
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -25,8 +24,7 @@ class User(BaseModel, AbstractUser):
     )
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["username",]
-
+    REQUIRED_FIELDS = []
 
     is_verified = models.BooleanField(
         "Verified",

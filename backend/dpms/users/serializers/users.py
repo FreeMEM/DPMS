@@ -33,12 +33,7 @@ class ResumedUserModelSerializer(serializers.ModelSerializer):
         """Meta class"""
 
         model = User
-        fields = (
-            "username",
-            "email",
-            "first_name",
-            "last_name"
-        )
+        fields = ("username", "email", "first_name", "last_name")
 
 
 class UserModelSerializer(serializers.ModelSerializer):
@@ -63,19 +58,15 @@ class UserModelSerializer(serializers.ModelSerializer):
 
 class UserSignUpSerializer(serializers.Serializer):
     """
-        User Signup serializer
-        Handle sign up data validation and user/profile creation
+    User Signup serializer
+    Handle sign up data validation and user/profile creation
     """
 
     # Account
     email = serializers.EmailField(
-        validators=[UniqueValidator(queryset=User.objects.all())],  # Valida que sea único dentro del modelo User
-    )
-
-    username = serializers.CharField(
-        min_length=4,
-        max_length=20,
-        validators=[UniqueValidator(queryset=User.objects.all())],  # Valida que sea único dentro del modelo User
+        validators=[
+            UniqueValidator(queryset=User.objects.all())
+        ],  # Valida que sea único dentro del modelo User
     )
 
     # Password
@@ -98,15 +89,15 @@ class UserSignUpSerializer(serializers.Serializer):
     def create(self, data):
         data.pop("password_confirmation")
         user = User.objects.create_user(**data, is_verified=False)
-        profile=Profile.objects.create(user=user)
-        # self.send_confirmation_email(user)
+        Profile.objects.create(user=user)
+        self.send_confirmation_email(user)
         return user
 
     def send_confirmation_email(self, user):
         """Send account verification link to given user."""
         verification_token = self.gen_verification_token(user)
         subject = "Bienvenido @{}! Confirma tu cuenta para empezar a participar en CapacitorParty".format(
-            user.username
+            user.email
         )
         from_email = "Capacitor Party <noreply@capacitorparty.com"
         content = render_to_string(
@@ -123,7 +114,7 @@ class UserSignUpSerializer(serializers.Serializer):
         """Create JWT token that the user can use to verify  its account."""
         exp_date = timezone.now() + timedelta(days=3)
         payload = {
-            "user": user.username,
+            "user": user.email,
             "exp": int(exp_date.timestamp()),
             "type": "email_confirmation",
         }
@@ -141,7 +132,6 @@ class UserLoginSerializer(serializers.Serializer):
     password = serializers.CharField(min_length=5, max_length=64)
 
     def validate(self, data):
-
         """Check credentials."""
         user = authenticate(username=data["email"], password=data["password"])
         if not user:
@@ -163,7 +153,6 @@ class UserLoginSerializer(serializers.Serializer):
         return self.context["user"], token.key, jwt_access_token
 
     def gen_jwt_access_token(self):
-        
         """Create JWT token that the user can use to verify  its account."""
         exp_date = timezone.now() + timedelta(days=30)
         payload = {

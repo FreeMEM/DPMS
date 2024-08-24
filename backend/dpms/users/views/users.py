@@ -36,11 +36,12 @@ from django.conf import settings
 
 # Serializers
 
+
 class UserViewSet(
     mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet
 ):
-    """User view set.
-
+    """
+    User view set.
     Handle sign up, login and account verification
     """
 
@@ -48,8 +49,8 @@ class UserViewSet(
     queryset = User.objects.filter(is_active=True)
     serializer_class = UserModelSerializer
 
-    lookup_field = "username"
-    lookup_url_kwarg = "username"
+    lookup_field = "email"
+    lookup_url_kwarg = "email"
     lookup_value_regex = "[\w@.-_]+"
 
     def get_permissions(self):
@@ -94,15 +95,15 @@ class UserViewSet(
         data = UserModelSerializer(user).data
         return Response(data, status=status.HTTP_201_CREATED)
 
-    # @action(detail=False, methods=["post"])
-    # def verify(self, request):
-    #     """Account verification"""
+    @action(detail=False, methods=["post"])
+    def verify(self, request):
+        """Account verification"""
 
-    #     serializer = AccountVerificationSerializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     serializer.save()
-    #     data = {"message": "Congratulations and wellcome to Capacitor Party community"}
-    #     return Response(data, status=status.HTTP_200_OK)
+        serializer = AccountVerificationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        data = {"message": "Congratulations and wellcome to Capacitor Party community"}
+        return Response(data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["put", "patch"])
     def profile(self, request, *args, **kargs):
