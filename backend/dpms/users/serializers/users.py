@@ -111,13 +111,14 @@ class UserSignUpSerializer(serializers.Serializer):
     def send_confirmation_email(self, user):
         """Send account verification link to given user."""
         verification_token = self.gen_verification_token(user)
+        verification_url = f"{settings.BACKEND_URL}/users/verify?={verification_token}"
         subject = "Bienvenido @{}! Confirma tu cuenta para empezar a participar en CapacitorParty".format(
             user.email
         )
         from_email = "Capacitor Party <noreply@capacitorparty.com"
         content = render_to_string(
             "emails/users/account_verification.html",
-            {"token": verification_token, "user": user},
+            {"token": verification_token, "user": user, "link": verification_url},
         )
         msg = EmailMultiAlternatives(subject, content, from_email, [user.email])
         msg.attach_alternative(content, "text/html")
