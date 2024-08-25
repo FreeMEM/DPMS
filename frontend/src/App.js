@@ -1,24 +1,23 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import theme from "./theme";
+import NavBar from "./@dpms-freemem/MainBar";
+import Content from "./@dpms-freemem/Content";
 
 function App() {
+  const [page, setPage] = useState(0);
+
+  const handleChange = (event, newValue) => {
+    setPage(newValue);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <NavBar value={page} handleChange={handleChange} />
+      <Content page={page} />
+    </ThemeProvider>
   );
 }
 
