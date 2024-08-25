@@ -36,39 +36,6 @@ WSGI_APPLICATION = "config.wsgi.application"
 AUTH_USER_MODEL = "users.User"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {module} {message}",
-            "style": "{",
-        },
-        "simple": {
-            "format": "{levelname} {message}",
-            "style": "{",
-        },
-        "vverbose": {
-            "format": "{asctime} {levelname} {name} {module} {process:d} {thread:d} {message}",
-            "style": "{",
-        },
-    },
-    "handlers": {
-        "console1": {"class": "logging.StreamHandler", "formatter": "simple"},
-        "console2": {"class": "logging.StreamHandler", "formatter": "verbose"},
-        "console3": {"class": "logging.StreamHandler", "formatter": "vverbose"},
-    },
-    "loggers": {
-        "dpms": {
-            "handlers": ["console2"],
-            "level": LOG_LEVEL,
-        },
-        "django": {
-            "handlers": ["console1"],
-            "level": "INFO",
-        },
-    },
-}
 # Apps
 DJANGO_APPS = [
     "django.contrib.auth",
