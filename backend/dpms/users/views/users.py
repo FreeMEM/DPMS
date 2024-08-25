@@ -86,12 +86,25 @@ class UserViewSet(
         data = UserModelSerializer(user).data
         return Response(data, status=status.HTTP_201_CREATED)
 
-    @action(detail=False, methods=["post"])
+    @action(detail=False, methods=["get"], permission_classes=[AllowAny])
     def verify(self, request):
+        # """Account verification"""
+        # serializer = AccountVerificationSerializer(data=request.data)
+        # serializer.is_valid(raise_exception=True)
+        # serializer.save()
+        # data = {"message": "Congratulations and welcome to Capacitor Party community"}
+        # return Response(data, status=status.HTTP_200_OK)
         """Account verification"""
-        serializer = AccountVerificationSerializer(data=request.data)
+        token = request.query_params.get("token")
+        if not token:
+            return Response(
+                {"error": "Token is required."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer = AccountVerificationSerializer(data={"token": token})
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
         data = {"message": "Congratulations and welcome to Capacitor Party community"}
         return Response(data, status=status.HTTP_200_OK)
 
