@@ -111,7 +111,9 @@ class UserSignUpSerializer(serializers.Serializer):
     def send_confirmation_email(self, user):
         """Send account verification link to given user."""
         verification_token = self.gen_verification_token(user)
-        verification_url = f"{settings.BACKEND_URL}/users/verify?={verification_token}"
+        verification_url = (
+            f"{settings.BACKEND_URL}/users/verify?token={verification_token}"
+        )
         subject = "Bienvenido @{}! Confirma tu cuenta para empezar a participar en CapacitorParty".format(
             user.email
         )
@@ -158,16 +160,23 @@ class UserLoginSerializer(serializers.Serializer):
 
     def create(self, data):
         """Generate or retrieve a new token"""
-        jwt_access_token = self.gen_jwt_access_token()
-        if not self.context["user"].allow_concurrence:
-            Token.objects.get(user=self.context["user"]).delete()
-        token, created = Token.objects.get_or_create(user=self.context["user"])
-        return self.context["user"], token.key, jwt_access_token
+        user = self.context["user"]
+        try:
+            Token.objects.get(user=user).delete()
+        except Token.DoesNotExist:
+            pass  # Si el token no existe, simplemente pasamos
 
-    def gen_jwt_access_token(self):
+        token = Token.objects.create(user=user)
+        jwt_access_token = self.generate_jwt_token(user)
+
+        return user, token.key, jwt_access_token
+
+    def generate_jwt_token(self, user):
         """Create JWT token that the user can use to verify its account."""
         exp_date = timezone.now() + timedelta(days=30)
         payload = {
+            "user_id": user.id,
+            "iat": int(timezone.now().timestamp()),
             "exp": int(exp_date.timestamp()),
             "type": "expiration date",
             "email": self.context["user"].email,
