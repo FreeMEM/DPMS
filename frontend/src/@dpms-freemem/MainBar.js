@@ -1,27 +1,30 @@
 // src/NavBar.js
 import React from "react";
-import { AppBar, Toolbar, Typography, Tabs, Tab } from "@mui/material";
+import { AppBar, Toolbar, Tabs, Tab, Box } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 function NavBar({ value, handleChange }) {
+  const { t } = useTranslation();
+
   return (
     <AppBar position="static">
       <Toolbar>
-        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+        <Box sx={{ flexGrow: 1 }}>
           <img
             src={`${process.env.PUBLIC_URL}/assets/logo_navbar2024.png`}
             alt="Posadas Party Logo"
             style={{ height: 50 }}
           />
-        </Typography>
+        </Box>
         <Tabs value={value} onChange={handleChange} textColor="inherit" indicatorColor="secondary">
-          <Tab label="INICIO" />
-          <Tab label="¿QUÉ ES?" />
-          <Tab label="COMPETICIONES" />
-          <Tab label="NORMATIVA" />
-          <Tab label="GALERÍA" />
-          <Tab label="CONTACTO" />
-          <Tab label="REGISTRO" />
-          <Tab label="LOGIN" />
+          <Tab label={t("HOME")} />
+          <Tab label={t("WHAT IS IT?")} />
+          <Tab label={t("COMPETITIONS")} />
+          <Tab label={t("RULES")} />
+          <Tab label={t("GALLERY")} />
+          <Tab label={t("CONTACT")} />
+          <Tab label={t("REGISTER")} />
+          <Tab label={t("LOGIN")} />
         </Tabs>
       </Toolbar>
     </AppBar>
