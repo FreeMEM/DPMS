@@ -4,6 +4,7 @@
 from rest_framework.response import Response
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import AuthenticationFailed, ValidationError
 
 # Serializers
 from dpms.users.serializers import (
@@ -65,17 +66,37 @@ class UserViewSet(
     @action(detail=False, methods=["post"])
     def login(self, request):
         """User sign in."""
+        print("LLEGO")
         serializer = UserLoginSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        user, token, jwt_access_token = serializer.save()
-        extended_data = UserModelSerializer(user).data
-        data = {
-            "user": extended_data,
-            "access_token": token,
-            "jwt_access_token": jwt_access_token,
-        }
-        return Response(data, status=status.HTTP_202_ACCEPTED)
+        try:
+            print("LLEGO1")
+            serializer.is_valid(raise_exception=True)
+            print("LLEGO2")
+            user, token, jwt_access_token = serializer.save()
+            print("LLEGO3")
+            extended_data = UserModelSerializer(user).data
+            print("LLEGO4")
+            data = {
+                "user": extended_data,
+                "access_token": token,
+                "jwt_access_token": jwt_access_token,
+            }
+            print("LLEGO5")
+            return Response(data, status=status.HTTP_202_ACCEPTED)
+        except AuthenticationFailed:
+            print("LLEGO2")
+            return Response(
+                {"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED
+            )
+        except ValidationError as e:
+            if (
+                "non_field_errors" in e.detail
+                and e.detail["non_field_errors"][0].code == "invalid"
+            ):
+                return Response(
+                    {"detail": "Invalid credentials"},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
 
     @action(detail=False, methods=["post"])
     def signup(self, request):
