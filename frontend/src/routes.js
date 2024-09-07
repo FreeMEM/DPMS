@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-d
 import { AuthContext } from "./@dpms-freemem/AuthContext"; // Ruta relativa correcta
 import Login from "./components/user/Login"; // Ruta relativa correcta
 import Register from "./components/user/Register"; // Ruta relativa correcta
+import ForgotPassword from "./components/user/ForgotPassword";
 import Dashboard from "./components/Dashboard"; // Ruta relativa correcta
 import Error404 from "./components/Error404"; // Ruta relativa correcta
 
@@ -31,6 +32,7 @@ const AppRoutes = () => {
           }
         />
         <Route path="/" element={<Navigate to="/dashboard" />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="*" element={<Error404 />} />
       </Routes>
     </Router>
