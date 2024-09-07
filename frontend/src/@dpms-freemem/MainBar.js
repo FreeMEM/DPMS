@@ -45,15 +45,18 @@ function MainBar() {
   return (
     <Box>
       <Box className="top-bar">
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={toggleDrawer}
-          className="icon-button"
-        >
-          <MenuIcon />
-        </IconButton>
+        <Box display="flex" alignItems="center">
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={toggleDrawer}
+            className="icon-button"
+          >
+            <MenuIcon />
+          </IconButton>
+          <img src={`${process.env.PUBLIC_URL}/assets/logo_navbar2024.png`} alt="Posadas Party Logo" className="logo" />
+        </Box>
         <IconButton
           color="inherit"
           aria-label="account of current user"
