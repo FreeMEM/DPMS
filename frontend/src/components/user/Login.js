@@ -54,12 +54,20 @@ const Login = () => {
   return (
     <ThemeProvider theme={theme}>
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh" bgcolor="background.default">
-        <Paper elevation={3} sx={{ padding: 4, maxWidth: 400, width: "100%" }}>
+        <Paper
+          elevation={3}
+          sx={{
+            padding: 4,
+            maxWidth: 400,
+            width: "100%",
+            margin: { xs: 2, sm: 3 }, // Márgenes laterales en pantallas pequeñas
+          }}
+        >
           <Box display="flex" justifyContent="center" mb={2}>
             <img
               src={`${process.env.PUBLIC_URL}/assets/logo_navbar2024.png`}
               alt="Posadas Party Logo"
-              style={{ height: 100 }}
+              style={{ height: 80 }}
             />
           </Box>
           <Typography variant="h5" align="center" gutterBottom>
