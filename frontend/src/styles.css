@@ -36,14 +36,14 @@
 }
 
 .logo {
-  height: 60px;
-  margin: 0 auto; /* Centrar horizontalmente */
+  height: 40px;
+  margin-left: 16px; /* Alinear con los ListItem */
 }
 
 .drawer-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start; /* Alinear a la izquierda */
   padding: 16px; /* Ajustar el padding para el contenido del drawer */
 }
 
