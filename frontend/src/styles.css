@@ -1,0 +1,62 @@
+/* styles.css */
+.top-bar {
+  background-color: rgba(84, 84, 84, 0.8); /* Basado en #545454 con transparencia */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px; /* Espaciado interno */
+}
+
+.drawer {
+  width: 240px;
+  flex-shrink: 0;
+}
+
+.drawer-paper {
+  width: 240px;
+  box-sizing: border-box;
+}
+
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px; /* Ajustar el padding para que el logo y el botón estén alineados */
+}
+
+.icon-button {
+  margin-left: 16px; /* 16px es equivalente a 2 unidades de Material-UI */
+  display: none; /* Ocultar por defecto */
+}
+
+@media (max-width: 600px) {
+  .icon-button {
+    display: inline-flex; /* Mostrar en pantallas pequeñas */
+  }
+}
+
+.logo {
+  height: 60px;
+  margin: 0 auto; /* Centrar horizontalmente */
+}
+
+.drawer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px; /* Ajustar el padding para el contenido del drawer */
+}
+
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #333 inset !important; /* Fondo gris oscuro */
+  -webkit-text-fill-color: #E0E0E0 !important; /* Color del texto */
+}
+
+input:-webkit-autofill + fieldset {
+  border-color: #FFA500 !important; /* Color del borde al autocompletar */
+}
+
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #333 inset !important;
+}

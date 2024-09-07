@@ -19,8 +19,6 @@ function App() {
         <CssBaseline />
         <AppRoutes />
         {/* <ParticleEffects /> */}
-        {/* <NavBar value={page} handleChange={handleChange} /> */}
-        {/* <Content page={page} /> */}
       </ThemeProvider>
     </AuthProvider>
   );

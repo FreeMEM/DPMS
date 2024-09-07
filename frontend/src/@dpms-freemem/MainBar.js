@@ -1,34 +1,135 @@
-// src/NavBar.js
-import React from "react";
-import { AppBar, Toolbar, Tabs, Tab, Box } from "@mui/material";
+import React, { useState, useContext } from "react";
+import {
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+  Box,
+  useMediaQuery,
+  useTheme,
+  Menu,
+  MenuItem,
+} from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import AccountCircle from "@mui/icons-material/AccountCircle";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"; // Importa el icono de cierre
 import { useTranslation } from "react-i18next";
+import { AuthContext } from "./AuthContext"; // Importa el contexto de autenticación
 
-function NavBar({ value, handleChange }) {
+function MainBar() {
   const { t } = useTranslation();
+  const { logout } = useContext(AuthContext); // Usa el contexto de autenticación
+  const [open, setOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const toggleDrawer = () => {
+    setOpen(!open);
+  };
+
+  const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    logout();
+    handleClose();
+  };
 
   return (
-    <AppBar position="static">
-      <Toolbar>
-        <Box sx={{ flexGrow: 1 }}>
-          <img
-            src={`${process.env.PUBLIC_URL}/assets/logo_navbar2024.png`}
-            alt="Posadas Party Logo"
-            style={{ height: 50 }}
-          />
+    <Box>
+      <Box className="top-bar">
+        <IconButton
+          color="inherit"
+          aria-label="open drawer"
+          edge="start"
+          onClick={toggleDrawer}
+          className="icon-button"
+        >
+          <MenuIcon />
+        </IconButton>
+        <IconButton
+          color="inherit"
+          aria-label="account of current user"
+          aria-controls="menu-appbar"
+          aria-haspopup="true"
+          onClick={handleMenu}
+          className="icon-button"
+        >
+          <AccountCircle />
+        </IconButton>
+        <Menu
+          id="menu-appbar"
+          anchorEl={anchorEl}
+          anchorOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+          keepMounted
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+        >
+          <MenuItem onClick={handleClose}>{t("Perfil")}</MenuItem>
+          <MenuItem onClick={handleLogout}>{t("Salir")}</MenuItem>
+        </Menu>
+      </Box>
+      <Drawer
+        variant={isMobile ? "temporary" : "persistent"}
+        className="drawer"
+        classes={{ paper: "drawer-paper" }}
+        open={open}
+        onClose={toggleDrawer}
+        ModalProps={{
+          keepMounted: true, // Mejor rendimiento en pantallas móviles
+        }}
+      >
+        <Box className="drawer-header">
+          <img src={`${process.env.PUBLIC_URL}/assets/logo_navbar2024.png`} alt="Posadas Party Logo" className="logo" />
+          <IconButton onClick={toggleDrawer}>
+            <ChevronLeftIcon />
+          </IconButton>
         </Box>
-        <Tabs value={value} onChange={handleChange} textColor="inherit" indicatorColor="secondary">
-          <Tab label={t("HOME")} />
-          <Tab label={t("WHAT IS IT?")} />
-          <Tab label={t("COMPETITIONS")} />
-          <Tab label={t("RULES")} />
-          <Tab label={t("GALLERY")} />
-          <Tab label={t("CONTACT")} />
-          <Tab label={t("REGISTER")} />
-          <Tab label={t("LOGIN")} />
-        </Tabs>
-      </Toolbar>
-    </AppBar>
+        <Box className="drawer-content">
+          <List>
+            <ListItem button>
+              <ListItemText primary={t("HOME")} />
+            </ListItem>
+            <ListItem button>
+              <ListItemText primary={t("WHAT IS IT?")} />
+            </ListItem>
+            <ListItem button>
+              <ListItemText primary={t("COMPETITIONS")} />
+            </ListItem>
+            <ListItem button>
+              <ListItemText primary={t("RULES")} />
+            </ListItem>
+            <ListItem button>
+              <ListItemText primary={t("GALLERY")} />
+            </ListItem>
+            <ListItem button>
+              <ListItemText primary={t("CONTACT")} />
+            </ListItem>
+            <ListItem button>
+              <ListItemText primary={t("REGISTER")} />
+            </ListItem>
+            <ListItem button>
+              <ListItemText primary={t("LOGIN")} />
+            </ListItem>
+          </List>
+        </Box>
+      </Drawer>
+    </Box>
   );
 }
 
-export default NavBar;
+export default MainBar;

@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
-import axios from "axios";
+import axiosWrapper from "../utils/AxiosWrapper"; // Asegúrate de que la ruta sea correcta
 
 export const AuthContext = createContext();
 
@@ -16,9 +16,10 @@ const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (username, password) => {
+  const login = async (email, password) => {
     try {
-      const response = await axios.post("/users/login", { username, password });
+      const client = axiosWrapper();
+      const response = await client.post("/users/login/", { email, password });
       const { token } = response.data;
       localStorage.setItem("token", token);
       setIsAuthenticated(true);
@@ -32,7 +33,7 @@ const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
   };
 
-  return <AuthContext.Provider value={{ isAuthenticated, login, logout, loading }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ isAuthenticated, loading, login, logout }}>{children}</AuthContext.Provider>;
 };
 
 export default AuthProvider;
