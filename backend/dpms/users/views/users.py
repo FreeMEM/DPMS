@@ -66,25 +66,25 @@ class UserViewSet(
     @action(detail=False, methods=["post"])
     def login(self, request):
         """User sign in."""
-        print("LLEGO")
+
         serializer = UserLoginSerializer(data=request.data)
         try:
-            print("LLEGO1")
+
             serializer.is_valid(raise_exception=True)
-            print("LLEGO2")
+
             user, token, jwt_access_token = serializer.save()
-            print("LLEGO3")
+
             extended_data = UserModelSerializer(user).data
-            print("LLEGO4")
+
             data = {
                 "user": extended_data,
                 "access_token": token,
                 "jwt_access_token": jwt_access_token,
             }
-            print("LLEGO5")
+
             return Response(data, status=status.HTTP_202_ACCEPTED)
         except AuthenticationFailed:
-            print("LLEGO2")
+
             return Response(
                 {"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED
             )
