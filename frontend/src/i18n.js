@@ -16,6 +16,10 @@ const resources = {
       CONTACT: "CONTACT",
       REGISTER: "REGISTER",
       LOGIN: "LOGIN",
+      "Forgot Password?": "Forgot Password?",
+      "Don't have an account?": "Don't have an account?",
+      "Sing Up": "Sing Up",
+      "Sign in with Google": "Sign in with Google",
     },
   },
   es: {
@@ -28,6 +32,10 @@ const resources = {
       CONTACT: "CONTACTO",
       REGISTER: "REGISTRO",
       LOGIN: "LOGIN",
+      "Forgot Password?": "¿Olvidaste tu contraseña?",
+      "Don't have an account?": "¿No tienes una cuenta?",
+      "Sing Up": "Regístrate",
+      "Sign in with Google": "Iniciar sesión con Google",
     },
   },
 };
