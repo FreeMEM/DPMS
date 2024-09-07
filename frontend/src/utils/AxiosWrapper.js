@@ -2,9 +2,15 @@ import axios from "axios";
 import axiosRetry from "axios-retry";
 
 const axiosWrapper = () => {
+  const baseURL = process.env.REACT_APP_BACKEND_ADDRESS || "http://localhost:8000";
   const client = axios.create({
-    baseURL: process.env.REACT_APP_BACKEND_ADDRESS,
+    baseURL: baseURL,
+    timeout: 1000,
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
+
   axiosRetry(client, {
     retries: 3,
     retryDelay: () => 3000,
@@ -17,14 +23,8 @@ const axiosWrapper = () => {
       return retryStatus;
     },
   });
+
   return client;
 };
 
-export default axiosWrapper();
-
-// export default axios.create({
-// 	baseURL: process.env.REACT_APP_BACKEND_ADDRESS
-// });
-
-// para gestionar el error de conexión global consultar al final de esta url
-// https://stackoverflow.com/questions/47005457/handling-axios-error-in-react
+export default axiosWrapper;
