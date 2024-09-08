@@ -2,9 +2,11 @@ import React, { useState, useEffect, useContext } from "react";
 
 import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../../@dpms-freemem/AuthContext";
-import { GoogleIcon } from "./CustomIcons";
-import { Box, Button, TextField, Typography, Paper } from "@mui/material";
+// import { GoogleIcon } from "./CustomIcons";
+import ModalForgotPassword from "./ModalForgotPassword";
+import { Box, Button, TextField, Typography, Paper, FormControl, FormLabel } from "@mui/material";
 import { useTranslation } from "react-i18next";
+
 // import Checkbox from "@mui/material/Checkbox";
 import Divider from "@mui/material/Divider";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -23,17 +25,27 @@ const theme = createTheme({
     },
   },
 });
+const SceneIDIcon = () => (
+  <img
+    src={`${process.env.PUBLIC_URL}/assets/SceneID_Icon_80x30.png`}
+    alt="SceneID Logo"
+    style={{ width: 65, height: 24 }}
+  />
+);
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [emailError, setEmailError] = React.useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = React.useState("");
-  const [passwordError, setPasswordError] = React.useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
+  const [emailError, setEmailError] = useState(false);
+  const [emailErrorMessage, setEmailErrorMessage] = useState("");
+  const [passwordError, setPasswordError] = useState(false);
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
+  const [open, setOpen] = useState(false);
   const { login } = useContext(AuthContext);
+  const [loginError, setLoginError] = useState(""); // Estado para el mensaje de error de login
   const navigate = useNavigate();
   const { t } = useTranslation();
+
   // Effect to handle shrink behavior if the browser autocompletes the inputs
   useEffect(() => {
     const emailField = document.getElementById("email-field");
@@ -59,12 +71,17 @@ const Login = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    try {
-      await login(email, password);
-      navigate("/");
-    } catch (error) {
-      console.error("Login failed:", error);
-      // Manejar el error de login aquí
+    if (validateInputs()) {
+      try {
+        await login(email, password);
+        navigate("/");
+      } catch (error) {
+        if (error.response && error.response.status === 401) {
+          setLoginError("Invalid email or password. Please try again.");
+        } else {
+          setLoginError("An unexpected error occurred. Please try again later.");
+        }
+      }
     }
   };
   const validateInputs = () => {
@@ -128,60 +145,72 @@ const Login = () => {
               gap: 2,
             }}
           >
-            <TextField
-              id="email-field"
-              label="Email"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              InputLabelProps={{
-                shrink: !!email, // Force shrink if there's a value
-              }}
-              InputProps={{
-                sx: {
-                  "&:-webkit-autofill": {
-                    WebkitBoxShadow: "0 0 0 1000px #333 inset",
-                    WebkitTextFillColor: "#E0E0E0",
-                  },
-                },
-              }}
-              autoComplete="email"
-            />
-            <TextField
-              id="password-field"
-              label="Password"
-              type="password"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              InputLabelProps={{
-                shrink: !!password, // Force shrink if there's a value
-              }}
-              InputProps={{
-                sx: {
-                  "&:-webkit-autofill": {
-                    WebkitBoxShadow: "0 0 0 1000px #333 inset",
-                    WebkitTextFillColor: "#E0E0E0",
-                  },
-                },
-              }}
-              autoComplete="current-password"
-            />
-            <Box mt={1} mb={2}>
-              <Link to="/forgot-password" style={{ textDecoration: "none", color: "#FFA500" }}>
-                <Typography variant="body2" align="right">
-                  {t("Forgot Password?")}
-                </Typography>
-              </Link>
-            </Box>
+            <FormControl>
+              <FormLabel htmlFor="email">Email</FormLabel>
+              <TextField
+                error={emailError}
+                helperText={emailErrorMessage}
+                id="email"
+                type="email"
+                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                autoComplete="email"
+                autoFocus
+                required
+                fullWidth
+                variant="outlined"
+                color={emailError ? "error" : "primary"}
+                sx={{ ariaLabel: "email" }}
+              />
+            </FormControl>
+            <FormControl>
+              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                <FormLabel htmlFor="password">Password</FormLabel>
+                {/* <Link component="button" onClick={handleClickOpen} variant="body2" sx={{ alignSelf: "baseline" }}>
+                  Forgot your password?
+                </Link> */}
+                <Link
+                  component="button"
+                  onClick={handleClickOpen}
+                  variant="body2"
+                  style={{ textDecoration: "none", color: "#FFA500" }}
+                >
+                  <Typography variant="body2" align="right">
+                    {t("Forgot your Password?")}
+                  </Typography>
+                </Link>
+              </Box>
+              <TextField
+                error={passwordError}
+                helperText={passwordErrorMessage}
+                name="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+                autoFocus
+                required
+                fullWidth
+                variant="outlined"
+                color={passwordError ? "error" : "primary"}
+              />
+            </FormControl>
+            {/* <FormControlLabel control={<Checkbox value="remember" color="primary" />} label="Remember me" /> */}
+            <ModalForgotPassword open={open} handleClose={handleClose} />
+            {loginError && (
+              <Typography color="error" variant="body2" align="center">
+                {t(loginError)}
+              </Typography>
+            )}
+            <Button type="submit" fullWidth variant="contained" onClick={validateInputs}>
+              {t("Sign in")}
+            </Button>
+
             <Box mt={2}>
-              <Button type="submit" variant="contained" color="primary" fullWidth>
-                Login
-              </Button>
               <Typography sx={{ textAlign: "center" }}>
                 {t("Don't have an account?")}{" "}
                 <Link to="/forgot-password" style={{ textDecoration: "none", color: "#FFA500" }}>
@@ -189,18 +218,27 @@ const Login = () => {
                 </Link>
               </Typography>
             </Box>
-            <Divider>or</Divider>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <Button
-                type="submit"
-                fullWidth
-                variant="outlined"
-                onClick={() => alert("Sign in with Google")}
-                startIcon={<GoogleIcon />}
-              >
-                {t("Sign in with Google")}
-              </Button>
-            </Box>
+          </Box>
+          <Divider>or</Divider>
+          <Box mt={2} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {/* <Button
+              type="submit"
+              fullWidth
+              variant="outlined"
+              onClick={() => alert("Sign in with Google")}
+              startIcon={<GoogleIcon />}
+            >
+              {t("Sign in with Google")}
+            </Button> */}
+            <Button
+              type="submit"
+              fullWidth
+              variant="outlined"
+              onClick={() => alert("Sign in with SceneID")}
+              startIcon={<SceneIDIcon />}
+            >
+              {t("Sign in with SceneID")}
+            </Button>
           </Box>
         </Paper>
       </Box>
