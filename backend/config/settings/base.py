@@ -51,6 +51,7 @@ THIRD_PARTY_APPS = [
     "rest_framework.authtoken",
     "drf_yasg",
     "corsheaders",
+    "social_django",
 ]
 LOCAL_APPS = [
     "dpms.users.apps.UsersAppConfig",
@@ -92,6 +93,23 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+AUTHENTICATION_BACKENDS = (
+    "dpms.users.oauth.sceneid.SceneIDOAuth2",  # Añade el backend de SceneID
+    "django.contrib.auth.backends.ModelBackend",
+)
+
+# Claves de SceneID (obtenidas desde el portal de desarrolladores de SceneID)
+SOCIAL_AUTH_SCENEID_KEY = env("SCENE_CLIENT_ID")
+SOCIAL_AUTH_SCENEID_SECRET = env("SCENEID_CLIENT_SECRET")
+
+# Configura las URLs
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+SOCIAL_AUTH_SCENEID_SCOPE = ["openid", "profile", "email"]
+
+# Otros ajustes relacionados con la autenticación
+SOCIAL_AUTH_JSONFIELD_ENABLED = True
 
 
 CORS_ALLOWED_ORIGINS = [
