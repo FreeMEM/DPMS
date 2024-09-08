@@ -46,10 +46,10 @@
   align-items: flex-start; /* Alinear a la izquierda */
   padding: 16px; /* Ajustar el padding para el contenido del drawer */
 }
-
 input:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 1000px #333 inset !important; /* Fondo gris oscuro */
   -webkit-text-fill-color: #E0E0E0 !important; /* Color del texto */
+  -webkit-text-color: #E0E0E0 !important; /* Color del texto */
 }
 
 input:-webkit-autofill + fieldset {
@@ -58,5 +58,33 @@ input:-webkit-autofill + fieldset {
 
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #333333 inset !important;
+}
+
+input:-webkit-autofill::first-line {
+  color: #E0E0E0 !important; /* Asegurar que el color del texto sea blanco */
+}
+
+input:-webkit-autofill::selection {
+  background-color: #333 !important; /* Fondo gris oscuro para la selección */
+  color: #E0E0E0 !important; /* Color del texto para la selección */
+}
+
+input:-webkit-autofill::placeholder {
+  color: #E0E0E0 !important; /* Color del texto del placeholder */
+}
+
+input:-webkit-autofill::hover,
+input:-webkit-autofill::focus {
   -webkit-box-shadow: 0 0 0 1000px #333 inset !important;
+  -webkit-text-fill-color: #E0E0E0 !important; /* Color del texto */
+}
+
+/* Estilos para evitar el subrayado en rojo */
+.MuiOutlinedInput-root.Mui-error .MuiOutlinedInput-notchedOutline {
+  border-color: #FFA500 !important; /* Cambiar el color del borde en estado de error */
+}
+
+.MuiFormHelperText-root.Mui-error {
+  color: #FFA500 !important; /* Cambiar el color del texto de ayuda en estado de error */
 }
