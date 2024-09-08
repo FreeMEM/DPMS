@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import {
   Drawer,
   List,
-  ListItem,
+  ListItemButton,
   ListItemText,
   IconButton,
   Box,
@@ -103,31 +103,31 @@ function MainBar() {
           </IconButton>
         </Box>
         <Box className="drawer-content">
-          <List>
-            <ListItem button>
+          <List sx={{ width: "100%" }}>
+            <ListItemButton>
               <ListItemText primary={t("HOME")} />
-            </ListItem>
-            <ListItem button>
+            </ListItemButton>
+            <ListItemButton>
               <ListItemText primary={t("WHAT IS IT?")} />
-            </ListItem>
-            <ListItem button>
+            </ListItemButton>
+            <ListItemButton>
               <ListItemText primary={t("COMPETITIONS")} />
-            </ListItem>
-            <ListItem button>
+            </ListItemButton>
+            <ListItemButton>
               <ListItemText primary={t("RULES")} />
-            </ListItem>
-            <ListItem button>
+            </ListItemButton>
+            <ListItemButton>
               <ListItemText primary={t("GALLERY")} />
-            </ListItem>
-            <ListItem button>
+            </ListItemButton>
+            <ListItemButton>
               <ListItemText primary={t("CONTACT")} />
-            </ListItem>
-            <ListItem button>
+            </ListItemButton>
+            <ListItemButton>
               <ListItemText primary={t("REGISTER")} />
-            </ListItem>
-            <ListItem button>
+            </ListItemButton>
+            <ListItemButton>
               <ListItemText primary={t("LOGIN")} />
-            </ListItem>
+            </ListItemButton>
           </List>
         </Box>
       </Drawer>
