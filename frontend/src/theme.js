@@ -6,7 +6,6 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 const defaultTheme = createTheme();
 
-const customShadows = [...defaultTheme.shadows];
 export const gray = {
   50: "hsl(220, 35%, 97%)",
   100: "hsl(220, 30%, 94%)",
@@ -28,14 +27,15 @@ const theme = createTheme({
     secondary: {
       main: "#FFA500", // Naranja vibrante
     },
-    // background: {
-    //   default: "#000000", // Fondo negro
-    //   paper: "#1C1C1C", // Fondo de papel oscuro
-    // },
     background: {
-      default: gray[900],
-      paper: "hsl(220, 30%, 7%)",
+      default: "#121212", // Fondo negro
+      // paper: "#1C1C1C", // Fondo de papel oscuro
+      paper: "#262626",
     },
+    // background: {
+    //   default: gray[900],
+    //   paper: "hsl(220, 30%, 7%)",
+    // },
     text: {
       primary: "#FFFFFF", // Blanco para el texto principal
       secondary: "#00FF00", // Verde para el texto secundario

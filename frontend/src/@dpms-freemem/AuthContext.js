@@ -24,7 +24,8 @@ const AuthProvider = ({ children }) => {
       localStorage.setItem("token", token);
       setIsAuthenticated(true);
     } catch (error) {
-      console.error("Login failed", error);
+      // console.error("Login failed", error);
+      throw error;
     }
   };
 
