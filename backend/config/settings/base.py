@@ -25,6 +25,7 @@ DATABASES = {
     "default": env.db("DATABASE_URL"),
 }
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
+DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
 
 # URLs
 ROOT_URLCONF = "config.urls"
@@ -108,7 +109,7 @@ LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 SOCIAL_AUTH_SCENEID_SCOPE = ["openid", "profile", "email"]
 
-# Otros ajustes relacionados con la autenticación
+# Otros ajustes relacionados con la autenti/ión
 SOCIAL_AUTH_JSONFIELD_ENABLED = True
 
 
