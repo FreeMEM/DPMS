@@ -2,14 +2,18 @@
 
 from .base import *  # NOQA
 import .base import env
-import environ, os
-from django.core.exceptions import ImproperlyConfigured
 from pprint import pprint
+import os
+from django.core.exceptions import ImproperlyConfigured
 
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+
+if not SECRET_KEY:
+    raise ImproperlyConfigured("The SECRET_KEY setting must not be empty.")
 # Base
 # env = environ.Env()
-pprint(env)
-SECRET_KEY = env("DJANGO_SECRET_KEY")
+# pprint(env)
+# SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 
 if not SECRET_KEY:
