@@ -88,7 +88,7 @@ SECURE_CONTENT_TYPE_NOSNIFF = env.bool(
 # EMAIL_SUBJECT_PREFIX = env("DJANGO_EMAIL_SUBJECT_PREFIX", default="[Comparte Ride]")
 
 # Admin
-ADMIN_URL = env("DJANGO_ADMIN_URL")
+# ADMIN_URL = env("DJANGO_ADMIN_URL")
 
 # # Anymail (Mailgun)
 # INSTALLED_APPS += ["anymail"]  # noqa F405
