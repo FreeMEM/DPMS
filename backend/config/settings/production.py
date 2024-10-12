@@ -1,23 +1,13 @@
 """Production settings."""
 
 from .base import *  # NOQA
-import .base import env
+from .base import env
 from django.core.exceptions import ImproperlyConfigured
 
-print(env.ENVIRON)
-SECRET_KEY = env('DJANGO_SECRET_KEY')
+SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 if not SECRET_KEY:
     raise ImproperlyConfigured("The SECRET_KEY setting must not be empty.")
-# Base
-# env = environ.Env()
-# pprint(env)
-# SECRET_KEY = env("DJANGO_SECRET_KEY")
-
-
-if not SECRET_KEY:
-    raise ImproperlyConfigured("The SECRET_KEY setting must not be empty.")
-
 
 ALLOWED_HOSTS = env.list(
     "DJANGO_ALLOWED_HOSTS",
