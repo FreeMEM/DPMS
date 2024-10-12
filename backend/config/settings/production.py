@@ -63,46 +63,46 @@ SECURE_CONTENT_TYPE_NOSNIFF = env.bool(
 # }
 
 # Static  files
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Media
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/"
+# DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+# MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/"
 
 # Templates
-TEMPLATES[0]["OPTIONS"]["loaders"] = [  # noqa F405
-    (
-        "django.template.loaders.cached.Loader",
-        [
-            "django.template.loaders.filesystem.Loader",
-            "django.template.loaders.app_directories.Loader",
-        ],
-    ),
-]
+# TEMPLATES[0]["OPTIONS"]["loaders"] = [  # noqa F405
+#    (
+#         "django.template.loaders.cached.Loader",
+#         [
+#             "django.template.loaders.filesystem.Loader",
+#             "django.template.loaders.app_directories.Loader",
+#         ],
+#     ),
+# ]
 
-# Email
-DEFAULT_FROM_EMAIL = env(
-    "DJANGO_DEFAULT_FROM_EMAIL", default="Comparte Ride <noreply@comparteride.com>"
-)
-SERVER_EMAIL = env("DJANGO_SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
-EMAIL_SUBJECT_PREFIX = env("DJANGO_EMAIL_SUBJECT_PREFIX", default="[Comparte Ride]")
+# # Email
+# DEFAULT_FROM_EMAIL = env(
+#     "DJANGO_DEFAULT_FROM_EMAIL", default="Comparte Ride <noreply@comparteride.com>"
+# )
+# SERVER_EMAIL = env("DJANGO_SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
+# EMAIL_SUBJECT_PREFIX = env("DJANGO_EMAIL_SUBJECT_PREFIX", default="[Comparte Ride]")
 
 # Admin
 ADMIN_URL = env("DJANGO_ADMIN_URL")
 
-# Anymail (Mailgun)
-INSTALLED_APPS += ["anymail"]  # noqa F405
-EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
-ANYMAIL = {
-    "MAILGUN_API_KEY": env("MAILGUN_API_KEY"),
-    "MAILGUN_SENDER_DOMAIN": env("MAILGUN_DOMAIN"),
-}
+# # Anymail (Mailgun)
+# INSTALLED_APPS += ["anymail"]  # noqa F405
+# EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
+# ANYMAIL = {
+#     "MAILGUN_API_KEY": env("MAILGUN_API_KEY"),
+#     "MAILGUN_SENDER_DOMAIN": env("MAILGUN_DOMAIN"),
+# }
 
-# Gunicorn
-INSTALLED_APPS += ["gunicorn"]  # noqa F405
+# # Gunicorn
+# INSTALLED_APPS += ["gunicorn"]  # noqa F405
 
-# WhiteNoise
-MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")  # noqa F405
+# # WhiteNoise
+# MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")  # noqa F405
 
 
 # Logging
@@ -147,4 +147,4 @@ LOGGING = {
     },
 }
 
-BACKEND_URL = "https://backend.capacitorparty.com"
+BACKEND_URL = "https://api.dpms.freemem.space"
