@@ -2,7 +2,13 @@
 
 from .base import *  # NOQA
 from .base import env
+import os
+from django.core.exceptions import ImproperlyConfigured
 
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+
+if not SECRET_KEY:
+    raise ImproperlyConfigured("The SECRET_KEY setting must not be empty.")
 # Base
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 ALLOWED_HOSTS = env.list(
