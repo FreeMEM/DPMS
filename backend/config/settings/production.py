@@ -52,15 +52,15 @@ SECURE_CONTENT_TYPE_NOSNIFF = env.bool(
 )
 
 # Storages
-INSTALLED_APPS += ["storages"]  # noqa F405
-AWS_ACCESS_KEY_ID = env("DJANGO_AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = env("DJANGO_AWS_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = env("DJANGO_AWS_STORAGE_BUCKET_NAME")
-AWS_QUERYSTRING_AUTH = False
-_AWS_EXPIRY = 60 * 60 * 24 * 7
-AWS_S3_OBJECT_PARAMETERS = {
-    "CacheControl": f"max-age={_AWS_EXPIRY}, s-maxage={_AWS_EXPIRY}, must-revalidate",
-}
+# INSTALLED_APPS += ["storages"]  # noqa F405
+# AWS_ACCESS_KEY_ID = env("DJANGO_AWS_ACCESS_KEY_ID")
+# AWS_SECRET_ACCESS_KEY = env("DJANGO_AWS_SECRET_ACCESS_KEY")
+# AWS_STORAGE_BUCKET_NAME = env("DJANGO_AWS_STORAGE_BUCKET_NAME")
+# AWS_QUERYSTRING_AUTH = False
+# _AWS_EXPIRY = 60 * 60 * 24 * 7
+# AWS_S3_OBJECT_PARAMETERS = {
+#     "CacheControl": f"max-age={_AWS_EXPIRY}, s-maxage={_AWS_EXPIRY}, must-revalidate",
+# }
 
 # Static  files
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
