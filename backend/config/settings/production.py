@@ -5,7 +5,16 @@ from .base import env
 
 # Base
 SECRET_KEY = env("DJANGO_SECRET_KEY")
-ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["capacitorparty.com"])
+ALLOWED_HOSTS = env.list(
+    "DJANGO_ALLOWED_HOSTS",
+    default=[
+        "api.dpms.freemem.space",
+        "dpms.capacitorparty.com",
+        "dpms.freemem.space",
+        "capacitorparty.com",
+        "freemem.space",
+    ],
+)
 
 # Databases
 DATABASES["default"] = env.db("DATABASE_URL")  # NOQA
