@@ -11,7 +11,7 @@ env = environ.Env()
 # Base
 DEBUG = env.bool("DJANGO_DEBUG", False)
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
-
+SECRET_KEY = env("DJANGO_SECRET_KEY")
 # Language and timezone
 TIME_ZONE = "Europe/Madrid"
 LANGUAGE_CODE = "es-es"
