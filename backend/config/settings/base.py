@@ -20,6 +20,17 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
+ALLOWED_HOSTS = env.list(
+    "DJANGO_ALLOWED_HOSTS",
+    default=[
+        "api.dpms.freemem.space",
+        "dpms.capacitorparty.com",
+        "dpms.freemem.space",
+        "capacitorparty.com",
+        "freemem.space",
+    ],
+)
+
 # # DATABASES
 # DATABASES = {
 #     "default": env.db("DATABASE_URL"),
