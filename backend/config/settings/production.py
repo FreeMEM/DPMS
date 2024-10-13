@@ -18,7 +18,18 @@ ALLOWED_HOSTS = env.list(
 )
 
 # Databases
-DATABASES["default"] = env.db("DATABASE_URL")  # NOQA
+# DATABASES["default"] = env.db("DATABASE_URL")  # NOQA
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": env("POSTGRES_DB"),
+        "USER": env("POSTGRES_USER"),
+        "PASSWORD": env("POSTGRES_PASSWORD"),
+        "HOST": env("POSTGRES_HOST"),
+        "PORT": env("POSTGRES_PORT"),
+    },
+}
+
 DATABASES["default"]["ATOMIC_REQUESTS"] = True  # NOQA
 DATABASES["default"]["CONN_MAX_AGE"] = env.int("CONN_MAX_AGE", default=60)  # NOQA
 
