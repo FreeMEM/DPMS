@@ -125,9 +125,13 @@ const Login = () => {
         >
           <Box display="flex" justifyContent="center" mb={2}>
             <img
-              src={`${process.env.PUBLIC_URL}/assets/logo_navbar2024.png`}
+              src={`${process.env.PUBLIC_URL}/assets/logo_pp_192.png`}
+              // src={`${process.env.PUBLIC_URL}/assets/logo2k25halo.png`}
               alt="Posadas Party Logo"
-              style={{ height: 80 }}
+              // añade sombra al logo
+              // style={{ boxShadow: "0 0 10px 0 rgba(255, 255, 255, 0.2)" }}
+              // style={{ height: 192, borderColor: "primary.main", borderWidth: 2, borderStyle: "solid" }}
+              style={{ height: 192 }}
             />
           </Box>
           <Typography variant="h5" align="center" gutterBottom>

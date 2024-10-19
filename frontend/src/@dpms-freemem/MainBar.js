@@ -55,7 +55,7 @@ function MainBar() {
           >
             <MenuIcon />
           </IconButton>
-          <img src={`${process.env.PUBLIC_URL}/assets/logo_navbar2024.png`} alt="Posadas Party Logo" className="logo" />
+          <img src={`${process.env.PUBLIC_URL}/assets/logo_navbar2025.png`} alt="Posadas Party Logo" className="logo" />
         </Box>
         <IconButton
           color="inherit"
@@ -97,7 +97,7 @@ function MainBar() {
         }}
       >
         <Box className="drawer-header">
-          <img src={`${process.env.PUBLIC_URL}/assets/logo_navbar2024.png`} alt="Posadas Party Logo" className="logo" />
+          <img src={`${process.env.PUBLIC_URL}/assets/logo_navbar2025.png`} alt="Posadas Party Logo" className="logo" />
           <IconButton onClick={toggleDrawer}>
             <ChevronLeftIcon />
           </IconButton>
