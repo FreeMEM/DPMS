@@ -40,7 +40,7 @@ const ForgotPassword = () => {
         >
           <Box display="flex" justifyContent="center" mb={2}>
             <img
-              src={`${process.env.PUBLIC_URL}/assets/logo_navbar2024.png`}
+              src={`${process.env.PUBLIC_URL}/assets/logo_pp_192.png`}
               alt="Posadas Party Logo"
               style={{ height: 80 }}
             />
