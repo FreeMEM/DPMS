@@ -29,12 +29,36 @@ const AuthProvider = ({ children }) => {
     }
   };
 
+  const signup = async ({ email, nickname, group, password, password_confirmation, first_name, last_name }) => {
+    try {
+      const client = axiosWrapper();
+      const username = email; // Puedes usar el email como nombre de usuario
+      const response = await client.post("/users/register/", {
+        email,
+        username,
+        nickname,
+        group,
+        password,
+        password_confirmation,
+        first_name,
+        last_name,
+      });
+      const { token } = response.data;
+      localStorage.setItem("token", token);
+      setIsAuthenticated(true);
+    } catch (error) {
+      throw error;
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem("token");
     setIsAuthenticated(false);
   };
 
-  return <AuthContext.Provider value={{ isAuthenticated, loading, login, logout }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ isAuthenticated, loading, login, signup, logout }}>{children}</AuthContext.Provider>
+  );
 };
 
 export default AuthProvider;
