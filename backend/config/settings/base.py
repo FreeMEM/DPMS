@@ -6,10 +6,11 @@ from pathlib import Path
 ROOT_DIR = environ.Path(__file__) - 3
 APPS_DIR = ROOT_DIR.path("dpms")
 env = environ.Env()
+environ.Env.read_env()  # reading .env file
 # Base
 DEBUG = env.bool("DJANGO_DEBUG", False)
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
-SECRET_KEY = env("DJANGO_SECRET_KEY")
+# SECRET_KEY = env("DJANGO_SECRET_KEY")
 # Language and timezone
 TIME_ZONE = "Europe/Madrid"
 LANGUAGE_CODE = "es-es"
@@ -146,11 +147,10 @@ CORS_ALLOWED_ORIGINS = [
     "https://api.dpms.freemem.space",
     "https://dpms.capacitorparty.com",
     "https://dpms.freemem.space",
-
     # Añade otras URLs permitidas aquí
 ]
 # Static files
-#STATIC_ROOT = str(ROOT_DIR("staticfiles"))
+# STATIC_ROOT = str(ROOT_DIR("staticfiles"))
 STATIC_ROOT = BASE_DIR / "../staticfiles/static"
 STATIC_URL = "/static/"
 # STATICFILES_DIRS = [
@@ -162,8 +162,9 @@ STATICFILES_FINDERS = [
 ]
 
 # Media
-#MEDIA_ROOT = str(APPS_DIR("media"))
+# MEDIA_ROOT = str(APPS_DIR("media"))
 MEDIA_ROOT = BASE_DIR / "../staticfiles/media"
+print("MEDIA_ROOT", MEDIA_ROOT)
 MEDIA_URL = "/media/"
 
 # Templates
