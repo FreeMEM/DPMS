@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import { AuthContext } from "./@dpms-freemem/AuthContext"; // Ruta relativa correcta
 import Login from "./components/user/Login"; // Ruta relativa correcta
-import Register from "./components/user/Register"; // Ruta relativa correcta
+import Signup from "./components/user/Signup"; // Ruta relativa correcta
 import ForgotPassword from "./components/user/ForgotPassword";
 import Dashboard from "./components/Dashboard"; // Ruta relativa correcta
 import Error404 from "./components/Error404"; // Ruta relativa correcta
@@ -22,7 +22,7 @@ const AppRoutes = () => {
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/signup" element={<Signup />} />
         <Route
           path="/dashboard"
           element={
