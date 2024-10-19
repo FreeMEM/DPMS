@@ -34,3 +34,9 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.production")
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
 application = get_wsgi_application()
+#print("Variables de entorno:", os.environ)
+
+#sys.stdout.write(f"Python executable: {sys.executable}\n")
+#sys.stdout.write(f"Python version: {sys.version}\n")
+#sys.stdout.write(f"Sys.path: {sys.path}\n")
+#sys.stdout.write(f"Virtualenv: {os.environ.get('VIRTUAL_ENV')}\n")

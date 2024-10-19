@@ -1,13 +1,11 @@
 """Base settings to build other settings files upon."""
 
 import environ, os
-
+from pathlib import Path
 
 ROOT_DIR = environ.Path(__file__) - 3
 APPS_DIR = ROOT_DIR.path("dpms")
-
 env = environ.Env()
-
 # Base
 DEBUG = env.bool("DJANGO_DEBUG", False)
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
@@ -19,6 +17,7 @@ SITE_ID = 1
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 ALLOWED_HOSTS = env.list(
     "DJANGO_ALLOWED_HOSTS",
@@ -144,10 +143,15 @@ SOCIAL_AUTH_JSONFIELD_ENABLED = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://192.168.1.74:3000",
+    "https://api.dpms.freemem.space",
+    "https://dpms.capacitorparty.com",
+    "https://dpms.freemem.space",
+
     # Añade otras URLs permitidas aquí
 ]
 # Static files
-STATIC_ROOT = str(ROOT_DIR("staticfiles"))
+#STATIC_ROOT = str(ROOT_DIR("staticfiles"))
+STATIC_ROOT = BASE_DIR / "../staticfiles/static"
 STATIC_URL = "/static/"
 # STATICFILES_DIRS = [
 #     str(APPS_DIR.path('static')),
@@ -158,7 +162,8 @@ STATICFILES_FINDERS = [
 ]
 
 # Media
-MEDIA_ROOT = str(APPS_DIR("media"))
+#MEDIA_ROOT = str(APPS_DIR("media"))
+MEDIA_ROOT = BASE_DIR / "../staticfiles/media"
 MEDIA_URL = "/media/"
 
 # Templates
