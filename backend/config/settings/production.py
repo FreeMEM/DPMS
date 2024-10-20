@@ -125,11 +125,14 @@ BACKEND_URL = "https://api.dpms.freemem.space"
 # # WhiteNoise
 # MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")  # noqa F405
 
-INSTALLED_APPS += ["django_social"]
+INSTALLED_APPS += ["social_django"]
 # Claves de SceneID (obtenidas desde el portal de desarrolladores de SceneID)
 SOCIAL_AUTH_SCENEID_KEY = env("SCENE_CLIENT_ID")
 SOCIAL_AUTH_SCENEID_SECRET = env("SCENEID_CLIENT_SECRET")
-
+SOCIAL_AUTH_SCENEID_SCOPE = ["profile", "email"]  # Define el alcance que necesitas
+SOCIAL_AUTH_SCENEID_REDIRECT_URI = (
+    "https://api.dpms.freemem.space/auth/sceneid/callback/"  # URL de callback
+)
 
 # Logging
 # A sample logging configuration. The only tangible logging
