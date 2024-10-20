@@ -8,8 +8,6 @@ from django.db import models
 from dpms.utils.models import BaseModel
 
 
-
-
 class Profile(BaseModel):
     """Profile model
 

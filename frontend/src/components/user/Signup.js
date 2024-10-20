@@ -52,9 +52,33 @@ const Signup = () => {
           last_name: lastName,
           group, // Incluyendo el campo group en el post
         });
-        navigate("/login");
+        navigate("/confirmation-sent");
       } catch (error) {
-        setRegistrationError("Registration failed. Please try again.");
+        // Controla si el error es de validación (400)
+        if (error.response && error.response.status === 400) {
+          const errors = error.response.data;
+
+          if (errors.non_field_errors) {
+            setRegistrationError(errors.non_field_errors.join(" "));
+          }
+
+          if (errors.email) {
+            setEmailError(true);
+            setEmailErrorMessage(errors.email.join(" "));
+          }
+
+          if (errors.password) {
+            setPasswordError(true);
+            setPasswordErrorMessage(errors.password.join(" "));
+          }
+
+          if (errors.password_confirmation) {
+            setPasswordConfirmationError(true);
+            setPasswordConfirmationErrorMessage(errors.password_confirmation.join(" "));
+          }
+        } else {
+          setRegistrationError("Registration failed. Please try again.");
+        }
       }
     }
   };

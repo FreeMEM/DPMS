@@ -41,7 +41,8 @@ const resources = {
       "Sing Up": "Regístrate",
       "Sign in with Google": "Iniciar sesión con Google",
       "Sign in": "Iniciar sesión",
-      "Sign In": "Iniciar sesión",
+      "Sign In": "Iniciar Sesión",
+      "Sign Up": "Registrarse",
       "Enter your email": "Introduce tu correo",
       "Enter your password": "Introduce tu contraseña",
       "Confirm your password": "Confirma tu contraseña",
@@ -54,6 +55,18 @@ const resources = {
         "Ocurrió un error inesperado. Por favor, inténtalo de nuevo más tarde.",
       "Sign in with SceneID": "Iniciar sesión con SceneID",
       "Already have an account?": "¿Ya tienes una cuenta?",
+      "Account Verification": "Verificación de Cuenta",
+      "Please wait while we verify your account": "Por favor, espera mientras verificamos tu cuenta",
+      "Welcome {{name}}! Your account is verified.": "¡Bienvenido {{name}}! Tu cuenta está verificada.",
+      "Congratulations and welcome to Posadas Party community":
+        "¡Felicidades y bienvenido a la comunidad de Posadas Party!",
+      "Verification failed. Please try again": "La verificación falló. Por favor, inténtalo de nuevo",
+      "Token is missing": "Falta el token",
+      "An error occurred": "Ocurrió un error",
+      "Sorry, the page you are looking for does not exist": "Lo siento, la página que buscas no existe",
+      "A confirmation email has been sent to your email address. Please check your inbox to verify your account":
+        "Se ha enviado un correo de confirmación a tu dirección de correo. Por favor, revisa tu bandeja de entrada para verificar tu cuenta",
+      "Registration Complete": "Registro Completado",
     },
   },
 };

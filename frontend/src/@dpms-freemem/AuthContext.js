@@ -33,18 +33,17 @@ const AuthProvider = ({ children }) => {
     try {
       const client = axiosWrapper();
       const username = email; // Puedes usar el email como nombre de usuario
-      const response = await client.post("/users/register/", {
+      const response = await client.post("/users/signup/", {
         email,
         username,
-        nickname,
-        group,
         password,
         password_confirmation,
         first_name,
         last_name,
+        nickname,
+        group,
       });
-      const { token } = response.data;
-      localStorage.setItem("token", token);
+      console.log(response.data);
       setIsAuthenticated(true);
     } catch (error) {
       throw error;
@@ -56,8 +55,19 @@ const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
   };
 
+  const verifyAccount = async (token) => {
+    try {
+      const response = await axiosWrapper().get(`/users/verify?token=${token}`);
+      return response; // Devuelve la respuesta con el status 200 o 400
+    } catch (error) {
+      throw error; // Maneja el error
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, loading, login, signup, logout }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ isAuthenticated, loading, login, signup, logout, verifyAccount }}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 
