@@ -1,11 +1,13 @@
 import React, { useContext } from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
-import { AuthContext } from "./@dpms-freemem/AuthContext"; // Ruta relativa correcta
-import Login from "./components/user/Login"; // Ruta relativa correcta
-import Signup from "./components/user/Signup"; // Ruta relativa correcta
+import { AuthContext } from "./@dpms-freemem/AuthContext";
+import Login from "./components/user/Login";
+import Signup from "./components/user/Signup";
+import ConfirmationSent from "./components/user/ConfirmationSent";
+import VerifyAccount from "./components/user/VerifyAccount";
 import ForgotPassword from "./components/user/ForgotPassword";
-import Dashboard from "./components/Dashboard"; // Ruta relativa correcta
-import Error404 from "./components/Error404"; // Ruta relativa correcta
+import Dashboard from "./components/Dashboard";
+import Error404 from "./components/Error404";
 
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useContext(AuthContext);
@@ -33,6 +35,8 @@ const AppRoutes = () => {
         />
         <Route path="/" element={<Navigate to="/dashboard" />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/verify-account/:token" element={<VerifyAccount />} />
+        <Route path="/confirmation-sent" element={<ConfirmationSent />} />
         <Route path="*" element={<Error404 />} />
       </Routes>
     </Router>

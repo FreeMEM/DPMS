@@ -86,21 +86,40 @@ class UserSignUpSerializer(serializers.Serializer):
     first_name = serializers.CharField(min_length=2, max_length=50)
     last_name = serializers.CharField(min_length=2, max_length=50)
 
+    # New fields: Nickname and Group
+    nickname = serializers.CharField(min_length=2, max_length=50, required=False)
+    group = serializers.CharField(min_length=2, max_length=50, required=False)
+
     def validate(self, data):
+        logger.info(data)
         """Verify passwords match"""
         passwd = data["password"]
         passwd_conf = data["password_confirmation"]
+
         if passwd != passwd_conf:
             raise serializers.ValidationError("Passwords doesn't match.")
+
         password_validation.validate_password(passwd)
         return data
 
     def create(self, data):
+        """Handle user and profile creation."""
         try:
+            logger.info(data)
             data.pop("password_confirmation")
-            logger.info(">> signup: %s", data["email"])
-            user = User.objects.create_user(**data, is_verified=False)
-            Profile.objects.create(user=user)
+            user_data = {
+                "email": data.get("email"),
+                "username": data.get("username"),
+                "password": data.get("password"),
+                "first_name": data.get("first_name"),
+                "last_name": data.get("last_name"),
+            }
+            user = User.objects.create_user(**user_data, is_verified=False)
+            Profile.objects.create(
+                user=user,
+                nickname=data.get("nickname", ""),
+                group=data.get("group", ""),
+            )
             self.send_confirmation_email(user)
             return user
         except IntegrityError:
@@ -112,7 +131,7 @@ class UserSignUpSerializer(serializers.Serializer):
         """Send account verification link to given user."""
         verification_token = self.gen_verification_token(user)
         verification_url = (
-            f"{settings.BACKEND_URL}/users/verify?token={verification_token}"
+            f"{settings.FRONTEND_URL}/verify-account/{verification_token}"
         )
         subject = "Bienvenido @{}! Confirma tu cuenta para empezar a participar en PosadasParty".format(
             user.email

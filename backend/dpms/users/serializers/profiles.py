@@ -18,10 +18,4 @@ class ProfileModelSerializer(serializers.ModelSerializer):
 
         model = Profile
         """ fields to show """
-        fields = (
-            "extra_information",
-            "avatar",
-            "nickname",
-            "group",
-            "visit_listing"
-        )
+        fields = ("extra_information", "avatar", "nickname", "group", "visit_listing")
