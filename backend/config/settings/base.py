@@ -3,6 +3,13 @@
 import environ, os
 from pathlib import Path
 
+import ssl
+from django.core.mail import get_connection
+
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
+
 ROOT_DIR = environ.Path(__file__) - 3
 APPS_DIR = ROOT_DIR.path("dpms")
 env = environ.Env()
@@ -204,6 +211,7 @@ X_FRAME_OPTIONS = "DENY"
 EMAIL_BACKEND = env(
     "DJANGO_EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend"
 )
+
 
 # Admin
 ADMIN_URL = "admin/"
