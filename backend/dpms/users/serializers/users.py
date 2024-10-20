@@ -117,7 +117,7 @@ class UserSignUpSerializer(serializers.Serializer):
         subject = "Bienvenido @{}! Confirma tu cuenta para empezar a participar en PosadasParty".format(
             user.email
         )
-        from_email = "Posadas Party <no-reply@freemem.space"
+        from_email = "Posadas Party <no-reply@freemem.space>"
         content = render_to_string(
             "emails/users/account_verification.html",
             {"token": verification_token, "user": user, "link": verification_url},
