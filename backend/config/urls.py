@@ -30,9 +30,9 @@ urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     # Routes
     path("", include(("dpms.users.urls", "users"), namespace="users")),
-    path(
-        "oauth/", include("social_django.urls", namespace="social")
-    ),  # Añadir ruta para OAuth
+    # path(
+    #     "oauth/", include("social_django.urls", namespace="social")
+    # ),  # Añadir ruta para OAuth
     # https://dpms.backend.posadasparty.com/oauth/sceneid/callback
     path(
         "docs/",
