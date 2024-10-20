@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // Hook para redireccionar
 import { Box, Button, Typography, Paper } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
@@ -19,7 +19,8 @@ const theme = createTheme({
   },
 });
 
-const Error404 = () => {
+const ConfirmationSent = () => {
+  const navigate = useNavigate();
   const { t } = useTranslation();
 
   return (
@@ -42,17 +43,19 @@ const Error404 = () => {
             />
           </Box>
           <Typography variant="h5" align="center" gutterBottom>
-            {t("404 - Page Not Found")}
+            {t("Registration Complete")}
           </Typography>
 
           <Box display="flex" justifyContent="center" mb={2}>
             <Typography variant="body1" align="center">
-              {t("Sorry, the page you are looking for does not exist")}
+              {t(
+                "A confirmation email has been sent to your email address. Please check your inbox to verify your account"
+              )}
             </Typography>
           </Box>
 
-          <Button fullWidth variant="contained" color="primary" component={Link} to="/">
-            {t("Go to Home")}
+          <Button fullWidth variant="contained" color="primary" onClick={() => navigate("/login")}>
+            {t("Go to Login")}
           </Button>
         </Paper>
       </Box>
@@ -60,4 +63,4 @@ const Error404 = () => {
   );
 };
 
-export default Error404;
+export default ConfirmationSent;

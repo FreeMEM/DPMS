@@ -43,6 +43,7 @@ CELERY_TASK_EAGER_PROPAGATES = True
 AUTH_USER_MODEL = "users.User"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+FRONTEND_URL = "http://localhost:3000"
 BACKEND_URL = "http://localhost:8000"
 LOGGING = {
     "version": 1,

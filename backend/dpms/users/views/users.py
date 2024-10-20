@@ -26,9 +26,12 @@ from dpms.users.permissions import IsAccountOwner
 from django.utils import timezone
 from datetime import timedelta
 import jwt
+import logging
 
 # Django
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 
 class UserViewSet(
@@ -101,6 +104,8 @@ class UserViewSet(
     @action(detail=False, methods=["post"])
     def signup(self, request):
         """User sign up."""
+        logger.info("User sign up")
+        logger.info(request.data)
         serializer = UserSignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
@@ -126,7 +131,7 @@ class UserViewSet(
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        data = {"message": "Congratulations and welcome to Capacitor Party community"}
+        data = {"message": "Congratulations and welcome to Posadas Party community"}
         return Response(data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["put", "patch"])

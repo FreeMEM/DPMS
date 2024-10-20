@@ -201,4 +201,5 @@ LOGGING = {
     },
 }
 
+FRONTEND_URL = "https://dpms.freemem.space"
 BACKEND_URL = "https://api.dpms.freemem.space"
