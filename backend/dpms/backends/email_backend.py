@@ -8,9 +8,7 @@ class CustomSMTPConnection(EmailBackend):
         if self.connection:
             return False
         try:
-            self.connection = smtplib.SMTP(
-                self.host, self.port, **self.connection_params
-            )
+            self.connection = smtplib.SMTP(self.host, self.port)
             if self.use_tls:
                 context = ssl.create_default_context()
                 context.check_hostname = False
