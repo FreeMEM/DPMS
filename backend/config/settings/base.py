@@ -128,12 +128,14 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "social_django.middleware.SocialAuthExceptionMiddleware",
 ]
 
-AUTHENTICATION_BACKENDS = (
-    "dpms.users.oauth.sceneid.SceneIDOAuth2",  # Añade el backend de SceneID
-    "django.contrib.auth.backends.ModelBackend",
-)
+# AUTHENTICATION_BACKENDS = (
+#     # "dpms.users.oauth.sceneid.SceneIDOAuth2",  # Añade el backend de SceneID
+#     "social_core.backends.sceneid.SceneIDOAuth2",  # SceneID backend
+#     "django.contrib.auth.backends.ModelBackend",
+# )
 
 # Claves de SceneID (obtenidas desde el portal de desarrolladores de SceneID)
 # SOCIAL_AUTH_SCENEID_KEY = env("SCENE_CLIENT_ID")
@@ -141,7 +143,7 @@ AUTHENTICATION_BACKENDS = (
 
 # Configura las URLs
 LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/logout/"
 SOCIAL_AUTH_SCENEID_SCOPE = ["openid", "profile", "email"]
 
 # Otros ajustes relacionados con la autenti/ión
