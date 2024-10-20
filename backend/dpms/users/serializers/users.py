@@ -87,8 +87,12 @@ class UserSignUpSerializer(serializers.Serializer):
     last_name = serializers.CharField(min_length=2, max_length=50)
 
     # New fields: Nickname and Group
-    nickname = serializers.CharField(min_length=2, max_length=50, required=False)
-    group = serializers.CharField(min_length=2, max_length=50, required=False)
+    nickname = serializers.CharField(
+        min_length=2, max_length=50, required=False, allow_blank=True
+    )
+    group = serializers.CharField(
+        min_length=2, max_length=50, required=False, allow_blank=True
+    )
 
     def validate(self, data):
         logger.info(data)
