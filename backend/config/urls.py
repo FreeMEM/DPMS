@@ -31,7 +31,7 @@ urlpatterns = [
     # Routes
     path("", include(("dpms.users.urls", "users"), namespace="users")),
     path(
-        "auth/", include("social_django.urls", namespace="social")
+        "oauth/", include("social_django.urls", namespace="social")
     ),  # Añadir ruta para OAuth
     # https://dpms.backend.posadasparty.com/oauth/sceneid/callback
     path(
