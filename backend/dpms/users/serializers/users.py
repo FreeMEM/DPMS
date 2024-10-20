@@ -110,25 +110,21 @@ class UserSignUpSerializer(serializers.Serializer):
 
     def send_confirmation_email(self, user):
         """Send account verification link to given user."""
-        try:
-
-            verification_token = self.gen_verification_token(user)
-            verification_url = (
-                f"{settings.BACKEND_URL}/users/verify?token={verification_token}"
-            )
-            subject = "Bienvenido @{}! Confirma tu cuenta para empezar a participar en PosadasParty".format(
-                user.email
-            )
-            from_email = "Posadas Party <no-reply@freemem.space"
-            content = render_to_string(
-                "emails/users/account_verification.html",
-                {"token": verification_token, "user": user, "link": verification_url},
-            )
-            msg = EmailMultiAlternatives(subject, content, from_email, [user.email])
-            msg.attach_alternative(content, "text/html")
-            msg.send()
-        except Exception as e:
-            logger.error("Error sending email: %s", str(e))  # noqa: F821
+        verification_token = self.gen_verification_token(user)
+        verification_url = (
+            f"{settings.BACKEND_URL}/users/verify?token={verification_token}"
+        )
+        subject = "Bienvenido @{}! Confirma tu cuenta para empezar a participar en PosadasParty".format(
+            user.email
+        )
+        from_email = "Posadas Party <no-reply@freemem.space"
+        content = render_to_string(
+            "emails/users/account_verification.html",
+            {"token": verification_token, "user": user, "link": verification_url},
+        )
+        msg = EmailMultiAlternatives(subject, content, from_email, [user.email])
+        msg.attach_alternative(content, "text/html")
+        msg.send()
 
     def gen_verification_token(self, user):
         """Create JWT token that the user can use to verify its account."""
