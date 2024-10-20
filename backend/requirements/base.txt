@@ -51,3 +51,4 @@ django-admin-rangefilter
 # Social Auth
 social-auth-app-django
 python-social-auth
+social-auth-core
