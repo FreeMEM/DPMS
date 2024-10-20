@@ -171,7 +171,7 @@ STATICFILES_FINDERS = [
 # Media
 # MEDIA_ROOT = str(APPS_DIR("media"))
 MEDIA_ROOT = BASE_DIR / "../staticfiles/media"
-print("MEDIA_ROOT", MEDIA_ROOT)
+
 MEDIA_URL = "/media/"
 
 # Templates
