@@ -5,6 +5,7 @@ from .base import env
 
 # Base
 DEBUG = True
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 
 # Security
 SECRET_KEY = env(
