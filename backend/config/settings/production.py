@@ -125,6 +125,11 @@ BACKEND_URL = "https://api.dpms.freemem.space"
 # # WhiteNoise
 # MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")  # noqa F405
 
+INSTALLED_APPS += ["django_social"]
+# Claves de SceneID (obtenidas desde el portal de desarrolladores de SceneID)
+SOCIAL_AUTH_SCENEID_KEY = env("SCENE_CLIENT_ID")
+SOCIAL_AUTH_SCENEID_SECRET = env("SCENEID_CLIENT_SECRET")
+
 
 # Logging
 # A sample logging configuration. The only tangible logging
