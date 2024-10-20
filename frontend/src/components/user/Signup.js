@@ -27,93 +27,33 @@ const Signup = () => {
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [group, setGroup] = useState(""); // Nuevo campo para group
-  const [emailError, setEmailError] = useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = useState("");
-  const [passwordError, setPasswordError] = useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
-  const [passwordConfirmationError, setPasswordConfirmationError] = useState(false);
-  const [passwordConfirmationErrorMessage, setPasswordConfirmationErrorMessage] = useState("");
-  const [registrationError, setRegistrationError] = useState("");
+  const [group, setGroup] = useState("");
+  const [errors, setErrors] = useState({});
   const { signup } = useContext(AuthContext);
   const navigate = useNavigate();
   const { t } = useTranslation();
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    if (validateInputs()) {
-      try {
-        await signup({
-          email,
-          nickname,
-          password,
-          password_confirmation: passwordConfirmation,
-          first_name: firstName,
-          last_name: lastName,
-          group, // Incluyendo el campo group en el post
-        });
-        navigate("/confirmation-sent");
-      } catch (error) {
-        // Controla si el error es de validación (400)
-        if (error.response && error.response.status === 400) {
-          const errors = error.response.data;
-
-          if (errors.non_field_errors) {
-            setRegistrationError(errors.non_field_errors.join(" "));
-          }
-
-          if (errors.email) {
-            setEmailError(true);
-            setEmailErrorMessage(errors.email.join(" "));
-          }
-
-          if (errors.password) {
-            setPasswordError(true);
-            setPasswordErrorMessage(errors.password.join(" "));
-          }
-
-          if (errors.password_confirmation) {
-            setPasswordConfirmationError(true);
-            setPasswordConfirmationErrorMessage(errors.password_confirmation.join(" "));
-          }
-        } else {
-          setRegistrationError("Registration failed. Please try again.");
-        }
+    setErrors({});
+    try {
+      await signup({
+        email,
+        nickname,
+        password,
+        password_confirmation: passwordConfirmation,
+        first_name: firstName,
+        last_name: lastName,
+        group,
+      });
+      navigate("/confirmation-sent");
+    } catch (error) {
+      if (error.response && error.response.status === 400) {
+        setErrors(error.response.data);
+      } else {
+        setErrors({ non_field_errors: "Registration failed. Please try again." });
       }
     }
-  };
-
-  const validateInputs = () => {
-    let isValid = true;
-
-    if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      setEmailError(true);
-      setEmailErrorMessage("Please enter a valid email address.");
-      isValid = false;
-    } else {
-      setEmailError(false);
-      setEmailErrorMessage("");
-    }
-
-    if (!password || password.length < 6) {
-      setPasswordError(true);
-      setPasswordErrorMessage("Password must be at least 6 characters long.");
-      isValid = false;
-    } else {
-      setPasswordError(false);
-      setPasswordErrorMessage("");
-    }
-
-    if (password !== passwordConfirmation) {
-      setPasswordConfirmationError(true);
-      setPasswordConfirmationErrorMessage("Passwords do not match.");
-      isValid = false;
-    } else {
-      setPasswordConfirmationError(false);
-      setPasswordConfirmationErrorMessage("");
-    }
-
-    return isValid;
   };
 
   return (
@@ -123,9 +63,9 @@ const Signup = () => {
           elevation={3}
           sx={{
             padding: 4,
-            maxWidth: 400, // Ajuste de ancho máximo igual al de Login
-            width: "100%", // Asegura que el formulario se ajuste al ancho del contenedor
-            margin: { xs: 2, sm: 3 }, // Márgenes laterales, igual al de Login
+            maxWidth: 400,
+            width: "100%",
+            margin: { xs: 2, sm: 3 },
           }}
         >
           <Typography variant="h5" align="center" gutterBottom>
@@ -145,8 +85,8 @@ const Signup = () => {
             <FormControl>
               <FormLabel htmlFor="email">{t("Email")}</FormLabel>
               <TextField
-                error={emailError}
-                helperText={emailErrorMessage}
+                error={Boolean(errors.email)}
+                helperText={errors.email ? errors.email[0] : ""}
                 id="email"
                 type="email"
                 name="email"
@@ -170,7 +110,6 @@ const Signup = () => {
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
                 placeholder={t("Enter your nickname")}
-                required
                 fullWidth
                 variant="outlined"
               />
@@ -179,6 +118,8 @@ const Signup = () => {
             <FormControl>
               <FormLabel htmlFor="firstName">{t("First Name")}</FormLabel>
               <TextField
+                error={Boolean(errors.first_name)}
+                helperText={errors.first_name ? errors.first_name[0] : ""}
                 id="firstName"
                 type="text"
                 name="firstName"
@@ -194,6 +135,8 @@ const Signup = () => {
             <FormControl>
               <FormLabel htmlFor="lastName">{t("Last Name")}</FormLabel>
               <TextField
+                error={Boolean(errors.last_name)}
+                helperText={errors.last_name ? errors.last_name[0] : ""}
                 id="lastName"
                 type="text"
                 name="lastName"
@@ -215,7 +158,6 @@ const Signup = () => {
                 value={group}
                 onChange={(e) => setGroup(e.target.value)}
                 placeholder={t("Enter your group")}
-                required
                 fullWidth
                 variant="outlined"
               />
@@ -224,8 +166,8 @@ const Signup = () => {
             <FormControl>
               <FormLabel htmlFor="password">{t("Password")}</FormLabel>
               <TextField
-                error={passwordError}
-                helperText={passwordErrorMessage}
+                error={Boolean(errors.password)}
+                helperText={errors.password ? errors.password[0] : ""}
                 id="password"
                 type="password"
                 name="password"
@@ -242,8 +184,8 @@ const Signup = () => {
             <FormControl>
               <FormLabel htmlFor="passwordConfirmation">{t("Confirm Password")}</FormLabel>
               <TextField
-                error={passwordConfirmationError}
-                helperText={passwordConfirmationErrorMessage}
+                error={Boolean(errors.password_confirmation)}
+                helperText={errors.password_confirmation ? errors.password_confirmation[0] : ""}
                 id="passwordConfirmation"
                 type="password"
                 name="passwordConfirmation"
@@ -256,9 +198,9 @@ const Signup = () => {
               />
             </FormControl>
 
-            {registrationError && (
+            {errors.non_field_errors && (
               <Typography color="error" variant="body2" align="center">
-                {t(registrationError)}
+                {t(errors.non_field_errors)}
               </Typography>
             )}
 
