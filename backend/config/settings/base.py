@@ -87,7 +87,7 @@ THIRD_PARTY_APPS = [
     "rest_framework.authtoken",
     "drf_yasg",
     "corsheaders",
-    "social_django",
+    # "social_django",
 ]
 LOCAL_APPS = [
     "dpms.users.apps.UsersAppConfig",
@@ -128,7 +128,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "social_django.middleware.SocialAuthExceptionMiddleware",
+    # "social_django.middleware.SocialAuthExceptionMiddleware",
 ]
 
 # AUTHENTICATION_BACKENDS = (
@@ -144,7 +144,7 @@ MIDDLEWARE = [
 # Configura las URLs
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/logout/"
-SOCIAL_AUTH_SCENEID_SCOPE = ["openid", "profile", "email"]
+# SOCIAL_AUTH_SCENEID_SCOPE = ["openid", "profile", "email"]
 
 # Otros ajustes relacionados con la autenti/ión
 SOCIAL_AUTH_JSONFIELD_ENABLED = True
