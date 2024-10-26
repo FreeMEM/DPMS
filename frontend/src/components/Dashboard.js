@@ -19,8 +19,6 @@ const Dashboard = () => {
       {value === 3 && <div>Rules Content</div>}
       {value === 4 && <div>Gallery Content</div>}
       {value === 5 && <div>Contact Content</div>}
-      {value === 6 && <div>Register Content</div>}
-      {value === 7 && <div>Login Content</div>}
     </Box>
   );
 };
