@@ -5,7 +5,6 @@ from django.db import models
 
 
 class BaseModel(models.Model):
-
     """
     Acts as an abstract base class from which every other model in the project will inherit.
     This class provides every table with the following attributes:
