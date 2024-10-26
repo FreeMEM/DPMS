@@ -30,10 +30,6 @@ function Content({ page }) {
         return <Typography variant="h5">GALERÍA</Typography>;
       case 5:
         return <Typography variant="h5">CONTACTO</Typography>;
-      case 6:
-        return <Typography variant="h5">REGISTRO</Typography>;
-      case 7:
-        return <Typography variant="h5">LOGIN</Typography>;
       default:
         return null;
     }

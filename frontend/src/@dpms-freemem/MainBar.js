@@ -105,28 +105,20 @@ function MainBar() {
         <Box className="drawer-content">
           <List sx={{ width: "100%" }}>
             <ListItemButton>
-              <ListItemText primary={t("HOME")} />
+              <ListItemText primary={t("Home")} />
+            </ListItemButton>
+
+            <ListItemButton>
+              <ListItemText primary={t("Competitions")} />
             </ListItemButton>
             <ListItemButton>
-              <ListItemText primary={t("WHAT IS IT?")} />
+              <ListItemText primary={t("Rules")} />
             </ListItemButton>
             <ListItemButton>
-              <ListItemText primary={t("COMPETITIONS")} />
+              <ListItemText primary={t("Gallery")} />
             </ListItemButton>
             <ListItemButton>
-              <ListItemText primary={t("RULES")} />
-            </ListItemButton>
-            <ListItemButton>
-              <ListItemText primary={t("GALLERY")} />
-            </ListItemButton>
-            <ListItemButton>
-              <ListItemText primary={t("CONTACT")} />
-            </ListItemButton>
-            <ListItemButton>
-              <ListItemText primary={t("REGISTER")} />
-            </ListItemButton>
-            <ListItemButton>
-              <ListItemText primary={t("LOGIN")} />
+              <ListItemText primary={t("Contact")} />
             </ListItemButton>
           </List>
         </Box>
