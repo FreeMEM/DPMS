@@ -27,7 +27,7 @@ const AppRoutes = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route
-          path="/dashboard/demo-party"
+          path="/demo-party/dashboard"
           element={
             <PrivateRoute>
               <DemoPartyDashboard />
@@ -35,14 +35,14 @@ const AppRoutes = () => {
           }
         />
         <Route
-          path="/dashboard/admin"
+          path="/admin/dashboard"
           element={
             <PrivateRoute>
               <AdminDashboard />
             </PrivateRoute>
           }
         />
-        <Route path="/" element={<Navigate to="/dashboard/demo-party" />} />
+        <Route path="/" element={<Navigate to="/demo-party/dashboard" />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verify-account/:token" element={<VerifyAccount />} />
         <Route path="/confirmation-sent" element={<ConfirmationSent />} />
