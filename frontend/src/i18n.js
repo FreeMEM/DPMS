@@ -21,6 +21,9 @@ const resources = {
       "Sign in": "Sign in",
       "Invalid email or password. Please try again.": "Invalid email or password. Please try again.",
       "An unexpected error occurred. Please try again later.": "An unexpected error occurred. Please try again later.",
+      Profile: "Profile",
+      "Sign out": "Sign out",
+      Administration: "Administration",
     },
   },
   es: {
@@ -61,6 +64,9 @@ const resources = {
       "A confirmation email has been sent to your email address. Please check your inbox to verify your account":
         "Se ha enviado un correo de confirmación a tu dirección de correo. Por favor, revisa tu bandeja de entrada para verificar tu cuenta",
       "Registration Complete": "Registro Completado",
+      Profile: "Perfil",
+      "Sign out": "Salir",
+      Administration: "Administración",
     },
   },
 };

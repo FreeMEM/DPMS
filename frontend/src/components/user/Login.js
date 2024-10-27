@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 
 import { useNavigate, Link } from "react-router-dom";
-import { AuthContext } from "../../@dpms-freemem/AuthContext";
+import { AuthContext } from "../../AuthContext";
 // import { GoogleIcon } from "./CustomIcons";
 import ModalForgotPassword from "./ModalForgotPassword";
 import { Box, Button, TextField, Typography, Paper, FormControl, FormLabel } from "@mui/material";
