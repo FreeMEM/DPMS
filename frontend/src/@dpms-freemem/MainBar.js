@@ -11,6 +11,7 @@ import {
   Menu,
   MenuItem,
   ListItemIcon,
+  Typography,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -46,9 +47,9 @@ const MainBar = () => {
 
   // Determina el panel correcto según la ruta
   useEffect(() => {
-    if (location.pathname === "/dashboard/demo-party") {
+    if (location.pathname === "/demo-party/dashboard") {
       setPanel("user");
-    } else if (groups.includes("DPMS Admins")) {
+    } else if (groups.includes("DPMS Admins") && location.pathname.startsWith("/admin/dashboard")) {
       setPanel("admin");
     } else if (groups.includes("DPMS Users")) {
       setPanel("user");
@@ -84,19 +85,33 @@ const MainBar = () => {
 
   const handleAdminPanel = () => {
     setPanel("admin");
-    navigate("/dashboard/admin");
+    navigate("/admin/dashboard");
     handleClose();
   };
 
   const handleParty = () => {
     setPanel("user");
-    navigate("/dashboard/demo-party");
+    navigate("/demo-party/dashboard");
     handleClose();
   };
 
+  // Función para obtener el label actual para mostrar al lado del AccountCircle
+  const getCurrentLabel = () => {
+    if (location.pathname.startsWith("/admin/dashboard")) {
+      return t("Administrator");
+    } else if (location.pathname === "/demo-party/dashboard") {
+      return t("Demo Party");
+    } else {
+      return t("User");
+    }
+  };
+
+  // Función para verificar si una ruta está activa
+  const isActive = (path) => location.pathname === path;
+
   return (
     <Box>
-      <Box className="top-bar">
+      <Box className="top-bar" display="flex" alignItems="center" justifyContent="space-between">
         <Box display="flex" alignItems="center">
           <IconButton
             color="inherit"
@@ -109,16 +124,21 @@ const MainBar = () => {
           </IconButton>
           <img src={`${process.env.PUBLIC_URL}/assets/logo_navbar2025.png`} alt="Posadas Party Logo" className="logo" />
         </Box>
-        <IconButton
-          color="inherit"
-          aria-label="account of current user"
-          aria-controls="menu-appbar"
-          aria-haspopup="true"
-          onClick={handleMenu}
-          className="icon-button"
-        >
-          <AccountCircle />
-        </IconButton>
+        <Box display="flex" alignItems="center">
+          <Typography variant="body1" color="inherit" sx={{ marginRight: 1 }}>
+            {getCurrentLabel()}
+          </Typography>
+          <IconButton
+            color="inherit"
+            aria-label="account of current user"
+            aria-controls="menu-appbar"
+            aria-haspopup="true"
+            onClick={handleMenu}
+            className="icon-button"
+          >
+            <AccountCircle />
+          </IconButton>
+        </Box>
         <Menu
           id="menu-appbar"
           anchorEl={anchorEl}
@@ -135,14 +155,14 @@ const MainBar = () => {
             <ListItemText primary={t("Profile")} />
           </MenuItem>
           {groups.includes("DPMS Admins") && (
-            <MenuItem onClick={handleAdminPanel}>
+            <MenuItem onClick={handleAdminPanel} selected={location.pathname.startsWith("/admin/dashboard")}>
               <ListItemIcon>
                 <AdminPanelSettingsIcon fontSize="small" />
               </ListItemIcon>
               <ListItemText primary={t("Administration")} />
             </MenuItem>
           )}
-          <MenuItem onClick={handleParty}>
+          <MenuItem onClick={handleParty} selected={location.pathname === "/demo-party/dashboard"}>
             <ListItemIcon>
               <CelebrationIcon fontSize="small" />
             </ListItemIcon>
@@ -172,31 +192,31 @@ const MainBar = () => {
         {panel === "user" && (
           <Box className="drawer-content">
             <List sx={{ width: "100%" }}>
-              <ListItemButton onClick={() => navigate("/")}>
+              <ListItemButton selected={isActive("/")} onClick={() => navigate("/")}>
                 <ListItemIcon>
                   <HomeIcon />
                 </ListItemIcon>
                 <ListItemText primary={t("Home")} />
               </ListItemButton>
-              <ListItemButton onClick={() => navigate("/competitions")}>
+              <ListItemButton selected={isActive("/competitions")} onClick={() => navigate("/competitions")}>
                 <ListItemIcon>
                   <SportsEsportsIcon />
                 </ListItemIcon>
                 <ListItemText primary={t("Competitions")} />
               </ListItemButton>
-              <ListItemButton onClick={() => navigate("/rules")}>
+              <ListItemButton selected={isActive("/rules")} onClick={() => navigate("/rules")}>
                 <ListItemIcon>
                   <GavelIcon />
                 </ListItemIcon>
                 <ListItemText primary={t("Rules")} />
               </ListItemButton>
-              <ListItemButton onClick={() => navigate("/gallery")}>
+              <ListItemButton selected={isActive("/gallery")} onClick={() => navigate("/gallery")}>
                 <ListItemIcon>
                   <PhotoLibraryIcon />
                 </ListItemIcon>
                 <ListItemText primary={t("Gallery")} />
               </ListItemButton>
-              <ListItemButton onClick={() => navigate("/contact")}>
+              <ListItemButton selected={isActive("/contact")} onClick={() => navigate("/contact")}>
                 <ListItemIcon>
                   <ContactMailIcon />
                 </ListItemIcon>
@@ -208,25 +228,31 @@ const MainBar = () => {
         {panel === "admin" && (
           <Box className="drawer-content">
             <List sx={{ width: "100%" }}>
-              <ListItemButton onClick={handleUserPanel}>
+              <ListItemButton selected={isActive("/")} onClick={handleUserPanel}>
                 <ListItemIcon>
                   <HomeIcon />
                 </ListItemIcon>
                 <ListItemText primary={t("User Panel")} />
               </ListItemButton>
-              <ListItemButton onClick={() => navigate("/dashboard/admin")}>
+              <ListItemButton selected={isActive("/admin/dashboard")} onClick={() => navigate("/admin/dashboard")}>
                 <ListItemIcon>
                   <DashboardIcon />
                 </ListItemIcon>
                 <ListItemText primary={t("Dashboard")} />
               </ListItemButton>
-              <ListItemButton onClick={() => navigate("/dashboard/admin/users")}>
+              <ListItemButton
+                selected={isActive("/admin/dashboard/users")}
+                onClick={() => navigate("/admin/dashboard/users")}
+              >
                 <ListItemIcon>
                   <PeopleIcon />
                 </ListItemIcon>
                 <ListItemText primary={t("Users")} />
               </ListItemButton>
-              <ListItemButton onClick={() => navigate("/dashboard/admin/settings")}>
+              <ListItemButton
+                selected={isActive("/admin/dashboard/settings")}
+                onClick={() => navigate("/admin/dashboard/settings")}
+              >
                 <ListItemIcon>
                   <SettingsIcon />
                 </ListItemIcon>

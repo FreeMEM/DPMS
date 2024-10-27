@@ -22,25 +22,39 @@ const theme = createTheme({
   palette: {
     mode: "dark",
     primary: {
-      main: "#00FF00", // Verde vibrante
-    },
-    secondary: {
-      main: "#FFA500", // Naranja vibrante
+      main: "#FFA500",
     },
     background: {
-      default: "#121212", // Fondo negro
-      // paper: "#1C1C1C", // Fondo de papel oscuro
-      paper: "#262626",
+      default: "#121212",
+      paper: "#1D1D1D", // Color de fondo para componentes como el Drawer
     },
-    // background: {
-    //   default: gray[900],
-    //   paper: "hsl(220, 30%, 7%)",
-    // },
     text: {
-      primary: "#FFFFFF", // Blanco para el texto principal
-      secondary: "#00FF00", // Verde para el texto secundario
+      primary: "#FFFFFF",
     },
   },
+
+  // palette: {
+  //   mode: "dark",
+  //   primary: {
+  //     main: "#00FF00", // Verde vibrante
+  //   },
+  //   secondary: {
+  //     main: "#FFA500", // Naranja vibrante
+  //   },
+  //   background: {
+  //     default: "#121212", // Fondo negro
+  //     // paper: "#1C1C1C", // Fondo de papel oscuro
+  //     paper: "#262626",
+  //   },
+  //   // background: {
+  //   //   default: gray[900],
+  //   //   paper: "hsl(220, 30%, 7%)",
+  //   // },
+  //   text: {
+  //     primary: "#FFFFFF", // Blanco para el texto principal
+  //     secondary: "#00FF00", // Verde para el texto secundario
+  //   },
+  // },
   typography: {
     fontFamily: ['"Inter", "sans-serif"'].join(","),
     h1: {
