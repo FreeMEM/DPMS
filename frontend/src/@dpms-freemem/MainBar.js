@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   Drawer,
   List,
@@ -27,19 +27,19 @@ import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import SettingsIcon from "@mui/icons-material/Settings";
 import PeopleIcon from "@mui/icons-material/People";
-import CelebrationIcon from "@mui/icons-material/Celebration"; // Icono para Party
+import CelebrationIcon from "@mui/icons-material/Celebration";
 import { useTranslation } from "react-i18next";
-import { AuthContext } from "../AuthContext"; // Importa el contexto de autenticación
+import { AuthContext } from "../AuthContext";
 
 const MainBar = () => {
   const { t } = useTranslation();
-  const { logout } = useContext(AuthContext); // Usa el contexto de autenticación
+  const { logout, groups } = useContext(AuthContext);
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [panel, setPanel] = useState("user"); // "user" o "admin"
+  const [panel, setPanel] = useState("user");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const navigate = useNavigate(); // Inicializa useNavigate
+  const navigate = useNavigate();
 
   const toggleDrawer = () => {
     setOpen(!open);
@@ -58,22 +58,32 @@ const MainBar = () => {
     handleClose();
   };
 
-  const handleAdmin = () => {
-    setPanel("admin"); // Cambia al panel de administrador
-    navigate("/dashboard/admin"); // Navega a la ruta /dashboard/admin
+  const handleUserPanel = () => {
+    setPanel("user");
+    navigate("/");
     handleClose();
   };
 
-  const handleUserPanel = () => {
-    setPanel("user"); // Cambia al panel de usuario
-    navigate("/"); // Navega a la página principal u otra ruta de usuario
+  const handleAdminPanel = () => {
+    setPanel("admin");
+    navigate("/dashboard/admin");
     handleClose();
   };
 
   const handleParty = () => {
-    navigate("/dashboard/demo-party"); // Navega a la ruta de Party
+    setPanel("user");
+    navigate("/dashboard/demo-party");
     handleClose();
   };
+
+  // Configura solo el estado `panel` en función de los grupos, sin navegación
+  useEffect(() => {
+    if (groups.includes("DPMS Admins")) {
+      setPanel("admin");
+    } else if (groups.includes("DPMS Users")) {
+      setPanel("user");
+    }
+  }, [groups]);
 
   return (
     <Box>
@@ -121,12 +131,14 @@ const MainBar = () => {
             </ListItemIcon>
             <ListItemText primary={t("Profile")} />
           </MenuItem>
-          <MenuItem onClick={handleAdmin}>
-            <ListItemIcon>
-              <AdminPanelSettingsIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText primary={t("Administration")} />
-          </MenuItem>
+          {groups.includes("DPMS Admins") && (
+            <MenuItem onClick={handleAdminPanel}>
+              <ListItemIcon>
+                <AdminPanelSettingsIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary={t("Administration")} />
+            </MenuItem>
+          )}
           <MenuItem onClick={handleParty}>
             <ListItemIcon>
               <CelebrationIcon fontSize="small" />
@@ -148,7 +160,7 @@ const MainBar = () => {
         open={open}
         onClose={toggleDrawer}
         ModalProps={{
-          keepMounted: true, // Mejor rendimiento en pantallas móviles
+          keepMounted: true,
         }}
       >
         <Box className="drawer-header">
@@ -200,7 +212,7 @@ const MainBar = () => {
                 <ListItemIcon>
                   <HomeIcon />
                 </ListItemIcon>
-                <ListItemText primary={t("Panel de Usuario")} />
+                <ListItemText primary={t("User Panel")} />
               </ListItemButton>
               <ListItemButton onClick={() => navigate("/dashboard/admin")}>
                 <ListItemIcon>
@@ -208,17 +220,27 @@ const MainBar = () => {
                 </ListItemIcon>
                 <ListItemText primary={t("Dashboard")} />
               </ListItemButton>
-              <ListItemButton onClick={() => navigate("/dashboard/admin/users")}>
+              <ListItemButton
+                onClick={() => {
+                  setPanel("user");
+                  navigate("/dashboard/admin/users");
+                }}
+              >
                 <ListItemIcon>
                   <PeopleIcon />
                 </ListItemIcon>
-                <ListItemText primary={t("Usuarios")} />
+                <ListItemText primary={t("Users")} />
               </ListItemButton>
-              <ListItemButton onClick={() => navigate("/dashboard/admin/settings")}>
+              <ListItemButton
+                onClick={() => {
+                  setPanel("admin");
+                  navigate("/dashboard/admin/settings");
+                }}
+              >
                 <ListItemIcon>
                   <SettingsIcon />
                 </ListItemIcon>
-                <ListItemText primary={t("Configuración")} />
+                <ListItemText primary={t("Settings")} />
               </ListItemButton>
             </List>
           </Box>

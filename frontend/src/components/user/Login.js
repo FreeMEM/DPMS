@@ -76,6 +76,7 @@ const Login = () => {
         await login(email, password);
         navigate("/");
       } catch (error) {
+        console.error("Login failed", error);
         if (error.response && error.response.status === 401) {
           setLoginError("Invalid email or password. Please try again.");
         } else {
