@@ -78,11 +78,13 @@ class UserViewSet(
             user, token, jwt_access_token = serializer.save()
 
             extended_data = UserModelSerializer(user).data
+            user_groups = user.groups.values_list("name", flat=True)
 
             data = {
                 "user": extended_data,
                 "access_token": token,
                 "jwt_access_token": jwt_access_token,
+                "groups": user_groups,
             }
 
             return Response(data, status=status.HTTP_202_ACCEPTED)

@@ -2,7 +2,7 @@ import React from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import theme from "./theme";
-import AuthProvider from "./@dpms-freemem/AuthContext";
+import AuthProvider from "./AuthContext";
 
 import AppRoutes from "./routes";
 

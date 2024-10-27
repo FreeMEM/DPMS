@@ -2,6 +2,7 @@
 
 # Django
 from django.contrib import admin
+from django.contrib.auth.models import Permission
 from django.contrib.auth.admin import UserAdmin
 
 # Models
@@ -30,7 +31,6 @@ class CustomUserAdmin(UserAdmin):
         "is_verified",
         # "is_evaluator",
         "allow_concurrence",
-        
     )
 
     search_fields = ["username", "email", "id"]
@@ -59,9 +59,11 @@ class ProfileAdmin(admin.ModelAdmin):
         "user__last_name",
         "nickname",
         "group",
-        "visit_listing"
+        "visit_listing",
     )
 
 
 admin.site.register(User, CustomUserAdmin)
+admin.site.register(Permission)
+
 # admin.site.register(WorkgroupMembership, WorkgroupMembershipAdmin)

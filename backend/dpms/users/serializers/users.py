@@ -3,6 +3,9 @@
 # Django
 from django.core.mail import EmailMultiAlternatives
 from django.contrib.auth import authenticate, password_validation
+from django.contrib.auth.models import (
+    Group,
+)  # modelo grupos de autenticación y autorización
 from django.template.loader import render_to_string
 from django.db import IntegrityError
 from django.conf import settings
@@ -48,12 +51,7 @@ class UserModelSerializer(serializers.ModelSerializer):
         """Meta class"""
 
         model = User
-        fields = (
-            "first_name",
-            "last_name",
-            "email",
-            "profile",
-        )
+        fields = ("first_name", "last_name", "email", "profile", "groups")
 
 
 class UserSignUpSerializer(serializers.Serializer):
@@ -119,6 +117,9 @@ class UserSignUpSerializer(serializers.Serializer):
                 "last_name": data.get("last_name"),
             }
             user = User.objects.create_user(**user_data, is_verified=False)
+            # Asigna el usuario al grupo de autenticación y autorización "DPMS Users"
+            dpms_group, created = Group.objects.get_or_create(name="DPMS Users")
+            user.groups.add(dpms_group)
             Profile.objects.create(
                 user=user,
                 nickname=data.get("nickname", ""),
@@ -191,6 +192,7 @@ class UserLoginSerializer(serializers.Serializer):
 
         token = Token.objects.create(user=user)
         jwt_access_token = self.generate_jwt_token(user)
+        user_groups = user.groups.values_list("name", flat=True)
 
         return user, token.key, jwt_access_token
 
