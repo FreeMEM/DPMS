@@ -12,7 +12,7 @@ import {
   MenuItem,
   ListItemIcon,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -42,20 +42,22 @@ const MainBar = () => {
   const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"));
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
+  const location = useLocation(); // Obtener la ubicación actual
 
-  // Muestra el Drawer de forma predeterminada en pantallas grandes
+  // Determina el panel correcto según la ruta
   useEffect(() => {
-    setOpen(isLargeScreen);
-  }, [isLargeScreen]);
-
-  // Configura el estado `panel` en función de los grupos del usuario
-  useEffect(() => {
-    if (groups.includes("DPMS Admins")) {
+    if (location.pathname === "/dashboard/demo-party") {
+      setPanel("user");
+    } else if (groups.includes("DPMS Admins")) {
       setPanel("admin");
     } else if (groups.includes("DPMS Users")) {
       setPanel("user");
     }
-  }, [groups]);
+  }, [groups, location]);
+
+  useEffect(() => {
+    setOpen(isLargeScreen);
+  }, [isLargeScreen]);
 
   const toggleDrawer = () => {
     setOpen(!open);
@@ -102,9 +104,6 @@ const MainBar = () => {
             edge="start"
             onClick={toggleDrawer}
             className="icon-button"
-            sx={{
-              display: isLargeScreen ? "block" : "block", // Siempre visible
-            }}
           >
             <MenuIcon />
           </IconButton>
@@ -123,15 +122,9 @@ const MainBar = () => {
         <Menu
           id="menu-appbar"
           anchorEl={anchorEl}
-          anchorOrigin={{
-            vertical: "top",
-            horizontal: "right",
-          }}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
           keepMounted
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "right",
-          }}
+          transformOrigin={{ vertical: "top", horizontal: "right" }}
           open={Boolean(anchorEl)}
           onClose={handleClose}
         >
@@ -167,14 +160,8 @@ const MainBar = () => {
         variant={isMobile ? "temporary" : "persistent"}
         open={open}
         onClose={!isLargeScreen ? toggleDrawer : null}
-        ModalProps={{
-          keepMounted: true,
-        }}
-        sx={{
-          "& .MuiDrawer-paper": {
-            width: 240,
-          },
-        }}
+        ModalProps={{ keepMounted: true }}
+        sx={{ "& .MuiDrawer-paper": { width: 240 } }}
       >
         <Box className="drawer-header" display="flex" justifyContent="space-between" alignItems="center" p={1}>
           <img src={`${process.env.PUBLIC_URL}/assets/logo_navbar2025.png`} alt="Posadas Party Logo" className="logo" />
