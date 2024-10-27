@@ -3,7 +3,7 @@
 import React from "react";
 import { Container, Box, Typography, Button } from "@mui/material";
 
-function Content({ page }) {
+const Content = ({ page }) => {
   const renderContent = () => {
     switch (page) {
       case 0:
@@ -40,6 +40,6 @@ function Content({ page }) {
       <Box sx={{ my: 4 }}>{renderContent()}</Box>
     </Container>
   );
-}
+};
 
 export default Content;

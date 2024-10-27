@@ -6,12 +6,21 @@ export const AuthContext = createContext();
 const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [groups, setGroups] = useState([]);
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      // Aquí puedes agregar lógica para verificar la validez del token
+    // Recupera token, user y groups desde localStorage
+    const storedToken = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+    const storedGroups = localStorage.getItem("groups");
+
+    if (storedToken && storedUser && storedGroups) {
       setIsAuthenticated(true);
+      setToken(storedToken);
+      setUser(JSON.parse(storedUser));
+      setGroups(JSON.parse(storedGroups));
     }
     setLoading(false);
   }, []);
@@ -21,11 +30,16 @@ const AuthProvider = ({ children }) => {
       const client = axiosWrapper();
       const response = await client.post("/users/login/", { email, password });
       console.log(response.data);
-      const { token } = response.data;
-      localStorage.setItem("token", token);
+
+      const { access_token, user, groups } = response.data; // Extrae token, user y groups
+      localStorage.setItem("token", access_token);
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("groups", JSON.stringify(groups)); // Guarda groups como un array de strings
       setIsAuthenticated(true);
+      setToken(access_token);
+      setUser(user);
+      setGroups(groups);
     } catch (error) {
-      // console.error("Login failed", error);
       throw error;
     }
   };
@@ -44,7 +58,7 @@ const AuthProvider = ({ children }) => {
         nickname,
         group,
       });
-      console.log(response.data);
+      // console.log(response.data);
       setIsAuthenticated(true);
     } catch (error) {
       throw error;
@@ -52,8 +66,14 @@ const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    // Limpia el estado y el localStorage al cerrar sesión
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("groups");
     setIsAuthenticated(false);
+    setToken(null);
+    setUser(null);
+    setGroups([]);
   };
 
   const verifyAccount = async (token) => {
@@ -66,7 +86,9 @@ const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, loading, login, signup, logout, verifyAccount }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, loading, login, signup, logout, verifyAccount, user, groups, token }}
+    >
       {children}
     </AuthContext.Provider>
   );
