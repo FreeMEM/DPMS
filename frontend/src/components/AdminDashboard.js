@@ -4,8 +4,7 @@ import Content from "../@dpms-freemem/Content"; // Ruta relativa correcta
 import { Box } from "@mui/material";
 
 const AdminDashboard = () => {
-  const [value, setValue] = useState(1);
-  console.log("value", value);
+  const [value, setValue] = useState(0);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
