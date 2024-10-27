@@ -38,8 +38,24 @@ const MainBar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [panel, setPanel] = useState("user");
   const theme = useTheme();
+
+  const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"));
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
+
+  // Muestra el Drawer de forma predeterminada en pantallas grandes
+  useEffect(() => {
+    setOpen(isLargeScreen);
+  }, [isLargeScreen]);
+
+  // Configura el estado `panel` en función de los grupos del usuario
+  useEffect(() => {
+    if (groups.includes("DPMS Admins")) {
+      setPanel("admin");
+    } else if (groups.includes("DPMS Users")) {
+      setPanel("user");
+    }
+  }, [groups]);
 
   const toggleDrawer = () => {
     setOpen(!open);
@@ -76,15 +92,6 @@ const MainBar = () => {
     handleClose();
   };
 
-  // Configura solo el estado `panel` en función de los grupos, sin navegación
-  useEffect(() => {
-    if (groups.includes("DPMS Admins")) {
-      setPanel("admin");
-    } else if (groups.includes("DPMS Users")) {
-      setPanel("user");
-    }
-  }, [groups]);
-
   return (
     <Box>
       <Box className="top-bar">
@@ -95,6 +102,9 @@ const MainBar = () => {
             edge="start"
             onClick={toggleDrawer}
             className="icon-button"
+            sx={{
+              display: isLargeScreen ? "block" : "block", // Siempre visible
+            }}
           >
             <MenuIcon />
           </IconButton>
@@ -155,15 +165,18 @@ const MainBar = () => {
       </Box>
       <Drawer
         variant={isMobile ? "temporary" : "persistent"}
-        className="drawer"
-        classes={{ paper: "drawer-paper" }}
         open={open}
-        onClose={toggleDrawer}
+        onClose={!isLargeScreen ? toggleDrawer : null}
         ModalProps={{
           keepMounted: true,
         }}
+        sx={{
+          "& .MuiDrawer-paper": {
+            width: 240,
+          },
+        }}
       >
-        <Box className="drawer-header">
+        <Box className="drawer-header" display="flex" justifyContent="space-between" alignItems="center" p={1}>
           <img src={`${process.env.PUBLIC_URL}/assets/logo_navbar2025.png`} alt="Posadas Party Logo" className="logo" />
           <IconButton onClick={toggleDrawer}>
             <ChevronLeftIcon />
@@ -220,23 +233,13 @@ const MainBar = () => {
                 </ListItemIcon>
                 <ListItemText primary={t("Dashboard")} />
               </ListItemButton>
-              <ListItemButton
-                onClick={() => {
-                  setPanel("user");
-                  navigate("/dashboard/admin/users");
-                }}
-              >
+              <ListItemButton onClick={() => navigate("/dashboard/admin/users")}>
                 <ListItemIcon>
                   <PeopleIcon />
                 </ListItemIcon>
                 <ListItemText primary={t("Users")} />
               </ListItemButton>
-              <ListItemButton
-                onClick={() => {
-                  setPanel("admin");
-                  navigate("/dashboard/admin/settings");
-                }}
-              >
+              <ListItemButton onClick={() => navigate("/dashboard/admin/settings")}>
                 <ListItemIcon>
                   <SettingsIcon />
                 </ListItemIcon>
