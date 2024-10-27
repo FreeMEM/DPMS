@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { AuthContext } from "../../@dpms-freemem/AuthContext";
+import { AuthContext } from "../../AuthContext";
 import { Box, Button, TextField, Typography, Paper, FormControl, FormLabel } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom"; // Importa useParams
-import { AuthContext } from "../../@dpms-freemem/AuthContext"; // Importa el contexto de autenticación
+import { AuthContext } from "../../AuthContext"; // Importa el contexto de autenticación
 import { Box, Button, Typography, Paper } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
