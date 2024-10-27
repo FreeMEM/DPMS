@@ -48,7 +48,7 @@ const AuthProvider = ({ children }) => {
     try {
       const client = axiosWrapper();
       const username = email; // Puedes usar el email como nombre de usuario
-      const response = await client.post("/users/signup/", {
+      await client.post("/users/signup/", {
         email,
         username,
         password,
