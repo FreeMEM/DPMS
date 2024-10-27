@@ -65,7 +65,7 @@ const resources = {
         "Se ha enviado un correo de confirmación a tu dirección de correo. Por favor, revisa tu bandeja de entrada para verificar tu cuenta",
       "Registration Complete": "Registro Completado",
       Profile: "Perfil",
-      "Sign out": "Salir",
+      "Sign out": "Cerrar sesión",
       Administration: "Administración",
     },
   },
