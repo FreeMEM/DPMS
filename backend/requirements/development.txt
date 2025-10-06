@@ -1,11 +1,13 @@
 -r ./base.txt
 
 # Debugging
-ipdb
+ipdb==0.13.13
 
 # Tools
-django-extensions
-
+django-extensions==4.1
 
 # Code quality
-flake8
+flake8==7.3.0
+mccabe==0.7.0
+pycodestyle==2.14.0
+pyflakes==3.4.0

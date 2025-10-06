@@ -114,8 +114,7 @@ docker compose -f local.yml exec backend_party python manage.py makemigrations
 
 **Run backend tests:**
 ```bash
-cd backend
-pytest
+docker compose -f local.yml exec backend_party pytest
 ```
 
 **Access Django shell:**
