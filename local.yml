@@ -8,6 +8,7 @@ services:
             dockerfile: ./docker/backend/development.Dockerfile
         entrypoint: /app/docker/backend/wsgi-entrypoint.sh
         image: django_backend_party
+        working_dir: /app/backend
         depends_on:
             - postgres
         volumes:
