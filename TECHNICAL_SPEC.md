@@ -705,10 +705,364 @@ class SiteSettings(models.Model):
         return obj
 ```
 
+#### VotingConfiguration (Configuración de Votación)
+```python
+class VotingConfiguration(BaseModel):
+    """
+    Configuración de votación para una edición.
+    Permite configurar modalidades mixtas (público + jurado) y control de acceso.
+    """
+    edition = OneToOneField(
+        Edition,
+        on_delete=CASCADE,
+        related_name='voting_config',
+        verbose_name="Edición"
+    )
+
+    # Modalidad de votación
+    VOTING_MODE_CHOICES = [
+        ('public', 'Votación Pública 100%'),
+        ('jury', 'Votación por Jurado 100%'),
+        ('mixed', 'Modalidad Mixta (Público + Jurado)'),
+    ]
+    voting_mode = CharField(
+        max_length=10,
+        choices=VOTING_MODE_CHOICES,
+        default='public',
+        verbose_name="Modalidad de votación"
+    )
+    public_weight = PositiveIntegerField(
+        default=100,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        verbose_name="Peso votación pública (%)",
+        help_text="Porcentaje de peso de la votación pública (0-100%)"
+    )
+    jury_weight = PositiveIntegerField(
+        default=0,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        verbose_name="Peso votación jurado (%)",
+        help_text="Porcentaje de peso de la votación del jurado (0-100%)"
+    )
+
+    # Control de acceso a votación
+    ACCESS_MODE_CHOICES = [
+        ('open', 'Abierta por Tiempo'),
+        ('code', 'Código de Asistencia'),
+        ('manual', 'Verificación Manual'),
+        ('checkin', 'Check-in Físico (QR)'),
+    ]
+    access_mode = CharField(
+        max_length=10,
+        choices=ACCESS_MODE_CHOICES,
+        default='open',
+        verbose_name="Modo de acceso",
+        help_text="Cómo se controla quién puede votar"
+    )
+
+    # Configuración de resultados
+    results_published = BooleanField(
+        default=False,
+        verbose_name="Resultados publicados"
+    )
+    results_published_at = DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de publicación"
+    )
+    show_partial_results = BooleanField(
+        default=False,
+        verbose_name="Mostrar resultados parciales",
+        help_text="Permitir ver resultados antes del cierre de votación"
+    )
+
+    # created, modified
+
+    class Meta:
+        verbose_name = "Configuración de Votación"
+        verbose_name_plural = "Configuraciones de Votación"
+
+    def __str__(self):
+        return f"Votación - {self.edition.title}"
+
+    def clean(self):
+        """Validar que los pesos sumen 100% en modo mixto"""
+        if self.voting_mode == 'mixed':
+            if self.public_weight + self.jury_weight != 100:
+                raise ValidationError(
+                    "Los pesos público y jurado deben sumar 100% en modo mixto"
+                )
+
+    def calculate_final_score(self, production):
+        """
+        Calcula el score final de una producción según la modalidad.
+
+        Returns:
+            float: Puntuación final calculada
+        """
+        public_votes = production.votes.filter(is_jury_vote=False)
+        jury_votes = production.votes.filter(is_jury_vote=True)
+
+        public_avg = public_votes.aggregate(Avg('score'))['score__avg'] or 0
+        jury_avg = jury_votes.aggregate(Avg('score'))['score__avg'] or 0
+
+        if self.voting_mode == 'public':
+            return public_avg
+        elif self.voting_mode == 'jury':
+            return jury_avg
+        else:  # mixed
+            return (
+                (public_avg * self.public_weight / 100) +
+                (jury_avg * self.jury_weight / 100)
+            )
+
+
+#### AttendanceCode (Código de Asistencia)
+```python
+class AttendanceCode(BaseModel):
+    """
+    Códigos únicos para verificar asistencia física a la party.
+    Se generan en lotes y se distribuyen a asistentes.
+    """
+    code = CharField(
+        max_length=50,
+        unique=True,
+        verbose_name="Código"
+    )
+    edition = ForeignKey(
+        Edition,
+        on_delete=CASCADE,
+        related_name='attendance_codes',
+        verbose_name="Edición"
+    )
+    is_used = BooleanField(
+        default=False,
+        verbose_name="Usado"
+    )
+    used_by = ForeignKey(
+        User,
+        on_delete=SET_NULL,
+        null=True,
+        blank=True,
+        related_name='used_codes',
+        verbose_name="Usado por"
+    )
+    used_at = DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de uso"
+    )
+    notes = TextField(
+        blank=True,
+        verbose_name="Notas"
+    )
+    # created, modified
+
+    class Meta:
+        verbose_name = "Código de Asistencia"
+        verbose_name_plural = "Códigos de Asistencia"
+        ordering = ['code']
+
+    def __str__(self):
+        status = "Usado" if self.is_used else "Disponible"
+        return f"{self.code} - {self.edition.title} ({status})"
+
+    def use_code(self, user):
+        """Marca el código como usado por un usuario"""
+        if self.is_used:
+            raise ValidationError("Este código ya ha sido utilizado")
+
+        self.is_used = True
+        self.used_by = user
+        self.used_at = timezone.now()
+        self.save()
+
+        # Crear verificación de asistente
+        AttendeeVerification.objects.create(
+            user=user,
+            edition=self.edition,
+            is_verified=True,
+            verification_method='code',
+            notes=f"Código: {self.code}"
+        )
+
+
+#### AttendeeVerification (Verificación de Asistente)
+```python
+class AttendeeVerification(BaseModel):
+    """
+    Registro de asistentes verificados para una edición.
+    Controla quién puede votar según el modo de acceso configurado.
+    """
+    user = ForeignKey(
+        User,
+        on_delete=CASCADE,
+        related_name='attendee_verifications',
+        verbose_name="Usuario"
+    )
+    edition = ForeignKey(
+        Edition,
+        on_delete=CASCADE,
+        related_name='verified_attendees',
+        verbose_name="Edición"
+    )
+    is_verified = BooleanField(
+        default=False,
+        verbose_name="Verificado"
+    )
+    verified_by = ForeignKey(
+        User,
+        on_delete=SET_NULL,
+        null=True,
+        blank=True,
+        related_name='verifications_made',
+        verbose_name="Verificado por"
+    )
+    verified_at = DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de verificación"
+    )
+
+    VERIFICATION_METHOD_CHOICES = [
+        ('manual', 'Verificación Manual'),
+        ('code', 'Código de Asistencia'),
+        ('checkin', 'Check-in QR'),
+    ]
+    verification_method = CharField(
+        max_length=20,
+        choices=VERIFICATION_METHOD_CHOICES,
+        default='manual',
+        verbose_name="Método de verificación"
+    )
+    notes = TextField(
+        blank=True,
+        verbose_name="Notas"
+    )
+    # created, modified
+
+    class Meta:
+        verbose_name = "Verificación de Asistente"
+        verbose_name_plural = "Verificaciones de Asistentes"
+        unique_together = ['user', 'edition']
+
+    def __str__(self):
+        status = "Verificado" if self.is_verified else "Pendiente"
+        return f"{self.user.email} - {self.edition.title} ({status})"
+
+    def can_vote(self):
+        """Verifica si el asistente puede votar"""
+        config = self.edition.voting_config
+
+        if config.access_mode == 'open':
+            # En modo abierto, todos los verificados pueden votar
+            # durante el período de votación
+            return True
+
+        # En otros modos, debe estar verificado
+        return self.is_verified
+
+
+#### JuryMember (Miembro del Jurado)
+```python
+class JuryMember(BaseModel):
+    """
+    Miembro del jurado para una edición específica.
+    Puede votar en compos específicas o en todas.
+    """
+    user = ForeignKey(
+        User,
+        on_delete=CASCADE,
+        related_name='jury_memberships',
+        verbose_name="Usuario"
+    )
+    edition = ForeignKey(
+        Edition,
+        on_delete=CASCADE,
+        related_name='jury_members',
+        verbose_name="Edición"
+    )
+    compos = ManyToManyField(
+        Compo,
+        blank=True,
+        related_name='jury_members',
+        verbose_name="Competiciones",
+        help_text="Compos en las que puede votar. Vacío = todas las compos"
+    )
+    notes = TextField(
+        blank=True,
+        verbose_name="Notas",
+        help_text="Información adicional sobre el miembro del jurado"
+    )
+    # created, modified
+
+    class Meta:
+        unique_together = ['user', 'edition']
+        verbose_name = "Miembro del Jurado"
+        verbose_name_plural = "Miembros del Jurado"
+
+    def __str__(self):
+        return f"{self.user.email} - Jurado {self.edition.title}"
+
+    def can_vote_in_compo(self, compo):
+        """
+        Verifica si este miembro del jurado puede votar en una compo específica.
+
+        Args:
+            compo: Instancia de Compo
+
+        Returns:
+            bool: True si puede votar en esta compo
+        """
+        # Si no tiene compos asignadas, puede votar en todas
+        if not self.compos.exists():
+            return True
+
+        # Verificar si la compo está en su lista
+        return self.compos.filter(id=compo.id).exists()
+
+    def get_voting_progress(self):
+        """
+        Obtiene el progreso de votación del jurado.
+
+        Returns:
+            dict: Estadísticas de votación
+        """
+        # Obtener compos en las que puede votar
+        if self.compos.exists():
+            compos = self.compos.all()
+        else:
+            compos = Compo.objects.filter(
+                hascompo__edition=self.edition
+            ).distinct()
+
+        # Contar producciones y votos
+        total_productions = Production.objects.filter(
+            edition=self.edition,
+            compo__in=compos
+        ).count()
+
+        votes_cast = Vote.objects.filter(
+            user=self.user,
+            production__edition=self.edition,
+            production__compo__in=compos,
+            is_jury_vote=True
+        ).count()
+
+        return {
+            'total_productions': total_productions,
+            'votes_cast': votes_cast,
+            'pending': total_productions - votes_cast,
+            'progress_percentage': (votes_cast / total_productions * 100) if total_productions > 0 else 0
+        }
+
+
 #### Vote (Sistema de Votación)
 ```python
 class Vote(BaseModel):
-    """Votos de usuarios en producciones"""
+    """
+    Votos de usuarios o jurados en producciones.
+    Soporta votación pública y por jurado.
+    """
     user = ForeignKey(
         User,
         on_delete=CASCADE,
@@ -730,6 +1084,11 @@ class Vote(BaseModel):
         max_length=500,
         verbose_name="Comentario"
     )
+    is_jury_vote = BooleanField(
+        default=False,
+        verbose_name="Voto de jurado",
+        help_text="Indica si este voto es de un miembro del jurado"
+    )
     # created, modified
 
     class Meta:
@@ -737,21 +1096,89 @@ class Vote(BaseModel):
         verbose_name_plural = "Votos"
         unique_together = [['user', 'production']]
         ordering = ['-created']
+        indexes = [
+            models.Index(fields=['production', 'is_jury_vote']),
+        ]
 
     def __str__(self):
-        return f"{self.user.email} → {self.production.title}: {self.score}/10"
+        vote_type = "Jurado" if self.is_jury_vote else "Público"
+        return f"{self.user.email} → {self.production.title}: {self.score}/10 ({vote_type})"
 
     def clean(self):
-        # Validar que la votación esté abierta
+        """Validaciones de negocio"""
         edition = self.production.edition
-        # TODO: Validar período de votación
-        pass
-```
+
+        # Verificar que existe configuración de votación
+        if not hasattr(edition, 'voting_config'):
+            raise ValidationError("La edición no tiene configuración de votación")
+
+        config = edition.voting_config
+
+        # Verificar período de votación
+        voting_period = VotingPeriod.objects.filter(
+            edition=edition,
+            is_active=True
+        ).first()
+
+        if not voting_period or not voting_period.is_open():
+            raise ValidationError("El período de votación no está abierto")
+
+        # Verificar modo de votación
+        if config.voting_mode == 'jury' and not self.is_jury_vote:
+            raise ValidationError(
+                "Esta edición solo acepta votos del jurado"
+            )
+
+        # Si es voto de jurado, verificar que el usuario es miembro del jurado
+        if self.is_jury_vote:
+            jury_member = JuryMember.objects.filter(
+                user=self.user,
+                edition=edition
+            ).first()
+
+            if not jury_member:
+                raise ValidationError(
+                    "El usuario no es miembro del jurado de esta edición"
+                )
+
+            if not jury_member.can_vote_in_compo(self.production.compo):
+                raise ValidationError(
+                    f"El jurado no está asignado a la compo {self.production.compo.name}"
+                )
+
+        # Si es voto público, verificar acceso según modalidad
+        if not self.is_jury_vote and config.access_mode != 'open':
+            verification = AttendeeVerification.objects.filter(
+                user=self.user,
+                edition=edition,
+                is_verified=True
+            ).first()
+
+            if not verification:
+                raise ValidationError(
+                    "El usuario no está verificado como asistente"
+                )
+
+    def save(self, *args, **kwargs):
+        """Auto-detectar si es voto de jurado"""
+        if not self.pk:  # Solo en creación
+            is_jury = JuryMember.objects.filter(
+                user=self.user,
+                edition=self.production.edition
+            ).exists()
+
+            if is_jury:
+                self.is_jury_vote = True
+
+        super().save(*args, **kwargs)
+
 
 #### VotingPeriod (Período de Votación)
 ```python
 class VotingPeriod(BaseModel):
-    """Define cuándo se puede votar para una edición"""
+    """
+    Define el período de tiempo en que se puede votar para una edición o compo.
+    """
     edition = ForeignKey(
         Edition,
         on_delete=CASCADE,
@@ -785,6 +1212,13 @@ class VotingPeriod(BaseModel):
         """Verifica si la votación está abierta ahora"""
         now = timezone.now()
         return self.is_active and self.start_date <= now <= self.end_date
+
+    def clean(self):
+        """Validar fechas"""
+        if self.end_date <= self.start_date:
+            raise ValidationError(
+                "La fecha de fin debe ser posterior a la fecha de inicio"
+            )
 ```
 
 ### 5.3 Modificaciones a Modelos Existentes
