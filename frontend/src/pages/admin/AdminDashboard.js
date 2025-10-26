@@ -7,18 +7,23 @@ import {
   Typography,
   Box,
   Alert,
+  Button,
 } from '@mui/material';
 import {
   People as PeopleIcon,
   EmojiEvents as TrophyIcon,
   CloudUpload as UploadIcon,
   HowToVote as VoteIcon,
+  Settings as SettingsIcon,
+  Category as CategoryIcon,
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import StatsCard from '../../components/admin/common/StatsCard';
 import axiosWrapper from '../../utils/AxiosWrapper';
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalEditions: 0,
@@ -104,40 +109,79 @@ const AdminDashboard = () => {
         </Grid>
       </Grid>
 
+      {/* Quick Actions */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={4}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                <TrophyIcon color="primary" sx={{ fontSize: 40 }} />
+                <Typography variant="h6">Ediciones</Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary" paragraph>
+                Crear y gestionar ediciones de parties
+              </Typography>
+              <Button
+                variant="contained"
+                fullWidth
+                onClick={() => navigate('/app/admin/editions')}
+              >
+                Gestionar Ediciones
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={4}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                <CategoryIcon color="primary" sx={{ fontSize: 40 }} />
+                <Typography variant="h6">Competiciones</Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary" paragraph>
+                Configurar tipos de competiciones (compos)
+              </Typography>
+              <Button
+                variant="contained"
+                fullWidth
+                onClick={() => navigate('/app/admin/compos')}
+              >
+                Gestionar Compos
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={4}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                <SettingsIcon color="primary" sx={{ fontSize: 40 }} />
+                <Typography variant="h6">Votaciones</Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary" paragraph>
+                Configurar sistema de votación y jurados
+              </Typography>
+              <Button
+                variant="contained"
+                fullWidth
+                onClick={() => navigate('/app/admin/voting')}
+              >
+                Configurar Votación
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
       {/* Welcome Card */}
       <Card>
         <CardHeader title="Bienvenido al Panel de Administración" />
         <CardContent>
-          <Typography variant="body1" paragraph>
-            Desde aquí puedes gestionar todos los aspectos del sistema DPMS:
+          <Typography variant="body1">
+            Gestiona todos los aspectos del sistema DPMS desde este panel centralizado.
           </Typography>
-          <Box component="ul" sx={{ pl: 2 }}>
-            <li>
-              <Typography variant="body2">
-                <strong>Ediciones:</strong> Crear y gestionar ediciones de parties
-              </Typography>
-            </li>
-            <li>
-              <Typography variant="body2">
-                <strong>Competiciones:</strong> Configurar tipos de competiciones (compos)
-              </Typography>
-            </li>
-            <li>
-              <Typography variant="body2">
-                <strong>Producciones:</strong> Ver y gestionar producciones enviadas
-              </Typography>
-            </li>
-            <li>
-              <Typography variant="body2">
-                <strong>Usuarios:</strong> Administrar usuarios y asignar roles
-              </Typography>
-            </li>
-            <li>
-              <Typography variant="body2">
-                <strong>Votaciones:</strong> Configurar sistema de votación con jurado y códigos de asistencia
-              </Typography>
-            </li>
-          </Box>
         </CardContent>
       </Card>
     </AdminLayout>
