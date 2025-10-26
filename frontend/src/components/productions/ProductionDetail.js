@@ -23,6 +23,8 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import { productionsAPI, filesAPI } from '../../services/api';
 import { AuthContext } from '../../AuthContext';
+import MainBar from '../../@dpms-freemem/MainBar';
+import Content from '../../@dpms-freemem/Content';
 
 const ProductionDetail = () => {
   const navigate = useNavigate();
@@ -94,32 +96,24 @@ const ProductionDetail = () => {
 
   const isOwner = user && production && production.uploaded_by === user.email;
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (error || !production) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error || 'Production not found'}
-        </Alert>
-        <Button
-          variant="outlined"
-          startIcon={<BackIcon />}
-          onClick={() => navigate(-1)}
-        >
-          Go Back
-        </Button>
-      </Box>
-    );
-  }
-
-  return (
+  const pageContent = loading ? (
+    <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+      <CircularProgress />
+    </Box>
+  ) : (error || !production) ? (
+    <Box sx={{ p: 3 }}>
+      <Alert severity="error" sx={{ mb: 3 }}>
+        {error || 'Production not found'}
+      </Alert>
+      <Button
+        variant="outlined"
+        startIcon={<BackIcon />}
+        onClick={() => navigate(-1)}
+      >
+        Go Back
+      </Button>
+    </Box>
+  ) : (
     <Box sx={{ p: 3, maxWidth: 1000, mx: 'auto' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Button
@@ -258,6 +252,15 @@ const ProductionDetail = () => {
           )}
         </Box>
       </Paper>
+    </Box>
+  );
+
+  return (
+    <Box>
+      <MainBar />
+      <Content>
+        {pageContent}
+      </Content>
     </Box>
   );
 };
