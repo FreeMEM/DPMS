@@ -37,19 +37,18 @@ const AdminDashboard = () => {
       setLoading(true);
       const client = axiosWrapper();
 
-      // Fetch basic stats
-      const [usersRes, editionsRes, productionsRes, votesRes] = await Promise.all([
-        client.get('/api/users/').catch(() => ({ data: { count: 0 } })),
-        client.get('/api/editions/').catch(() => ({ data: { count: 0 } })),
-        client.get('/api/productions/').catch(() => ({ data: { count: 0 } })),
-        client.get('/api/votes/').catch(() => ({ data: { count: 0 } })),
+      // Fetch basic stats - only use endpoints that exist
+      const [editionsRes, productionsRes, votesRes] = await Promise.all([
+        client.get('/api/editions/').catch(() => ({ data: [] })),
+        client.get('/api/productions/').catch(() => ({ data: [] })),
+        client.get('/api/votes/').catch(() => ({ data: [] })),
       ]);
 
       setStats({
-        totalUsers: usersRes.data?.count || usersRes.data?.length || 0,
-        totalEditions: editionsRes.data?.count || editionsRes.data?.length || 0,
-        totalProductions: productionsRes.data?.count || productionsRes.data?.length || 0,
-        totalVotes: votesRes.data?.count || votesRes.data?.length || 0,
+        totalUsers: 0, // TODO: Implement users endpoint
+        totalEditions: editionsRes.data?.length || 0,
+        totalProductions: productionsRes.data?.length || 0,
+        totalVotes: votesRes.data?.length || 0,
       });
 
       setError(null);
