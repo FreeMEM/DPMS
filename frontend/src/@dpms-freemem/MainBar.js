@@ -44,7 +44,7 @@ const MainBar = () => {
   const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"));
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
-  const location = useLocation(); // Obtener la ubicación actual
+  const location = useLocation();
 
   // Determina el panel correcto según la ruta
   useEffect(() => {
@@ -57,9 +57,12 @@ const MainBar = () => {
     }
   }, [groups, location]);
 
+  // Cierra el drawer en móvil cuando cambia la ubicación
   useEffect(() => {
-    setOpen(isLargeScreen);
-  }, [isLargeScreen]);
+    if (isMobile && open) {
+      setOpen(false);
+    }
+  }, [location.pathname, isMobile]);
 
   const toggleDrawer = () => {
     setOpen(!open);
@@ -178,56 +181,69 @@ const MainBar = () => {
         </Menu>
       </Box>
       <Drawer
-        variant={isMobile ? "temporary" : "persistent"}
+        variant={isMobile ? "temporary" : "permanent"}
         open={open}
-        onClose={!isLargeScreen ? toggleDrawer : null}
+        onClose={isMobile ? toggleDrawer : null}
         ModalProps={{ keepMounted: true }}
-        sx={{ "& .MuiDrawer-paper": { width: 240 } }}
+        sx={{
+          width: open ? 240 : 64,
+          flexShrink: 0,
+          whiteSpace: 'nowrap',
+          boxSizing: 'border-box',
+          "& .MuiDrawer-paper": {
+            width: open ? 240 : 64,
+            transition: theme.transitions.create('width', {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
+            overflowX: 'hidden',
+          },
+        }}
       >
-        <Box className="drawer-header" display="flex" justifyContent="space-between" alignItems="center" p={1}>
-          <img src={`${process.env.PUBLIC_URL}/assets/logo_navbar2025.png`} alt="Posadas Party Logo" className="logo" />
+        <Box className="drawer-header" display="flex" justifyContent={open ? "space-between" : "center"} alignItems="center" p={1}>
+          {open && <img src={`${process.env.PUBLIC_URL}/assets/logo_navbar2025.png`} alt="Posadas Party Logo" className="logo" />}
           <IconButton onClick={toggleDrawer}>
-            <ChevronLeftIcon />
+            {open ? <ChevronLeftIcon /> : <MenuIcon />}
           </IconButton>
         </Box>
         {panel === "user" && (
           <Box className="drawer-content">
             <List sx={{ width: "100%" }}>
-              <ListItemButton selected={isActive("/")} onClick={() => navigate("/")}>
-                <ListItemIcon>
+              <ListItemButton selected={isActive("/")} onClick={() => navigate("/")} sx={{ justifyContent: open ? 'initial' : 'center' }}>
+                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
                   <HomeIcon />
                 </ListItemIcon>
-                <ListItemText primary={t("Home")} />
+                {open && <ListItemText primary={t("Home")} />}
               </ListItemButton>
-              <ListItemButton selected={isActive("/compos")} onClick={() => navigate("/compos")}>
-                <ListItemIcon>
+              <ListItemButton selected={isActive("/compos")} onClick={() => navigate("/compos")} sx={{ justifyContent: open ? 'initial' : 'center' }}>
+                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
                   <EmojiEventsIcon />
                 </ListItemIcon>
-                <ListItemText primary={t("Competitions")} />
+                {open && <ListItemText primary={t("Competitions")} />}
               </ListItemButton>
-              <ListItemButton selected={isActive("/my-productions")} onClick={() => navigate("/my-productions")}>
-                <ListItemIcon>
+              <ListItemButton selected={isActive("/my-productions")} onClick={() => navigate("/my-productions")} sx={{ justifyContent: open ? 'initial' : 'center' }}>
+                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
                   <FolderIcon />
                 </ListItemIcon>
-                <ListItemText primary={t("My Productions")} />
+                {open && <ListItemText primary={t("My Productions")} />}
               </ListItemButton>
-              <ListItemButton selected={isActive("/rules")} onClick={() => navigate("/rules")}>
-                <ListItemIcon>
+              <ListItemButton selected={isActive("/rules")} onClick={() => navigate("/rules")} sx={{ justifyContent: open ? 'initial' : 'center' }}>
+                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
                   <GavelIcon />
                 </ListItemIcon>
-                <ListItemText primary={t("Rules")} />
+                {open && <ListItemText primary={t("Rules")} />}
               </ListItemButton>
-              <ListItemButton selected={isActive("/gallery")} onClick={() => navigate("/gallery")}>
-                <ListItemIcon>
+              <ListItemButton selected={isActive("/gallery")} onClick={() => navigate("/gallery")} sx={{ justifyContent: open ? 'initial' : 'center' }}>
+                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
                   <PhotoLibraryIcon />
                 </ListItemIcon>
-                <ListItemText primary={t("Gallery")} />
+                {open && <ListItemText primary={t("Gallery")} />}
               </ListItemButton>
-              <ListItemButton selected={isActive("/contact")} onClick={() => navigate("/contact")}>
-                <ListItemIcon>
+              <ListItemButton selected={isActive("/contact")} onClick={() => navigate("/contact")} sx={{ justifyContent: open ? 'initial' : 'center' }}>
+                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
                   <ContactMailIcon />
                 </ListItemIcon>
-                <ListItemText primary={t("Contact")} />
+                {open && <ListItemText primary={t("Contact")} />}
               </ListItemButton>
             </List>
           </Box>
@@ -235,35 +251,37 @@ const MainBar = () => {
         {panel === "admin" && (
           <Box className="drawer-content">
             <List sx={{ width: "100%" }}>
-              <ListItemButton selected={isActive("/")} onClick={handleUserPanel}>
-                <ListItemIcon>
+              <ListItemButton selected={isActive("/")} onClick={handleUserPanel} sx={{ justifyContent: open ? 'initial' : 'center' }}>
+                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
                   <HomeIcon />
                 </ListItemIcon>
-                <ListItemText primary={t("User Panel")} />
+                {open && <ListItemText primary={t("User Panel")} />}
               </ListItemButton>
-              <ListItemButton selected={isActive("/admin/dashboard")} onClick={() => navigate("/admin/dashboard")}>
-                <ListItemIcon>
+              <ListItemButton selected={isActive("/admin/dashboard")} onClick={() => navigate("/admin/dashboard")} sx={{ justifyContent: open ? 'initial' : 'center' }}>
+                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
                   <DashboardIcon />
                 </ListItemIcon>
-                <ListItemText primary={t("Dashboard")} />
+                {open && <ListItemText primary={t("Dashboard")} />}
               </ListItemButton>
               <ListItemButton
                 selected={isActive("/admin/dashboard/users")}
                 onClick={() => navigate("/admin/dashboard/users")}
+                sx={{ justifyContent: open ? 'initial' : 'center' }}
               >
-                <ListItemIcon>
+                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
                   <PeopleIcon />
                 </ListItemIcon>
-                <ListItemText primary={t("Users")} />
+                {open && <ListItemText primary={t("Users")} />}
               </ListItemButton>
               <ListItemButton
                 selected={isActive("/admin/dashboard/settings")}
                 onClick={() => navigate("/admin/dashboard/settings")}
+                sx={{ justifyContent: open ? 'initial' : 'center' }}
               >
-                <ListItemIcon>
+                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
                   <SettingsIcon />
                 </ListItemIcon>
-                <ListItemText primary={t("Settings")} />
+                {open && <ListItemText primary={t("Settings")} />}
               </ListItemButton>
             </List>
           </Box>

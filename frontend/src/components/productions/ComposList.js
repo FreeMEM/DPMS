@@ -18,7 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import { EmojiEvents as TrophyIcon } from '@mui/icons-material';
 import { editionsAPI } from '../../services/api';
 import MainBar from '../../@dpms-freemem/MainBar';
-import Content from '../../@dpms-freemem/Content';
+
 
 const ComposList = () => {
   const navigate = useNavigate();
@@ -171,12 +171,11 @@ const ComposList = () => {
   );
 
   return (
-    <Box>
+    <Box sx={{ display: 'flex' }}>
       <MainBar />
-      <Content>
-        {pageContent}
-      </Content>
-    </Box>
+            <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8, ml: { lg: '64px' } }}>
+                {pageContent}
+          </Box>
   );
 };
 

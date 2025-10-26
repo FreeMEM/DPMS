@@ -24,7 +24,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { productionsAPI, filesAPI } from '../../services/api';
 import { AuthContext } from '../../AuthContext';
 import MainBar from '../../@dpms-freemem/MainBar';
-import Content from '../../@dpms-freemem/Content';
+
 
 const ProductionDetail = () => {
   const navigate = useNavigate();
@@ -256,12 +256,11 @@ const ProductionDetail = () => {
   );
 
   return (
-    <Box>
+    <Box sx={{ display: 'flex' }}>
       <MainBar />
-      <Content>
-        {pageContent}
-      </Content>
-    </Box>
+            <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8, ml: { lg: '64px' } }}>
+                {pageContent}
+          </Box>
   );
 };
 
