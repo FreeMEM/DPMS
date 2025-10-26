@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    {% block seo %}
+    <title>{% block title %}{{ site_title|default:"DPMS - Demo Party Management System" }}{% endblock %}</title>
+    <meta name="description" content="{% block description %}Sistema de gestión de demo parties{% endblock %}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:title" content="{% block og_title %}{{ site_title|default:"DPMS" }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Sistema de gestión de demo parties{% endblock %}">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ request.build_absolute_uri }}">
+    <meta property="twitter:title" content="{% block twitter_title %}{{ site_title|default:"DPMS" }}{% endblock %}">
+    <meta property="twitter:description" content="{% block twitter_description %}Sistema de gestión de demo parties{% endblock %}">
+    {% endblock seo %}
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'website/css/main.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <div class="navbar-brand">
+                    <h1>DPMS</h1>
+                </div>
+                <div class="navbar-menu">
+                    <a href="/">Inicio</a>
+                    <a href="{{ FRONTEND_URL }}/login">Acceder</a>
+                    <a href="{{ FRONTEND_URL }}/signup">Registrarse</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 DPMS - Demo Party Management System</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="{% static 'website/js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

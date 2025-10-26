@@ -7,6 +7,9 @@ from .base import env
 DEBUG = True
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 
+# Frontend URL for development (React dev server with /app basename)
+FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:3000/app")
+
 # Security
 SECRET_KEY = env(
     "DJANGO_SECRET_KEY",
@@ -43,7 +46,7 @@ CELERY_TASK_EAGER_PROPAGATES = True
 AUTH_USER_MODEL = "users.User"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-FRONTEND_URL = "http://localhost:3000"
+# BACKEND_URL usado para otros propósitos si es necesario
 BACKEND_URL = "http://localhost:8000"
 
 LOGGING = {

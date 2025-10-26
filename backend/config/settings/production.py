@@ -6,6 +6,9 @@ from django.core.exceptions import ImproperlyConfigured
 
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 
+# Frontend URL for production (same domain, /app prefix)
+FRONTEND_URL = "/app"
+
 ALLOWED_HOSTS = env.list(
     "DJANGO_ALLOWED_HOSTS",
     default=[

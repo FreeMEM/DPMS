@@ -28,7 +28,7 @@ const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const client = axiosWrapper();
-      const response = await client.post("/users/login/", { email, password });
+      const response = await client.post("/api/users/login/", { email, password });
       console.log(response.data);
 
       const { access_token, user, groups } = response.data; // Extrae token, user y groups
@@ -48,7 +48,7 @@ const AuthProvider = ({ children }) => {
     try {
       const client = axiosWrapper();
       const username = email; // Puedes usar el email como nombre de usuario
-      await client.post("/users/signup/", {
+      await client.post("/api/users/signup/", {
         email,
         username,
         password,
@@ -78,7 +78,7 @@ const AuthProvider = ({ children }) => {
 
   const verifyAccount = async (token) => {
     try {
-      const response = await axiosWrapper().get(`/users/verify?token=${token}`);
+      const response = await axiosWrapper().get(`/api/users/verify?token=${token}`);
       return response; // Devuelve la respuesta con el status 200 o 400
     } catch (error) {
       throw error; // Maneja el error

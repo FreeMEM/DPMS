@@ -92,6 +92,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "dpms.users.apps.UsersAppConfig",
     "dpms.compos.apps.ComposAppConfig",
+    "dpms.website.apps.WebsiteConfig",
     # "dpms.users"
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -199,6 +200,7 @@ TEMPLATES = [
                 "django.template.context_processors.static",
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
+                "dpms.website.context_processors.frontend_url",
             ],
         },
     },
