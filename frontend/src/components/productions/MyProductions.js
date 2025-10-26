@@ -23,6 +23,8 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { productionsAPI } from '../../services/api';
+import MainBar from '../../@dpms-freemem/MainBar';
+import Content from '../../@dpms-freemem/Content';
 
 const MyProductions = () => {
   const navigate = useNavigate();
@@ -96,15 +98,11 @@ const MyProductions = () => {
     });
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  return (
+  const pageContent = loading ? (
+    <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+      <CircularProgress />
+    </Box>
+  ) : (
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4">
@@ -258,6 +256,15 @@ const MyProductions = () => {
           </Button>
         </DialogActions>
       </Dialog>
+    </Box>
+  );
+
+  return (
+    <Box>
+      <MainBar />
+      <Content>
+        {pageContent}
+      </Content>
     </Box>
   );
 };

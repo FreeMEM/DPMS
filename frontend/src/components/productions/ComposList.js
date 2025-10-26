@@ -17,6 +17,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { EmojiEvents as TrophyIcon } from '@mui/icons-material';
 import { editionsAPI } from '../../services/api';
+import MainBar from '../../@dpms-freemem/MainBar';
+import Content from '../../@dpms-freemem/Content';
 
 const ComposList = () => {
   const navigate = useNavigate();
@@ -72,15 +74,11 @@ const ComposList = () => {
     navigate(`/productions/new?edition=${selectedEdition}&compo=${compoId}`);
   };
 
-  if (loading && !selectedEdition) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  return (
+  const pageContent = loading && !selectedEdition ? (
+    <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+      <CircularProgress />
+    </Box>
+  ) : (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
         Competitions
@@ -169,6 +167,15 @@ const ComposList = () => {
           No competitions available for this edition yet.
         </Typography>
       )}
+    </Box>
+  );
+
+  return (
+    <Box>
+      <MainBar />
+      <Content>
+        {pageContent}
+      </Content>
     </Box>
   );
 };

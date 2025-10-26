@@ -15,6 +15,8 @@ import {
 import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { editionsAPI, productionsAPI } from '../../services/api';
 import FileUpload from './FileUpload';
+import MainBar from '../../@dpms-freemem/MainBar';
+import Content from '../../@dpms-freemem/Content';
 
 const ProductionForm = () => {
   const navigate = useNavigate();
@@ -161,15 +163,11 @@ const ProductionForm = () => {
     }
   };
 
-  if (loadingData) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  return (
+  const pageContent = loadingData ? (
+    <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+      <CircularProgress />
+    </Box>
+  ) : (
     <Box sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>
       <Typography variant="h4" gutterBottom>
         {productionId ? 'Edit Production' : 'Submit Production'}
@@ -301,6 +299,15 @@ const ProductionForm = () => {
           </Box>
         </Box>
       </Paper>
+    </Box>
+  );
+
+  return (
+    <Box>
+      <MainBar />
+      <Content>
+        {pageContent}
+      </Content>
     </Box>
   );
 };
