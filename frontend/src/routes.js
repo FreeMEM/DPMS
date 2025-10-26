@@ -7,12 +7,13 @@ import ConfirmationSent from "./components/user/ConfirmationSent";
 import VerifyAccount from "./components/user/VerifyAccount";
 import ForgotPassword from "./components/user/ForgotPassword";
 import DemoPartyDashboard from "./components/DemoPartyDashboard";
-import AdminDashboard from "./components/AdminDashboard";
 import Error404 from "./components/Error404";
 import ComposList from "./components/productions/ComposList";
 import ProductionForm from "./components/productions/ProductionForm";
 import MyProductions from "./components/productions/MyProductions";
 import ProductionDetail from "./components/productions/ProductionDetail";
+import AdminRoute from "./components/common/AdminRoute";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useContext(AuthContext);
@@ -47,9 +48,9 @@ const AppRoutes = () => {
         <Route
           path="/admin/dashboard"
           element={
-            <PrivateRoute>
+            <AdminRoute>
               <AdminDashboard />
-            </PrivateRoute>
+            </AdminRoute>
           }
         />
         <Route path="/compos" element={<ComposList />} />
