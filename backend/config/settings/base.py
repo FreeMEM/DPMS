@@ -236,3 +236,14 @@ MANAGERS = ADMINS
 # CELERY_RESULT_SERIALIZER = 'json'
 # CELERYD_TASK_TIME_LIMIT = 5 * 60
 # CELERYD_TASK_SOFT_TIME_LIMIT = 60
+
+# Django REST Framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+}
