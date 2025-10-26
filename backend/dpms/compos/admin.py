@@ -4,7 +4,19 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
 from django.db.models import Count
-from .models import Edition, Compo, HasCompo, Production, File
+from .models import (
+    Edition,
+    Compo,
+    HasCompo,
+    Production,
+    File,
+    VotingConfiguration,
+    AttendanceCode,
+    AttendeeVerification,
+    JuryMember,
+    Vote,
+    VotingPeriod,
+)
 
 
 class HasCompoInlineForEdition(admin.TabularInline):
@@ -776,3 +788,727 @@ class FileAdmin(admin.ModelAdmin):
         updated = queryset.update(is_deleted=False)
         self.message_user(request, f"{updated} files are unmarked as deleted.")
     unmark_deleted.short_description = "Unmark as deleted"
+
+
+# ============================================================================
+# VOTING SYSTEM ADMIN
+# ============================================================================
+
+
+class VotingPeriodInline(admin.TabularInline):
+    """VotingPeriod inline for Edition admin"""
+    model = VotingPeriod
+    extra = 0
+    fields = ("compo", "start_date", "end_date", "is_active")
+    autocomplete_fields = ["compo"]
+
+
+class JuryMemberInline(admin.TabularInline):
+    """JuryMember inline for Edition admin"""
+    model = JuryMember
+    extra = 0
+    fields = ("user", "notes")
+    autocomplete_fields = ["user"]
+    verbose_name = "Jury Member"
+    verbose_name_plural = "Jury Members"
+
+
+@admin.register(VotingConfiguration)
+class VotingConfigurationAdmin(admin.ModelAdmin):
+    """VotingConfiguration model admin"""
+
+    list_display = (
+        "id",
+        "edition_link",
+        "voting_mode_badge",
+        "access_mode_badge",
+        "public_weight",
+        "jury_weight",
+        "results_published_badge",
+        "modified_display",
+    )
+
+    list_display_links = ("id", "edition_link")
+
+    search_fields = ("edition__title",)
+
+    list_filter = (
+        "voting_mode",
+        "access_mode",
+        "results_published",
+        "show_partial_results",
+        "modified",
+    )
+
+    readonly_fields = ("created", "modified")
+
+    fieldsets = (
+        ("Edition", {"fields": ("edition",)}),
+        (
+            "Voting Mode",
+            {
+                "fields": ("voting_mode", "public_weight", "jury_weight"),
+                "description": "Configure how votes are calculated. In mixed mode, weights must sum 100%.",
+            },
+        ),
+        (
+            "Access Control",
+            {
+                "fields": ("access_mode",),
+                "description": "Control who can vote: open (anyone), code (attendance codes), manual (admin verification), checkin (QR scan).",
+            },
+        ),
+        (
+            "Results",
+            {
+                "fields": (
+                    "results_published",
+                    "results_published_at",
+                    "show_partial_results",
+                )
+            },
+        ),
+        ("Timestamps", {"fields": ("created", "modified"), "classes": ("collapse",)}),
+    )
+
+    list_per_page = 50
+
+    autocomplete_fields = ["edition"]
+
+    def edition_link(self, obj):
+        """Link to edition admin page"""
+        url = reverse("admin:compos_edition_change", args=[obj.edition.pk])
+        return format_html('<a href="{}">{}</a>', url, obj.edition.title)
+
+    edition_link.short_description = "Edition"
+    edition_link.admin_order_field = "edition__title"
+
+    def voting_mode_badge(self, obj):
+        """Display voting mode"""
+        colors = {
+            "public": "#17a2b8",  # info blue
+            "jury": "#6f42c1",  # purple
+            "mixed": "#fd7e14",  # orange
+        }
+        color = colors.get(obj.voting_mode, "#6c757d")
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 3px 10px; border-radius: 3px;">{}</span>',
+            color,
+            obj.get_voting_mode_display(),
+        )
+
+    voting_mode_badge.short_description = "Voting Mode"
+    voting_mode_badge.admin_order_field = "voting_mode"
+
+    def access_mode_badge(self, obj):
+        """Display access mode"""
+        colors = {
+            "open": "#28a745",  # green
+            "code": "#ffc107",  # yellow
+            "manual": "#17a2b8",  # blue
+            "checkin": "#6f42c1",  # purple
+        }
+        color = colors.get(obj.access_mode, "#6c757d")
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 3px 10px; border-radius: 3px;">{}</span>',
+            color,
+            obj.get_access_mode_display(),
+        )
+
+    access_mode_badge.short_description = "Access Mode"
+    access_mode_badge.admin_order_field = "access_mode"
+
+    def results_published_badge(self, obj):
+        """Display published status"""
+        if obj.results_published:
+            return format_html(
+                '<span style="background-color: #28a745; color: white; padding: 3px 10px; border-radius: 3px;">Published</span>'
+            )
+        return format_html(
+            '<span style="background-color: #6c757d; color: white; padding: 3px 10px; border-radius: 3px;">Not Published</span>'
+        )
+
+    results_published_badge.short_description = "Results"
+    results_published_badge.admin_order_field = "results_published"
+
+    def modified_display(self, obj):
+        """Format modified date"""
+        return obj.modified.strftime("%Y-%m-%d %H:%M")
+
+    modified_display.short_description = "Modified"
+    modified_display.admin_order_field = "modified"
+
+
+@admin.register(AttendanceCode)
+class AttendanceCodeAdmin(admin.ModelAdmin):
+    """AttendanceCode model admin"""
+
+    list_display = (
+        "id",
+        "code",
+        "edition_link",
+        "used_badge",
+        "used_by_link",
+        "used_at_display",
+        "created_display",
+    )
+
+    list_display_links = ("id", "code")
+
+    search_fields = ("code", "edition__title", "used_by__email", "notes")
+
+    list_filter = ("is_used", "edition", "created")
+
+    readonly_fields = ("used_at", "created", "modified")
+
+    fieldsets = (
+        ("Code Information", {"fields": ("code", "edition")}),
+        ("Usage", {"fields": ("is_used", "used_by", "used_at")}),
+        ("Notes", {"fields": ("notes",)}),
+        ("Timestamps", {"fields": ("created", "modified"), "classes": ("collapse",)}),
+    )
+
+    list_per_page = 100
+
+    autocomplete_fields = ["edition", "used_by"]
+
+    actions = ["invalidate_codes"]
+
+    def edition_link(self, obj):
+        """Link to edition admin page"""
+        url = reverse("admin:compos_edition_change", args=[obj.edition.pk])
+        return format_html('<a href="{}">{}</a>', url, obj.edition.title)
+
+    edition_link.short_description = "Edition"
+    edition_link.admin_order_field = "edition__title"
+
+    def used_badge(self, obj):
+        """Display used status"""
+        if obj.is_used:
+            return format_html(
+                '<span style="background-color: #6c757d; color: white; padding: 3px 10px; border-radius: 3px;">Used</span>'
+            )
+        return format_html(
+            '<span style="background-color: #28a745; color: white; padding: 3px 10px; border-radius: 3px;">Available</span>'
+        )
+
+    used_badge.short_description = "Status"
+    used_badge.admin_order_field = "is_used"
+
+    def used_by_link(self, obj):
+        """Link to user who used the code"""
+        if obj.used_by:
+            url = reverse("admin:users_user_change", args=[obj.used_by.pk])
+            return format_html('<a href="{}">{}</a>', url, obj.used_by.email)
+        return "-"
+
+    used_by_link.short_description = "Used By"
+    used_by_link.admin_order_field = "used_by__email"
+
+    def used_at_display(self, obj):
+        """Format used date"""
+        if obj.used_at:
+            return obj.used_at.strftime("%Y-%m-%d %H:%M")
+        return "-"
+
+    used_at_display.short_description = "Used At"
+    used_at_display.admin_order_field = "used_at"
+
+    def created_display(self, obj):
+        """Format created date"""
+        return obj.created.strftime("%Y-%m-%d %H:%M")
+
+    created_display.short_description = "Created"
+    created_display.admin_order_field = "created"
+
+    def invalidate_codes(self, request, queryset):
+        """Invalidate selected codes"""
+        queryset = queryset.filter(is_used=False)
+        updated = queryset.update(notes="Invalidated by admin")
+        queryset.delete()
+        self.message_user(request, f"{updated} codes have been invalidated.")
+
+    invalidate_codes.short_description = "Invalidate selected codes"
+
+
+@admin.register(AttendeeVerification)
+class AttendeeVerificationAdmin(admin.ModelAdmin):
+    """AttendeeVerification model admin"""
+
+    list_display = (
+        "id",
+        "user_link",
+        "edition_link",
+        "verified_badge",
+        "verification_method_badge",
+        "verified_by_link",
+        "verified_at_display",
+        "created_display",
+    )
+
+    list_display_links = ("id", "user_link")
+
+    search_fields = (
+        "user__email",
+        "user__username",
+        "edition__title",
+        "verified_by__email",
+        "notes",
+    )
+
+    list_filter = ("is_verified", "verification_method", "edition", "created")
+
+    readonly_fields = ("verified_at", "created", "modified")
+
+    fieldsets = (
+        ("User & Edition", {"fields": ("user", "edition")}),
+        (
+            "Verification",
+            {"fields": ("is_verified", "verification_method", "verified_by", "verified_at")},
+        ),
+        ("Notes", {"fields": ("notes",)}),
+        ("Timestamps", {"fields": ("created", "modified"), "classes": ("collapse",)}),
+    )
+
+    list_per_page = 50
+
+    autocomplete_fields = ["user", "edition", "verified_by"]
+
+    actions = ["verify_attendees", "unverify_attendees"]
+
+    def user_link(self, obj):
+        """Link to user admin page"""
+        url = reverse("admin:users_user_change", args=[obj.user.pk])
+        return format_html('<a href="{}">{}</a>', url, obj.user.email)
+
+    user_link.short_description = "User"
+    user_link.admin_order_field = "user__email"
+
+    def edition_link(self, obj):
+        """Link to edition admin page"""
+        url = reverse("admin:compos_edition_change", args=[obj.edition.pk])
+        return format_html('<a href="{}">{}</a>', url, obj.edition.title)
+
+    edition_link.short_description = "Edition"
+    edition_link.admin_order_field = "edition__title"
+
+    def verified_badge(self, obj):
+        """Display verified status"""
+        if obj.is_verified:
+            return format_html(
+                '<span style="background-color: #28a745; color: white; padding: 3px 10px; border-radius: 3px;">Verified</span>'
+            )
+        return format_html(
+            '<span style="background-color: #ffc107; color: black; padding: 3px 10px; border-radius: 3px;">Pending</span>'
+        )
+
+    verified_badge.short_description = "Status"
+    verified_badge.admin_order_field = "is_verified"
+
+    def verification_method_badge(self, obj):
+        """Display verification method"""
+        colors = {
+            "manual": "#17a2b8",  # blue
+            "code": "#28a745",  # green
+            "checkin": "#6f42c1",  # purple
+        }
+        color = colors.get(obj.verification_method, "#6c757d")
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 3px 10px; border-radius: 3px;">{}</span>',
+            color,
+            obj.get_verification_method_display(),
+        )
+
+    verification_method_badge.short_description = "Method"
+    verification_method_badge.admin_order_field = "verification_method"
+
+    def verified_by_link(self, obj):
+        """Link to verifier"""
+        if obj.verified_by:
+            url = reverse("admin:users_user_change", args=[obj.verified_by.pk])
+            return format_html('<a href="{}">{}</a>', url, obj.verified_by.email)
+        return "-"
+
+    verified_by_link.short_description = "Verified By"
+    verified_by_link.admin_order_field = "verified_by__email"
+
+    def verified_at_display(self, obj):
+        """Format verified date"""
+        if obj.verified_at:
+            return obj.verified_at.strftime("%Y-%m-%d %H:%M")
+        return "-"
+
+    verified_at_display.short_description = "Verified At"
+    verified_at_display.admin_order_field = "verified_at"
+
+    def created_display(self, obj):
+        """Format created date"""
+        return obj.created.strftime("%Y-%m-%d %H:%M")
+
+    created_display.short_description = "Created"
+    created_display.admin_order_field = "created"
+
+    def verify_attendees(self, request, queryset):
+        """Verify selected attendees"""
+        from django.utils import timezone
+
+        updated = queryset.update(
+            is_verified=True, verified_by=request.user, verified_at=timezone.now()
+        )
+        self.message_user(request, f"{updated} attendees have been verified.")
+
+    verify_attendees.short_description = "Verify selected attendees"
+
+    def unverify_attendees(self, request, queryset):
+        """Unverify selected attendees"""
+        updated = queryset.update(is_verified=False, verified_by=None, verified_at=None)
+        self.message_user(request, f"{updated} attendees have been unverified.")
+
+    unverify_attendees.short_description = "Unverify selected attendees"
+
+
+@admin.register(JuryMember)
+class JuryMemberAdmin(admin.ModelAdmin):
+    """JuryMember model admin"""
+
+    list_display = (
+        "id",
+        "user_link",
+        "edition_link",
+        "compos_list",
+        "votes_progress",
+        "created_display",
+    )
+
+    list_display_links = ("id", "user_link")
+
+    search_fields = ("user__email", "user__username", "edition__title", "notes")
+
+    list_filter = ("edition", "created")
+
+    readonly_fields = ("created", "modified", "voting_progress_detail")
+
+    fieldsets = (
+        ("Jury Member", {"fields": ("user", "edition")}),
+        (
+            "Assigned Compos",
+            {
+                "fields": ("compos",),
+                "description": "Leave empty to allow voting in all compos",
+            },
+        ),
+        ("Voting Progress", {"fields": ("voting_progress_detail",)}),
+        ("Notes", {"fields": ("notes",)}),
+        ("Timestamps", {"fields": ("created", "modified"), "classes": ("collapse",)}),
+    )
+
+    filter_horizontal = ("compos",)
+
+    list_per_page = 50
+
+    autocomplete_fields = ["user", "edition"]
+
+    def user_link(self, obj):
+        """Link to user admin page"""
+        url = reverse("admin:users_user_change", args=[obj.user.pk])
+        return format_html('<a href="{}">{}</a>', url, obj.user.email)
+
+    user_link.short_description = "User"
+    user_link.admin_order_field = "user__email"
+
+    def edition_link(self, obj):
+        """Link to edition admin page"""
+        url = reverse("admin:compos_edition_change", args=[obj.edition.pk])
+        return format_html('<a href="{}">{}</a>', url, obj.edition.title)
+
+    edition_link.short_description = "Edition"
+    edition_link.admin_order_field = "edition__title"
+
+    def compos_list(self, obj):
+        """List of assigned compos"""
+        if not obj.compos.exists():
+            return "All compos"
+        return ", ".join([c.name for c in obj.compos.all()[:3]]) + (
+            "..." if obj.compos.count() > 3 else ""
+        )
+
+    compos_list.short_description = "Compos"
+
+    def votes_progress(self, obj):
+        """Display voting progress"""
+        progress = obj.get_voting_progress()
+        percentage = progress["progress_percentage"]
+        color = (
+            "#28a745" if percentage == 100 else "#ffc107" if percentage > 50 else "#dc3545"
+        )
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 3px 10px; border-radius: 3px;">{}/{} ({:.0f}%)</span>',
+            color,
+            progress["votes_cast"],
+            progress["total_productions"],
+            percentage,
+        )
+
+    votes_progress.short_description = "Voting Progress"
+
+    def voting_progress_detail(self, obj):
+        """Detailed voting progress"""
+        if obj.pk:
+            progress = obj.get_voting_progress()
+            return format_html(
+                "<strong>Total Productions:</strong> {}<br/>"
+                "<strong>Votes Cast:</strong> {}<br/>"
+                "<strong>Pending:</strong> {}<br/>"
+                "<strong>Progress:</strong> {:.2f}%",
+                progress["total_productions"],
+                progress["votes_cast"],
+                progress["pending"],
+                progress["progress_percentage"],
+            )
+        return "Save to see progress"
+
+    voting_progress_detail.short_description = "Voting Progress Details"
+
+    def created_display(self, obj):
+        """Format created date"""
+        return obj.created.strftime("%Y-%m-%d %H:%M")
+
+    created_display.short_description = "Created"
+    created_display.admin_order_field = "created"
+
+
+@admin.register(Vote)
+class VoteAdmin(admin.ModelAdmin):
+    """Vote model admin"""
+
+    list_display = (
+        "id",
+        "user_link",
+        "production_link",
+        "score_badge",
+        "vote_type_badge",
+        "comment_preview",
+        "created_display",
+    )
+
+    list_display_links = ("id", "user_link")
+
+    search_fields = (
+        "user__email",
+        "user__username",
+        "production__title",
+        "production__authors",
+        "comment",
+    )
+
+    list_filter = (
+        "is_jury_vote",
+        "score",
+        "production__edition",
+        "production__compo",
+        "created",
+    )
+
+    readonly_fields = ("created", "modified")
+
+    fieldsets = (
+        ("Vote", {"fields": ("user", "production")}),
+        ("Score & Comment", {"fields": ("score", "comment")}),
+        ("Type", {"fields": ("is_jury_vote",)}),
+        ("Timestamps", {"fields": ("created", "modified"), "classes": ("collapse",)}),
+    )
+
+    list_per_page = 50
+
+    autocomplete_fields = ["user", "production"]
+
+    def user_link(self, obj):
+        """Link to user admin page"""
+        url = reverse("admin:users_user_change", args=[obj.user.pk])
+        return format_html('<a href="{}">{}</a>', url, obj.user.email)
+
+    user_link.short_description = "User"
+    user_link.admin_order_field = "user__email"
+
+    def production_link(self, obj):
+        """Link to production admin page"""
+        url = reverse("admin:compos_production_change", args=[obj.production.pk])
+        return format_html('<a href="{}">{}</a>', url, obj.production.title)
+
+    production_link.short_description = "Production"
+    production_link.admin_order_field = "production__title"
+
+    def score_badge(self, obj):
+        """Display score with color"""
+        if obj.score >= 8:
+            color = "#28a745"  # green
+        elif obj.score >= 5:
+            color = "#ffc107"  # yellow
+        else:
+            color = "#dc3545"  # red
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 3px 10px; border-radius: 3px; font-weight: bold;">{}/10</span>',
+            color,
+            obj.score,
+        )
+
+    score_badge.short_description = "Score"
+    score_badge.admin_order_field = "score"
+
+    def vote_type_badge(self, obj):
+        """Display vote type"""
+        if obj.is_jury_vote:
+            return format_html(
+                '<span style="background-color: #6f42c1; color: white; padding: 3px 10px; border-radius: 3px;">Jury</span>'
+            )
+        return format_html(
+            '<span style="background-color: #17a2b8; color: white; padding: 3px 10px; border-radius: 3px;">Public</span>'
+        )
+
+    vote_type_badge.short_description = "Type"
+    vote_type_badge.admin_order_field = "is_jury_vote"
+
+    def comment_preview(self, obj):
+        """Preview of comment"""
+        if obj.comment:
+            return obj.comment[:50] + ("..." if len(obj.comment) > 50 else "")
+        return "-"
+
+    comment_preview.short_description = "Comment"
+
+    def created_display(self, obj):
+        """Format created date"""
+        return obj.created.strftime("%Y-%m-%d %H:%M")
+
+    created_display.short_description = "Created"
+    created_display.admin_order_field = "created"
+
+
+@admin.register(VotingPeriod)
+class VotingPeriodAdmin(admin.ModelAdmin):
+    """VotingPeriod model admin"""
+
+    list_display = (
+        "id",
+        "edition_link",
+        "compo_link",
+        "start_display",
+        "end_display",
+        "active_badge",
+        "status_badge",
+        "created_display",
+    )
+
+    list_display_links = ("id", "edition_link")
+
+    search_fields = ("edition__title", "compo__name")
+
+    list_filter = ("is_active", "edition", "compo", "start_date", "end_date")
+
+    readonly_fields = ("created", "modified", "is_currently_open")
+
+    fieldsets = (
+        ("Period", {"fields": ("edition", "compo")}),
+        ("Dates", {"fields": ("start_date", "end_date")}),
+        ("Status", {"fields": ("is_active", "is_currently_open")}),
+        ("Timestamps", {"fields": ("created", "modified"), "classes": ("collapse",)}),
+    )
+
+    list_per_page = 50
+
+    autocomplete_fields = ["edition", "compo"]
+
+    actions = ["activate_periods", "deactivate_periods"]
+
+    def edition_link(self, obj):
+        """Link to edition admin page"""
+        url = reverse("admin:compos_edition_change", args=[obj.edition.pk])
+        return format_html('<a href="{}">{}</a>', url, obj.edition.title)
+
+    edition_link.short_description = "Edition"
+    edition_link.admin_order_field = "edition__title"
+
+    def compo_link(self, obj):
+        """Link to compo admin page"""
+        if obj.compo:
+            url = reverse("admin:compos_compo_change", args=[obj.compo.pk])
+            return format_html('<a href="{}">{}</a>', url, obj.compo.name)
+        return "All compos"
+
+    compo_link.short_description = "Compo"
+    compo_link.admin_order_field = "compo__name"
+
+    def start_display(self, obj):
+        """Format start date"""
+        return obj.start_date.strftime("%Y-%m-%d %H:%M")
+
+    start_display.short_description = "Start"
+    start_display.admin_order_field = "start_date"
+
+    def end_display(self, obj):
+        """Format end date"""
+        return obj.end_date.strftime("%Y-%m-%d %H:%M")
+
+    end_display.short_description = "End"
+    end_display.admin_order_field = "end_date"
+
+    def active_badge(self, obj):
+        """Display active status"""
+        if obj.is_active:
+            return format_html(
+                '<span style="background-color: #28a745; color: white; padding: 3px 10px; border-radius: 3px;">Active</span>'
+            )
+        return format_html(
+            '<span style="background-color: #6c757d; color: white; padding: 3px 10px; border-radius: 3px;">Inactive</span>'
+        )
+
+    active_badge.short_description = "Active"
+    active_badge.admin_order_field = "is_active"
+
+    def status_badge(self, obj):
+        """Display current status"""
+        if obj.is_open():
+            return format_html(
+                '<span style="background-color: #28a745; color: white; padding: 3px 10px; border-radius: 3px;">OPEN NOW</span>'
+            )
+        from django.utils import timezone
+
+        now = timezone.now()
+        if now < obj.start_date:
+            return format_html(
+                '<span style="background-color: #ffc107; color: black; padding: 3px 10px; border-radius: 3px;">Upcoming</span>'
+            )
+        return format_html(
+            '<span style="background-color: #dc3545; color: white; padding: 3px 10px; border-radius: 3px;">Closed</span>'
+        )
+
+    status_badge.short_description = "Status"
+
+    def is_currently_open(self, obj):
+        """Check if currently open"""
+        if obj.pk:
+            return "Yes" if obj.is_open() else "No"
+        return "N/A"
+
+    is_currently_open.short_description = "Is Open Now?"
+
+    def created_display(self, obj):
+        """Format created date"""
+        return obj.created.strftime("%Y-%m-%d %H:%M")
+
+    created_display.short_description = "Created"
+    created_display.admin_order_field = "created"
+
+    def activate_periods(self, request, queryset):
+        """Activate selected periods"""
+        updated = queryset.update(is_active=True)
+        self.message_user(request, f"{updated} voting periods have been activated.")
+
+    activate_periods.short_description = "Activate selected periods"
+
+    def deactivate_periods(self, request, queryset):
+        """Deactivate selected periods"""
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f"{updated} voting periods have been deactivated.")
+
+    deactivate_periods.short_description = "Deactivate selected periods"
