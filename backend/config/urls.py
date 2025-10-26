@@ -30,6 +30,7 @@ urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     # API Routes
     path("api/", include(("dpms.users.urls", "users"), namespace="users")),
+    path("api/", include(("dpms.compos.urls", "compos"), namespace="compos")),
     # path(
     #     "oauth/", include("social_django.urls", namespace="social")
     # ),  # Añadir ruta para OAuth
