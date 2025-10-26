@@ -3,12 +3,21 @@ import axiosRetry from "axios-retry";
 
 const axiosWrapper = () => {
   const baseURL = process.env.REACT_APP_BACKEND_ADDRESS || "http://localhost:8000";
+  const token = localStorage.getItem("token");
+
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  // Add authorization token if available
+  if (token) {
+    headers["Authorization"] = `Token ${token}`;
+  }
+
   const client = axios.create({
     baseURL: baseURL,
-    timeout: 1000,
-    headers: {
-      "Content-Type": "application/json",
-    },
+    timeout: 10000, // Increased timeout to 10 seconds
+    headers: headers,
   });
 
   axiosRetry(client, {
