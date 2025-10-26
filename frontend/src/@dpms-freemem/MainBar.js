@@ -18,7 +18,6 @@ import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import HomeIcon from "@mui/icons-material/Home";
-import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import GavelIcon from "@mui/icons-material/Gavel";
 import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import ContactMailIcon from "@mui/icons-material/ContactMail";
@@ -29,6 +28,8 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import SettingsIcon from "@mui/icons-material/Settings";
 import PeopleIcon from "@mui/icons-material/People";
 import CelebrationIcon from "@mui/icons-material/Celebration";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import FolderIcon from "@mui/icons-material/Folder";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../AuthContext";
 
@@ -198,11 +199,17 @@ const MainBar = () => {
                 </ListItemIcon>
                 <ListItemText primary={t("Home")} />
               </ListItemButton>
-              <ListItemButton selected={isActive("/competitions")} onClick={() => navigate("/competitions")}>
+              <ListItemButton selected={isActive("/compos")} onClick={() => navigate("/compos")}>
                 <ListItemIcon>
-                  <SportsEsportsIcon />
+                  <EmojiEventsIcon />
                 </ListItemIcon>
                 <ListItemText primary={t("Competitions")} />
+              </ListItemButton>
+              <ListItemButton selected={isActive("/my-productions")} onClick={() => navigate("/my-productions")}>
+                <ListItemIcon>
+                  <FolderIcon />
+                </ListItemIcon>
+                <ListItemText primary={t("My Productions")} />
               </ListItemButton>
               <ListItemButton selected={isActive("/rules")} onClick={() => navigate("/rules")}>
                 <ListItemIcon>

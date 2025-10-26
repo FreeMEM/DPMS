@@ -9,6 +9,10 @@ import ForgotPassword from "./components/user/ForgotPassword";
 import DemoPartyDashboard from "./components/DemoPartyDashboard";
 import AdminDashboard from "./components/AdminDashboard";
 import Error404 from "./components/Error404";
+import ComposList from "./components/productions/ComposList";
+import ProductionForm from "./components/productions/ProductionForm";
+import MyProductions from "./components/productions/MyProductions";
+import ProductionDetail from "./components/productions/ProductionDetail";
 
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useContext(AuthContext);
@@ -42,6 +46,32 @@ const AppRoutes = () => {
             </PrivateRoute>
           }
         />
+        <Route path="/compos" element={<ComposList />} />
+        <Route
+          path="/productions/new"
+          element={
+            <PrivateRoute>
+              <ProductionForm />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/productions/edit/:id"
+          element={
+            <PrivateRoute>
+              <ProductionForm />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/my-productions"
+          element={
+            <PrivateRoute>
+              <MyProductions />
+            </PrivateRoute>
+          }
+        />
+        <Route path="/productions/:id" element={<ProductionDetail />} />
         <Route path="/" element={<Navigate to="/demo-party/dashboard" />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verify-account/:token" element={<VerifyAccount />} />
