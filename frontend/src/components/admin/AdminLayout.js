@@ -1,8 +1,8 @@
 import React from 'react';
 import { Box, Container, Breadcrumbs, Link as MuiLink, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
-import MainBar from '../@dpms-freemem/MainBar';
-import Content from '../@dpms-freemem/Content';
+import MainBar from '../../@dpms-freemem/MainBar';
+import Content from '../../@dpms-freemem/Content';
 
 const AdminLayout = ({ children, title, breadcrumbs = [] }) => {
   return (

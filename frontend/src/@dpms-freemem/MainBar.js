@@ -62,7 +62,7 @@ const MainBar = () => {
     if (isMobile && open) {
       setOpen(false);
     }
-  }, [location.pathname, isMobile]);
+  }, [location.pathname, isMobile, open]);
 
   const toggleDrawer = () => {
     setOpen(!open);
