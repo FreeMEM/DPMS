@@ -24,7 +24,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { productionsAPI } from '../../services/api';
 import MainBar from '../../@dpms-freemem/MainBar';
-import Content from '../../@dpms-freemem/Content';
 
 const MyProductions = () => {
   const navigate = useNavigate();
@@ -260,11 +259,11 @@ const MyProductions = () => {
   );
 
   return (
-    <Box>
+    <Box sx={{ display: 'flex' }}>
       <MainBar />
-      <Content>
+      <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8, ml: { lg: '64px' } }}>
         {pageContent}
-      </Content>
+      </Box>
     </Box>
   );
 };

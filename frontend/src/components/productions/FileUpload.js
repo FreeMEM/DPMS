@@ -90,6 +90,7 @@ const FileUpload = ({ onFilesUploaded, initialFiles = [] }) => {
   };
 
   return (
+    <Box sx={{ display: 'flex' }}>
     <Box>
       <Typography variant="h6" gutterBottom>
         Files

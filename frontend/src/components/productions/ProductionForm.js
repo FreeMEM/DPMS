@@ -16,7 +16,7 @@ import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { editionsAPI, productionsAPI } from '../../services/api';
 import FileUpload from './FileUpload';
 import MainBar from '../../@dpms-freemem/MainBar';
-import Content from '../../@dpms-freemem/Content';
+
 
 const ProductionForm = () => {
   const navigate = useNavigate();
@@ -303,12 +303,11 @@ const ProductionForm = () => {
   );
 
   return (
-    <Box>
+    <Box sx={{ display: 'flex' }}>
       <MainBar />
-      <Content>
-        {pageContent}
-      </Content>
-    </Box>
+            <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8, ml: { lg: '64px' } }}>
+                {pageContent}
+          </Box>
   );
 };
 
