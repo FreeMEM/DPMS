@@ -1,6 +1,6 @@
 # DPMS - Demo Party Management System
 
-A modern, secure web application for managing demoscene parties, competitions, productions, and voting systems.
+A modern, secure web application for managing demoscene parties, competitions, productions, voting systems, and live event presentation (StageRunner).
 
 ## About
 
@@ -16,8 +16,10 @@ I'm computing passionated since 1984. I organized RadyKal Party at Granada, Spai
 - **Competition Management (Compos)**: Create and manage different competition categories
 - **Production Submissions**: Allow sceners to submit their productions (demos, music, graphics, etc.)
 - **Voting System**: Enable attendees to vote on competition entries
+- **StageRunner**: Fullscreen presentation system for displaying productions on projector/big screen during events
 - **Role-based Access**: Different permissions for Admins, Organizers, and Sceners
 - **Multi-language Support**: Built with i18n support (currently Spanish/English)
+- **SEO-friendly Landing Page**: Public-facing page with event information, news, and gallery
 - **REST API**: Full-featured API with Swagger documentation
 
 ## Technology Stack
@@ -178,29 +180,57 @@ DPMS/
 │   ├── dpms/            # Main Django apps
 │   │   ├── users/       # User authentication and management
 │   │   ├── compos/      # Competitions and productions
+│   │   ├── website/     # Landing page (SSR)
 │   │   └── utils/       # Shared utilities
 │   └── requirements/    # Python dependencies
-├── frontend/            # React application
+├── frontend/            # React application (SPA)
 │   ├── src/
 │   │   ├── components/  # React components
+│   │   │   ├── user/           # Auth components
+│   │   │   └── productions/    # Production management
+│   │   ├── services/    # API clients
 │   │   ├── utils/       # Frontend utilities
 │   │   └── routes.js    # Application routing
+│   └── package.json
+├── stagerunner/         # StageRunner presentation app (separate React app)
+│   ├── src/
+│   │   ├── components/  # Presentation components
+│   │   ├── screens/     # Display screens
+│   │   ├── services/    # API client with caching
+│   │   └── hooks/       # Custom hooks (keyboard, slideshow)
 │   └── package.json
 ├── docker/              # Docker configurations
 ├── .envs/              # Environment variables (gitignored)
 ├── local.yml           # Local development Docker Compose
-└── production.yml      # Production Docker Compose
+├── production.yml      # Production Docker Compose
+├── TECHNICAL_SPEC.md   # Complete technical specification
+├── STAGERUNNER_SPEC.md # StageRunner detailed specification
+└── CLAUDE.md           # Development guidelines
 ```
+
+## Application URLs
+
+- **Landing Page**: `http://localhost:8000/` (Django SSR)
+- **User Application**: `http://localhost:3000/app/` (React SPA - development)
+- **Admin Panel**: `http://localhost:8000/admin/` (Django admin)
+- **API Documentation**: `http://localhost:8000/docs/` (Swagger)
+- **StageRunner**: `http://localhost:3001/` (React - when implemented)
 
 ## API Endpoints
 
 Main API endpoints:
 
-- `POST /users/signup/` - User registration
-- `POST /users/login/` - User authentication
-- `GET /users/verify?token=<token>` - Email verification
-- `GET /users/` - List users (authenticated)
-- `GET /docs/` - Swagger API documentation
+- `POST /api/users/signup/` - User registration
+- `POST /api/users/login/` - User authentication
+- `GET /api/users/verify?token=<token>` - Email verification
+- `GET /api/editions/` - List editions
+- `GET /api/compos/` - List competitions
+- `GET /api/productions/` - List productions
+- `GET /api/productions/my_productions/` - User's productions (authenticated)
+- `GET /api/files/` - List files
+- `POST /api/files/` - Upload file (multipart, authenticated)
+- `GET /api/files/{id}/download/` - Download file
+- `GET /docs/` - Full Swagger API documentation
 
 ## Contributing
 

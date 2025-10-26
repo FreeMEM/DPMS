@@ -1,9 +1,9 @@
 # DPMS - Especificación Técnica Completa
 ## Demo Party Management System
 
-**Versión**: 2.0
+**Versión**: 2.1
 **Fecha**: 2025-10-26
-**Arquitectura**: Híbrida (Django Landing + React SPA + REST API)
+**Arquitectura**: Híbrida (Django Landing + React SPA + REST API + StageRunner)
 
 ---
 
@@ -35,6 +35,7 @@ DPMS (Demo Party Management System) es un sistema integral para gestionar fiesta
 - **Participación**: Permitir a usuarios registrarse, enviar producciones y votar
 - **Difusión pública**: Página de landing SEO-friendly con información del evento
 - **Administración**: Panel de control para organizadores del evento
+- **Presentación**: StageRunner para mostrar producciones en proyector durante el evento
 
 ### 1.3 Usuarios del Sistema
 
@@ -53,47 +54,48 @@ DPMS (Demo Party Management System) es un sistema integral para gestionar fiesta
 El sistema utiliza una arquitectura híbrida que combina:
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    DPMS System Architecture                  │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         DPMS System Architecture                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-┌──────────────────────┐         ┌──────────────────────────┐
-│   Django Frontend    │         │    React SPA Frontend    │
-│   (Landing Page)     │         │   (Application Panel)    │
-├──────────────────────┤         ├──────────────────────────┤
-│ URL: /               │         │ URL: /app/*              │
-│                      │         │                          │
-│ - Noticias           │         │ - Login/Signup           │
-│ - Próximo evento     │         │ - Dashboard usuario      │
-│ - Contador           │         │ - Dashboard admin        │
-│ - Galería            │         │ - Gestión de producciones│
-│ - Información        │         │ - Votaciones             │
-│                      │         │                          │
-│ SEO: ✓ Indexable     │         │ SEO: ✗ No indexable      │
-│ Render: Server-side  │         │ Render: Client-side      │
-└──────────┬───────────┘         └──────────┬───────────────┘
-           │                                │
-           │                                │
-           └────────────┬───────────────────┘
-                        │
-                        ▼
-           ┌────────────────────────┐
-           │   Django REST API      │
-           │   URL: /api/*          │
-           ├────────────────────────┤
-           │ - Users API            │
-           │ - Editions API         │
-           │ - Compos API           │
-           │ - Productions API      │
-           │ - News API             │
-           │ - Gallery API          │
-           │ - Votes API            │
-           └────────────┬───────────┘
-                        │
-                        ▼
-           ┌────────────────────────┐
-           │   PostgreSQL Database  │
-           └────────────────────────┘
+┌──────────────────┐  ┌──────────────────┐  ┌──────────────────────────────┐
+│ Django Frontend  │  │ React SPA        │  │ StageRunner (React)          │
+│ (Landing Page)   │  │ (App Panel)      │  │ (Presentation Display)       │
+├──────────────────┤  ├──────────────────┤  ├──────────────────────────────┤
+│ URL: /           │  │ URL: /app/*      │  │ URL: /stage/* (standalone)   │
+│                  │  │                  │  │                              │
+│ - Noticias       │  │ - Login/Signup   │  │ - Countdown screen           │
+│ - Próximo evento │  │ - Dashboard user │  │ - Production list            │
+│ - Contador       │  │ - Dashboard admin│  │ - Production showcase        │
+│ - Galería        │  │ - Producciones   │  │ - Results display            │
+│ - Información    │  │ - Votaciones     │  │ - Announcements              │
+│                  │  │                  │  │                              │
+│ SEO: ✓ Indexable │  │ SEO: ✗ No index  │  │ Purpose: Projector/Big Screen│
+│ Render: SSR      │  │ Render: CSR      │  │ Control: Keyboard shortcuts  │
+└────────┬─────────┘  └────────┬─────────┘  └──────────────┬───────────────┘
+         │                     │                            │
+         │                     │                            │
+         └─────────────────────┴────────────────────────────┘
+                               │
+                               ▼
+                  ┌────────────────────────┐
+                  │   Django REST API      │
+                  │   URL: /api/*          │
+                  ├────────────────────────┤
+                  │ - Users API            │
+                  │ - Editions API         │
+                  │ - Compos API           │
+                  │ - Productions API      │
+                  │ - News API             │
+                  │ - Gallery API          │
+                  │ - Votes API            │
+                  │ - StageControl API     │
+                  └────────────┬───────────┘
+                               │
+                               ▼
+                  ┌────────────────────────┐
+                  │   PostgreSQL Database  │
+                  └────────────────────────┘
 ```
 
 ### 2.2 Stack Tecnológico
@@ -2130,7 +2132,47 @@ export default ProductionForm;
 - [ ] Tests de actualización de perfil
 - [ ] Tests de subida de avatar
 
-### Fase 7: Optimización y Pulido
+### Fase 7: StageRunner - Sistema de Presentación
+**Duración estimada**: 3-4 semanas
+
+**Descripción**: Aplicación React independiente para mostrar producciones en proyector durante el evento.
+
+**Backend** (Extensiones API):
+- [ ] Añadir `current` action a EditionViewSet
+- [ ] Añadir filtros `status` y `show_on_beamer` a HasCompoViewSet
+- [ ] Añadir campos `position` y `total_in_compo` a ProductionSerializer
+- [ ] Crear modelo `StageControl` (opcional Phase 2)
+- [ ] Crear endpoint `/api/stage-control/current/` (opcional Phase 2)
+
+**Frontend StageRunner** (Aplicación independiente):
+- [ ] Setup proyecto React en `stagerunner/`
+- [ ] Implementar API service layer con caching
+- [ ] Implementar StageContext (estado global)
+- [ ] Implementar keyboard controls hook
+- [ ] Implementar screens:
+  - [ ] IdleScreen (logo, próximo compo)
+  - [ ] CountdownScreen (cuenta regresiva)
+  - [ ] ProductionListScreen (lista numerada)
+  - [ ] ProductionShowScreen (showcase individual)
+  - [ ] ResultsScreen (tabla de resultados)
+  - [ ] AnnouncementScreen (anuncios)
+- [ ] Implementar transiciones entre pantallas
+- [ ] Implementar modo slideshow/rotación
+- [ ] Implementar fullscreen API
+- [ ] Implementar caché local con fallback offline
+- [ ] Implementar theme customization
+
+**Testing**:
+- [ ] Tests de keyboard shortcuts
+- [ ] Tests de API caching
+- [ ] Tests de offline mode
+- [ ] Test en proyector 1920x1080
+- [ ] Test de transiciones suaves
+
+**Documentación**:
+- [x] STAGERUNNER_SPEC.md completo
+
+### Fase 8: Optimización y Pulido
 **Duración estimada**: 1-2 semanas
 
 - [ ] Optimización de queries (select_related, prefetch_related)
@@ -2145,7 +2187,7 @@ export default ProductionForm;
 - [ ] Documentación API (Swagger completo)
 - [ ] README actualizado
 
-### Fase 8: Testing Final y Deployment
+### Fase 9: Testing Final y Deployment
 **Duración estimada**: 1-2 semanas
 
 - [ ] Tests de integración completos
@@ -2162,7 +2204,7 @@ export default ProductionForm;
 - [ ] Deploy a producción
 - [ ] Smoke tests en producción
 
-**Total estimado**: 15-20 semanas (~4-5 meses)
+**Total estimado**: 18-24 semanas (~4.5-6 meses)
 
 ---
 
