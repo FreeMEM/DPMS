@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
 import Login from "./components/user/Login";
@@ -26,7 +26,13 @@ const PrivateRoute = ({ children }) => {
 
 const AppRoutes = () => {
   return (
-    <Router basename="/app">
+    <Router
+      basename="/app"
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true
+      }}
+    >
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
