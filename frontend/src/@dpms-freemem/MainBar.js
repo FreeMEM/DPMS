@@ -41,8 +41,8 @@ const MainBar = () => {
   const [panel, setPanel] = useState("user");
   const theme = useTheme();
 
-  const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"));
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("sm")); // sm, md, lg, xl (≥600px)
+  const isMobile = !isDesktop; // xs (<600px)
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -115,17 +115,41 @@ const MainBar = () => {
 
   return (
     <Box>
-      <Box className="top-bar" display="flex" alignItems="center" justifyContent="space-between">
-        <Box display="flex" alignItems="center">
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={toggleDrawer}
-            className="icon-button"
-          >
-            <MenuIcon />
-          </IconButton>
+      <Box
+        className="top-bar"
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        sx={{
+          position: 'fixed',
+          top: 0,
+          left: isDesktop ? (open ? '240px' : '64px') : 0,
+          right: 0,
+          zIndex: theme.zIndex.drawer - 1,
+          paddingLeft: '0 !important',
+          paddingRight: '16px',
+          transition: theme.transitions.create('left', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
+        }}
+      >
+        <Box
+          display="flex"
+          alignItems="center"
+          sx={{ pl: isDesktop ? '8px' : 0 }}
+        >
+          {isMobile && (
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={toggleDrawer}
+              className="icon-button"
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
           <img src={`${process.env.PUBLIC_URL}/assets/logo_navbar2025.png`} alt="Posadas Party Logo" className="logo" />
         </Box>
         <Box display="flex" alignItems="center">
@@ -197,6 +221,7 @@ const MainBar = () => {
               duration: theme.transitions.duration.enteringScreen,
             }),
             overflowX: 'hidden',
+            zIndex: theme.zIndex.drawer,
           },
         }}
       >
