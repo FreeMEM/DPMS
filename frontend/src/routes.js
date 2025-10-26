@@ -14,6 +14,7 @@ import MyProductions from "./components/productions/MyProductions";
 import ProductionDetail from "./components/productions/ProductionDetail";
 import AdminRoute from "./components/common/AdminRoute";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import EditionsPage from "./pages/admin/EditionsPage";
 
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useContext(AuthContext);
@@ -50,6 +51,14 @@ const AppRoutes = () => {
           element={
             <AdminRoute>
               <AdminDashboard />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/editions"
+          element={
+            <AdminRoute>
+              <EditionsPage />
             </AdminRoute>
           }
         />
