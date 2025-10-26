@@ -1,0 +1,62 @@
+{% extends 'website/base.html' %}
+{% load static %}
+
+{% block title %}{{ event_name }} - Demo Party{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <h1>Bienvenidos a {{ event_name }}</h1>
+        <p class="lead">Sistema de gestión de demo parties</p>
+        <div class="cta-buttons">
+            <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary">Regístrate Ahora</a>
+            <a href="{{ FRONTEND_URL }}/login" class="btn btn-secondary">Ya tengo cuenta</a>
+        </div>
+    </div>
+</div>
+
+<div class="info-section">
+    <div class="container">
+        <h2>¿Qué es una Demo Party?</h2>
+        <p>
+            Una demo party es un encuentro de artistas digitales, programadores y creativos
+            de la escena demoscene donde se compite en diferentes categorías creando
+            obras audiovisuales, música, gráficos y más.
+        </p>
+
+        <div class="features">
+            <div class="feature">
+                <h3>🎨 Competiciones</h3>
+                <p>Participa en diferentes categorías: demos, música, gráficos, wild...</p>
+            </div>
+            <div class="feature">
+                <h3>🏆 Votación</h3>
+                <p>Vota por tus producciones favoritas y ayuda a decidir los ganadores.</p>
+            </div>
+            <div class="feature">
+                <h3>👥 Comunidad</h3>
+                <p>Conoce a otros artistas y programadores de la demoscene.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="upcoming-section">
+    <div class="container">
+        <h2>Próximo Evento</h2>
+        <p class="placeholder-text">
+            La información del próximo evento se mostrará aquí próximamente.
+            <br>
+            (Esta sección se completará en la Fase 1 del desarrollo)
+        </p>
+    </div>
+</div>
+
+<div class="cta-final">
+    <div class="container">
+        <h2>¿Listo para participar?</h2>
+        <p>Regístrate ahora y forma parte de la comunidad demoscene</p>
+        <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-large">Crear Cuenta Gratis</a>
+    </div>
+</div>
+{% endblock %}

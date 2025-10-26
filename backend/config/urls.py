@@ -28,15 +28,18 @@ schema_view = get_schema_view(
 urlpatterns = [
     # Django Admin
     path(settings.ADMIN_URL, admin.site.urls),
-    # Routes
-    path("", include(("dpms.users.urls", "users"), namespace="users")),
+    # API Routes
+    path("api/", include(("dpms.users.urls", "users"), namespace="users")),
     # path(
     #     "oauth/", include("social_django.urls", namespace="social")
     # ),  # Añadir ruta para OAuth
     # https://dpms.backend.posadasparty.com/oauth/sceneid/callback
+    # API Documentation
     path(
         "docs/",
         schema_view.with_ui("swagger", cache_timeout=0),
         name="schema-swagger-ui",
     ),
+    # Landing Page (debe ir al final como fallback)
+    path("", include(("dpms.website.urls", "website"), namespace="website")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
