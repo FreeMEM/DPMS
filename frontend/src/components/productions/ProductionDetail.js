@@ -258,7 +258,7 @@ const ProductionDetail = () => {
   return (
     <Box sx={{ display: 'flex' }}>
       <MainBar />
-      <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8, ml: { lg: '64px' } }}>
+      <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8, ml: { sm: '64px' } }}>
         {pageContent}
       </Box>
     </Box>

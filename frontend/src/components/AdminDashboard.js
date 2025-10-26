@@ -11,9 +11,11 @@ const AdminDashboard = () => {
   };
 
   return (
-    <Box>
+    <Box sx={{ display: 'flex' }}>
       <MainBar value={value} panel={"admin"} handleChange={handleChange} />
-      <Content page={value} />
+      <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8, ml: { sm: '64px' } }}>
+        <Content page={value} />
+      </Box>
     </Box>
   );
 };
