@@ -30,6 +30,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import CelebrationIcon from "@mui/icons-material/Celebration";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import FolderIcon from "@mui/icons-material/Folder";
+import CategoryIcon from "@mui/icons-material/Category";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../AuthContext";
 
@@ -50,7 +51,7 @@ const MainBar = () => {
   useEffect(() => {
     if (location.pathname === "/demo-party/dashboard") {
       setPanel("user");
-    } else if (groups.includes("DPMS Admins") && location.pathname.startsWith("/admin/dashboard")) {
+    } else if (groups.includes("DPMS Admins") && location.pathname.startsWith("/admin")) {
       setPanel("admin");
     } else if (groups.includes("DPMS Users")) {
       setPanel("user");
@@ -101,7 +102,7 @@ const MainBar = () => {
 
   // Función para obtener el label actual para mostrar al lado del AccountCircle
   const getCurrentLabel = () => {
-    if (location.pathname.startsWith("/admin/dashboard")) {
+    if (location.pathname.startsWith("/admin")) {
       return t("Administrator");
     } else if (location.pathname === "/demo-party/dashboard") {
       return t("Demo Party");
@@ -183,7 +184,7 @@ const MainBar = () => {
             <ListItemText primary={t("Profile")} />
           </MenuItem>
           {groups.includes("DPMS Admins") && (
-            <MenuItem onClick={handleAdminPanel} selected={location.pathname.startsWith("/admin/dashboard")}>
+            <MenuItem onClick={handleAdminPanel} selected={location.pathname.startsWith("/admin")}>
               <ListItemIcon>
                 <AdminPanelSettingsIcon fontSize="small" />
               </ListItemIcon>
@@ -289,24 +290,54 @@ const MainBar = () => {
                 {open && <ListItemText primary={t("Dashboard")} />}
               </ListItemButton>
               <ListItemButton
-                selected={isActive("/admin/dashboard/users")}
-                onClick={() => navigate("/admin/dashboard/users")}
+                selected={location.pathname.startsWith("/admin/editions")}
+                onClick={() => navigate("/admin/editions")}
                 sx={{ justifyContent: open ? 'initial' : 'center' }}
               >
                 <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
-                  <PeopleIcon />
+                  <EmojiEventsIcon />
                 </ListItemIcon>
-                {open && <ListItemText primary={t("Users")} />}
+                {open && <ListItemText primary={t("Editions")} />}
               </ListItemButton>
               <ListItemButton
-                selected={isActive("/admin/dashboard/settings")}
-                onClick={() => navigate("/admin/dashboard/settings")}
+                selected={location.pathname.startsWith("/admin/compos")}
+                onClick={() => navigate("/admin/compos")}
+                sx={{ justifyContent: open ? 'initial' : 'center' }}
+              >
+                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+                  <CategoryIcon />
+                </ListItemIcon>
+                {open && <ListItemText primary={t("Competitions")} />}
+              </ListItemButton>
+              <ListItemButton
+                selected={location.pathname.startsWith("/admin/productions")}
+                onClick={() => navigate("/admin/productions")}
+                sx={{ justifyContent: open ? 'initial' : 'center' }}
+              >
+                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+                  <FolderIcon />
+                </ListItemIcon>
+                {open && <ListItemText primary={t("Productions")} />}
+              </ListItemButton>
+              <ListItemButton
+                selected={location.pathname.startsWith("/admin/voting-config")}
+                onClick={() => navigate("/admin/voting-config")}
                 sx={{ justifyContent: open ? 'initial' : 'center' }}
               >
                 <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
                   <SettingsIcon />
                 </ListItemIcon>
-                {open && <ListItemText primary={t("Settings")} />}
+                {open && <ListItemText primary={t("Voting Config")} />}
+              </ListItemButton>
+              <ListItemButton
+                selected={location.pathname.startsWith("/admin/jury")}
+                onClick={() => navigate("/admin/jury")}
+                sx={{ justifyContent: open ? 'initial' : 'center' }}
+              >
+                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+                  <PeopleIcon />
+                </ListItemIcon>
+                {open && <ListItemText primary={t("Jury")} />}
               </ListItemButton>
             </List>
           </Box>

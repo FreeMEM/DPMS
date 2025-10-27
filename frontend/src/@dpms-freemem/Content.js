@@ -3,7 +3,24 @@
 import React from "react";
 import { Container, Box, Typography, Button } from "@mui/material";
 
-const Content = ({ page }) => {
+const Content = ({ page, children }) => {
+  // Si se pasan children, renderizar los children directamente
+  if (children) {
+    return (
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          minHeight: '100vh',
+          backgroundColor: 'background.default',
+        }}
+      >
+        {children}
+      </Box>
+    );
+  }
+
+  // Si no hay children, usar el comportamiento original con page
   const renderContent = () => {
     switch (page) {
       case 0:
