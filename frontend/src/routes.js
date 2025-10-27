@@ -15,6 +15,16 @@ import ProductionDetail from "./components/productions/ProductionDetail";
 import AdminRoute from "./components/common/AdminRoute";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import EditionsPage from "./pages/admin/EditionsPage";
+import EditionFormPage from "./pages/admin/EditionFormPage";
+import EditionDetailPage from "./pages/admin/EditionDetailPage";
+import ComposPage from "./pages/admin/ComposPage";
+import CompoFormPage from "./pages/admin/CompoFormPage";
+import CompoDetailPage from "./pages/admin/CompoDetailPage";
+import ProductionsPage from "./pages/admin/ProductionsPage";
+import ProductionDetailPage from "./pages/admin/ProductionDetailPage";
+import VotingConfigPage from "./pages/admin/VotingConfigPage";
+import AttendanceCodesPage from "./pages/admin/AttendanceCodesPage";
+import JuryManagementPage from "./pages/admin/JuryManagementPage";
 
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useContext(AuthContext);
@@ -59,6 +69,102 @@ const AppRoutes = () => {
           element={
             <AdminRoute>
               <EditionsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/editions/new"
+          element={
+            <AdminRoute>
+              <EditionFormPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/editions/:id/edit"
+          element={
+            <AdminRoute>
+              <EditionFormPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/editions/:id"
+          element={
+            <AdminRoute>
+              <EditionDetailPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/compos"
+          element={
+            <AdminRoute>
+              <ComposPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/compos/new"
+          element={
+            <AdminRoute>
+              <CompoFormPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/compos/:id/edit"
+          element={
+            <AdminRoute>
+              <CompoFormPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/compos/:id"
+          element={
+            <AdminRoute>
+              <CompoDetailPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/productions"
+          element={
+            <AdminRoute>
+              <ProductionsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/productions/:id"
+          element={
+            <AdminRoute>
+              <ProductionDetailPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/voting-config"
+          element={
+            <AdminRoute>
+              <VotingConfigPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/attendance-codes"
+          element={
+            <AdminRoute>
+              <AttendanceCodesPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/jury"
+          element={
+            <AdminRoute>
+              <JuryManagementPage />
             </AdminRoute>
           }
         />

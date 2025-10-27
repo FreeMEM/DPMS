@@ -31,29 +31,7 @@ const AdminRoute = ({ children }) => {
   }
 
   if (!groups || !groups.includes('DPMS Admins')) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '100vh',
-          gap: 2,
-          p: 3,
-        }}
-      >
-        <Typography variant="h4" gutterBottom>
-          Acceso Denegado
-        </Typography>
-        <Typography variant="body1" color="text.secondary" align="center">
-          No tienes permisos para acceder al panel de administración.
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          <Navigate to="/app/dashboard" replace />
-        </Typography>
-      </Box>
-    );
+    return <Navigate to="/app/demo-party/dashboard" replace />;
   }
 
   return children;
