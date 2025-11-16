@@ -103,7 +103,7 @@ const CompoDetailPage = () => {
         <Button
           variant="contained"
           startIcon={<EditIcon />}
-          onClick={() => navigate(`/app/admin/compos/${id}/edit`)}
+          onClick={() => navigate(`/admin/compos/${id}/edit`)}
         >
           Editar
         </Button>
