@@ -1,45 +1,40 @@
-import React, { useEffect, useRef } from 'react';
-import * as THREE from 'three';
+import React, { useEffect, useRef } from "react";
+import * as THREE from "three";
 
-const ThreeBackground = ({ variant = 'admin' }) => {
+const ThreeBackground = ({ variant = "admin" }) => {
   const containerRef = useRef(null);
   const mouseRef = useRef({ x: 0, y: 0 });
   const targetMouseRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const container = containerRef.current;
-    console.log('ThreeBackground: Container ref:', container);
-    console.log('ThreeBackground: Variant:', variant);
+    console.log("ThreeBackground: Container ref:", container);
+    console.log("ThreeBackground: Variant:", variant);
 
     if (!container) {
-      console.log('ThreeBackground: No container found!');
+      console.log("ThreeBackground: No container found!");
       return;
     }
 
-    console.log('ThreeBackground: Initializing Three.js...');
+    console.log("ThreeBackground: Initializing Three.js...");
 
     // Scene setup
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000
-    );
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = 5;
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    console.log('ThreeBackground: Renderer created:', renderer);
-    console.log('ThreeBackground: Canvas element:', renderer.domElement);
+    console.log("ThreeBackground: Renderer created:", renderer);
+    console.log("ThreeBackground: Canvas element:", renderer.domElement);
 
     container.appendChild(renderer.domElement);
-    console.log('ThreeBackground: Canvas appended to container');
+    console.log("ThreeBackground: Canvas appended to container");
 
     // Create particle system
-    const particlesCount = variant === 'admin' ? 1000 : 500;
+    const particlesCount = variant === "admin" ? 1000 : 500;
     const positions = new Float32Array(particlesCount * 3);
     const colors = new Float32Array(particlesCount * 3);
     const sizes = new Float32Array(particlesCount);
@@ -54,7 +49,7 @@ const ThreeBackground = ({ variant = 'admin' }) => {
 
       // Colors - diferentes según variante
       const colorValue = Math.random();
-      if (variant === 'admin') {
+      if (variant === "admin") {
         // Admin: gradient from blue to purple to pink (más intenso)
         if (colorValue < 0.33) {
           // Blue
@@ -97,9 +92,9 @@ const ThreeBackground = ({ variant = 'admin' }) => {
     }
 
     const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    geometry.setAttribute("size", new THREE.BufferAttribute(sizes, 1));
 
     const material = new THREE.PointsMaterial({
       size: 0.05,
@@ -113,16 +108,16 @@ const ThreeBackground = ({ variant = 'admin' }) => {
     const particles = new THREE.Points(geometry, material);
     scene.add(particles);
 
-    console.log('ThreeBackground: Particles created with', particlesCount, 'particles');
+    console.log("ThreeBackground: Particles created with", particlesCount, "particles");
 
     // Create lines to connect nearby particles
-    const maxConnections = variant === 'admin' ? 100 : 50;
+    const maxConnections = variant === "admin" ? 100 : 50;
     const lineGeometry = new THREE.BufferGeometry();
     const linePositions = new Float32Array(maxConnections * 2 * 3); // 2 points per line, 3 coords per point
-    lineGeometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+    lineGeometry.setAttribute("position", new THREE.BufferAttribute(linePositions, 3));
 
     const lineMaterial = new THREE.LineBasicMaterial({
-      color: variant === 'admin' ? 0x6020c0 : 0x20c0a0,
+      color: variant === "admin" ? 0x6020c0 : 0x20c0a0,
       transparent: true,
       opacity: 0.15,
       blending: THREE.AdditiveBlending,
@@ -131,11 +126,77 @@ const ThreeBackground = ({ variant = 'admin' }) => {
     const lines = new THREE.LineSegments(lineGeometry, lineMaterial);
     scene.add(lines);
 
+    // Create plasma background plane - make it much larger to cover the screen
+    const aspect = window.innerWidth / window.innerHeight;
+    const plasmaGeometry = new THREE.PlaneGeometry(20 * aspect, 20);
+
+    // Shader para el efecto plasma
+    const plasmaMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 },
+        color1: {
+          value:
+            variant === "admin"
+              ? new THREE.Color(0.15, 0.0, 0.25) // Dark purple para admin
+              : new THREE.Color(0.0, 0.15, 0.25),
+        }, // Dark cyan para user
+        color2: {
+          value:
+            variant === "admin"
+              ? new THREE.Color(0.35, 0.1, 0.45) // Medium purple para admin
+              : new THREE.Color(0.1, 0.35, 0.45),
+        }, // Medium cyan para user
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        uniform vec3 color1;
+        uniform vec3 color2;
+        varying vec2 vUv;
+
+        void main() {
+          vec2 uv = vUv * 2.0 - 1.0; // Center UV
+
+          // Multiple sine wave layers for complex plasma - reduced frequency for larger patterns
+          float wave1 = sin(uv.x * 2.0 + time * 0.3) * cos(uv.y * 1.5 - time * 0.2);
+          float wave2 = sin(uv.y * 2.5 + time * 0.25) * cos(uv.x * 2.0 + time * 0.15);
+          float wave3 = sin((uv.x + uv.y) * 1.5 + time * 0.35);
+
+          // Circular waves emanating from center - slower and larger
+          float dist = length(uv);
+          float wave4 = sin(dist * 4.0 - time * 0.8) * 0.5;
+
+          // Combine waves
+          float plasma = (wave1 + wave2 + wave3 + wave4) * 0.25;
+
+          // Increase contrast but keep it subtle
+          plasma = smoothstep(-0.3, 0.3, plasma);
+
+          // Mix colors based on plasma value
+          vec3 color = mix(color1, color2, plasma);
+
+          gl_FragColor = vec4(color, 0.4);
+        }
+      `,
+      transparent: true,
+      side: THREE.DoubleSide,
+    });
+
+    const plasma = new THREE.Mesh(plasmaGeometry, plasmaMaterial);
+    plasma.position.z = -8; // Mucho más lejos, como telón de fondo
+    scene.add(plasma);
+
     // Add ambient light
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
 
-    console.log('ThreeBackground: Scene setup complete, starting animation...');
+    console.log("ThreeBackground: Scene setup complete, starting animation...");
 
     // Mouse/Touch handlers
     const handleMouseMove = (event) => {
@@ -150,8 +211,8 @@ const ThreeBackground = ({ variant = 'admin' }) => {
       }
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
 
     // Handle window resize
     const handleResize = () => {
@@ -159,7 +220,7 @@ const ThreeBackground = ({ variant = 'admin' }) => {
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     // Store original positions for wave effect
     const originalPositions = new Float32Array(positions);
@@ -169,6 +230,9 @@ const ThreeBackground = ({ variant = 'admin' }) => {
 
     const animate = () => {
       const elapsedTime = clock.getElapsedTime();
+
+      // Update plasma shader time
+      plasmaMaterial.uniforms.time.value = elapsedTime;
 
       // Smooth mouse movement
       mouseRef.current.x += (targetMouseRef.current.x - mouseRef.current.x) * 0.05;
@@ -202,7 +266,7 @@ const ThreeBackground = ({ variant = 'admin' }) => {
 
         // Apply smooth repulsion when mouse is near
         if (distance < 3) {
-          const force = (3 - distance) / 3 * 0.5;
+          const force = ((3 - distance) / 3) * 0.5;
           positions[i3] -= dx * force;
           positions[i3 + 1] -= dy * force;
         }
@@ -268,9 +332,9 @@ const ThreeBackground = ({ variant = 'admin' }) => {
 
     // Cleanup
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("resize", handleResize);
 
       if (container && renderer.domElement && container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
@@ -280,6 +344,8 @@ const ThreeBackground = ({ variant = 'admin' }) => {
       material.dispose();
       lineGeometry.dispose();
       lineMaterial.dispose();
+      plasmaGeometry.dispose();
+      plasmaMaterial.dispose();
       renderer.dispose();
     };
   }, [variant]);
@@ -288,13 +354,13 @@ const ThreeBackground = ({ variant = 'admin' }) => {
     <div
       ref={containerRef}
       style={{
-        position: 'fixed',
+        position: "fixed",
         top: 0,
         left: 0,
-        width: '100%',
-        height: '100%',
+        width: "100%",
+        height: "100%",
         zIndex: -1,
-        pointerEvents: 'none',
+        pointerEvents: "none",
       }}
     />
   );
