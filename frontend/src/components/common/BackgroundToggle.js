@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { IconButton, Tooltip } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { Box, Switch, Typography, Paper } from '@mui/material';
 
 const BackgroundToggle = () => {
   const [backgroundEnabled, setBackgroundEnabled] = useState(() => {
@@ -19,30 +18,34 @@ const BackgroundToggle = () => {
     }));
   }, [backgroundEnabled]);
 
-  const handleToggle = () => {
-    setBackgroundEnabled(prev => !prev);
+  const handleToggle = (event) => {
+    setBackgroundEnabled(event.target.checked);
   };
 
   return (
-    <Tooltip title={backgroundEnabled ? 'Desactivar fondo animado' : 'Activar fondo animado'}>
-      <IconButton
-        onClick={handleToggle}
-        sx={{
-          position: 'fixed',
-          bottom: 16,
-          right: 16,
-          zIndex: 1000,
-          bgcolor: 'background.paper',
-          boxShadow: 3,
-          '&:hover': {
-            bgcolor: 'background.paper',
-            boxShadow: 6,
-          },
-        }}
-      >
-        {backgroundEnabled ? <Visibility /> : <VisibilityOff />}
-      </IconButton>
-    </Tooltip>
+    <Paper
+      sx={{
+        position: 'fixed',
+        bottom: 16,
+        right: 16,
+        zIndex: 1000,
+        px: 2,
+        py: 1,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+        boxShadow: 3,
+      }}
+    >
+      <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
+        Efectos
+      </Typography>
+      <Switch
+        checked={backgroundEnabled}
+        onChange={handleToggle}
+        size="small"
+      />
+    </Paper>
   );
 };
 
