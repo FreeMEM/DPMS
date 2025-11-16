@@ -104,7 +104,7 @@ const EditionDetailPage = () => {
         <Button
           variant="contained"
           startIcon={<EditIcon />}
-          onClick={() => navigate(`/app/admin/editions/${id}/edit`)}
+          onClick={() => navigate(`/admin/editions/${id}/edit`)}
         >
           Editar
         </Button>
@@ -217,7 +217,7 @@ const EditionDetailPage = () => {
                 variant="contained"
                 size="small"
                 startIcon={<AddIcon />}
-                onClick={() => navigate(`/app/admin/editions/${id}/add-compo`)}
+                onClick={() => navigate(`/admin/editions/${id}/add-compo`)}
               >
                 Añadir Compo
               </Button>

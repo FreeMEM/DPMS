@@ -207,14 +207,14 @@ const ComposPage = () => {
                     <TableCell align="right">
                       <IconButton
                         size="small"
-                        onClick={() => navigate(`/app/admin/compos/${compo.id}`)}
+                        onClick={() => navigate(`/admin/compos/${compo.id}`)}
                         title="Ver detalle"
                       >
                         <ViewIcon fontSize="small" />
                       </IconButton>
                       <IconButton
                         size="small"
-                        onClick={() => navigate(`/app/admin/compos/${compo.id}/edit`)}
+                        onClick={() => navigate(`/admin/compos/${compo.id}/edit`)}
                         title="Editar"
                       >
                         <EditIcon fontSize="small" />
