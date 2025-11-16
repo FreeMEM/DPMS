@@ -378,11 +378,6 @@ const ThreeBackground = ({ variant = "admin" }) => {
     return () => window.removeEventListener('backgroundToggle', handleToggle);
   }, []);
 
-  // No renderizar si está desactivado
-  if (!isVisible) {
-    return null;
-  }
-
   return (
     <div
       ref={containerRef}
@@ -394,6 +389,7 @@ const ThreeBackground = ({ variant = "admin" }) => {
         height: "100%",
         zIndex: -1,
         pointerEvents: "none",
+        display: isVisible ? "block" : "none",
       }}
     />
   );
