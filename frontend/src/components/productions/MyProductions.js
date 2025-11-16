@@ -24,6 +24,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { productionsAPI } from '../../services/api';
 import MainBar from '../../@dpms-freemem/MainBar';
+import ThreeBackground from '../common/ThreeBackground';
+import BackgroundToggle from '../common/BackgroundToggle';
 
 const MyProductions = () => {
   const navigate = useNavigate();
@@ -260,8 +262,10 @@ const MyProductions = () => {
 
   return (
     <Box sx={{ display: 'flex' }}>
+      <ThreeBackground variant="user" />
+      <BackgroundToggle />
       <MainBar />
-      <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8, ml: { sm: '64px' } }}>
+      <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8, ml: { sm: '64px' }, position: 'relative', zIndex: 1 }}>
         {pageContent}
       </Box>
     </Box>
