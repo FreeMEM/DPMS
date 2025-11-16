@@ -156,12 +156,52 @@ const ThreeBackground = ({ variant = "admin" }) => {
     const linePositions = new Float32Array(maxConnections * 2 * 3);
     lineGeometry.setAttribute("position", new THREE.BufferAttribute(linePositions, 3));
 
-    const lineMaterial = new THREE.LineBasicMaterial({
-      color: variant === "admin" ? 0x6020c0 : 0x20c0a0,
-      transparent: true,
-      opacity: currentEffect.lineOpacity,
-      blending: THREE.AdditiveBlending,
-    });
+    // Create material based on whether lines should be animated
+    let lineMaterial;
+    if (currentEffect.animateLines) {
+      // Shader material para energía fluyendo
+      lineMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          time: { value: 0 },
+          color: { value: new THREE.Color(variant === "admin" ? 0x6020c0 : 0x20c0a0) },
+          opacity: { value: currentEffect.lineOpacity }
+        },
+        vertexShader: `
+          varying vec3 vPosition;
+          void main() {
+            vPosition = position;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform float time;
+          uniform vec3 color;
+          uniform float opacity;
+          varying vec3 vPosition;
+
+          void main() {
+            // Crear efecto de energía fluyendo por la línea
+            float flow = fract(vPosition.x * 0.5 + vPosition.y * 0.5 + vPosition.z * 0.5 - time * 0.5);
+            float pulse = sin(flow * 3.14159 * 4.0) * 0.5 + 0.5;
+
+            // Brillo pulsante
+            float brightness = mix(0.3, 1.0, pulse);
+
+            gl_FragColor = vec4(color * brightness, opacity * (0.5 + pulse * 0.5));
+          }
+        `,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+      });
+    } else {
+      // Material básico para líneas estáticas
+      lineMaterial = new THREE.LineBasicMaterial({
+        color: variant === "admin" ? 0x6020c0 : 0x20c0a0,
+        transparent: true,
+        opacity: currentEffect.lineOpacity,
+        blending: THREE.AdditiveBlending,
+      });
+    }
 
     const lines = new THREE.LineSegments(lineGeometry, lineMaterial);
     scene.add(lines);
@@ -246,6 +286,11 @@ const ThreeBackground = ({ variant = "admin" }) => {
 
       // Update plasma shader time
       plasmaMaterial.uniforms.time.value = elapsedTime;
+
+      // Update line shader time if animated
+      if (currentEffect.animateLines && lineMaterial.uniforms) {
+        lineMaterial.uniforms.time.value = elapsedTime;
+      }
 
       // Smooth mouse movement
       mouseRef.current.x += (targetMouseRef.current.x - mouseRef.current.x) * 0.05;
