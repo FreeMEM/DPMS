@@ -396,6 +396,519 @@ export const energyGridEffect = {
 };
 
 /**
+ * TRON GRID EFFECT
+ * Grid in perspective with light cycles traveling on it
+ */
+export const tronGridEffect = {
+  name: 'tron-grid',
+
+  particleCount: (variant) => variant === "admin" ? 25 : 15, // Solo light cycles
+
+  // Usar líneas para las estelas (trails) de las motos
+  maxConnections: (variant) => (variant === "admin" ? 25 : 15) * 20, // 20 segmentos de trail por moto
+  lineOpacity: 0.8,
+  maxConnectionDistance: 100, // Distancia muy grande para no limitar los trails
+  animateLines: true, // Con animación de energía fluyendo
+  useLightTrails: true, // Flag especial para el modo de estelas
+  use3DGrid: true, // Flag para indicar que necesita grid 3D real
+
+  initializeParticles: (particlesCount, variant, particleColors) => {
+    const positions = new Float32Array(particlesCount * 3);
+    const colors = new Float32Array(particlesCount * 3);
+    const sizes = new Float32Array(particlesCount);
+    const particleData = [];
+
+    for (let i = 0; i < particlesCount; i++) {
+      const i3 = i * 3;
+
+      // Todas son light cycles que viajan sobre el grid
+      const lane = Math.floor(Math.random() * 10) - 5; // Carriles del grid
+      positions[i3] = lane * 2.5; // Posición X en carril
+      positions[i3 + 1] = 0.1; // Ligeramente sobre el grid
+      positions[i3 + 2] = Math.random() * -50 - 5; // Posición Z aleatoria
+
+      // Color TRON brillante
+      const colorChoice = Math.random();
+      let particleColor;
+      if (variant === "admin") {
+        // Admin: cyan/magenta brillante
+        if (colorChoice < 0.5) {
+          colors[i3] = 0.3; colors[i3 + 1] = 0.9; colors[i3 + 2] = 1.0; // Cyan
+          particleColor = { r: 0.3, g: 0.9, b: 1.0 };
+        } else {
+          colors[i3] = 1.0; colors[i3 + 1] = 0.3; colors[i3 + 2] = 1.0; // Magenta
+          particleColor = { r: 1.0, g: 0.3, b: 1.0 };
+        }
+      } else {
+        // User: cyan/naranja brillante
+        if (colorChoice < 0.5) {
+          colors[i3] = 0.2; colors[i3 + 1] = 0.95; colors[i3 + 2] = 1.0; // Cyan brillante
+          particleColor = { r: 0.2, g: 0.95, b: 1.0 };
+        } else {
+          colors[i3] = 1.0; colors[i3 + 1] = 0.65; colors[i3 + 2] = 0.0; // Naranja TRON
+          particleColor = { r: 1.0, g: 0.65, b: 0.0 };
+        }
+      }
+
+      sizes[i] = 8; // Un poco más grandes
+
+      particleData.push({
+        speed: Math.random() * 0.4 + 0.3, // Velocidad variable
+        lane: lane, // Carril en el que circula
+        changeTimer: Math.random() * 10 + 5, // Tiempo hasta cambiar de carril
+        trail: [], // Array para guardar las posiciones anteriores (estela)
+        color: particleColor, // Color de la estela
+      });
+    }
+
+    return { positions, colors, sizes, particleData };
+  },
+
+  animateParticles: (particlesCount, positions, particleData, mouseRef, elapsedTime) => {
+    const trails = []; // Array para devolver las estelas
+
+    for (let i = 0; i < particlesCount; i++) {
+      const i3 = i * 3;
+      const data = particleData[i];
+
+      // Guardar posición actual antes de mover
+      const currentPos = {
+        x: positions[i3],
+        y: positions[i3 + 1],
+        z: positions[i3 + 2]
+      };
+
+      // Light cycle: avanza hacia la cámara
+      positions[i3 + 2] += data.speed;
+
+      // Reset cuando pasa la cámara
+      if (positions[i3 + 2] > 10) {
+        positions[i3 + 2] = -60;
+        // Limpiar trail al reiniciar
+        data.trail = [];
+        // Ocasionalmente cambia de carril al reiniciar
+        if (Math.random() > 0.5) {
+          data.lane = Math.floor(Math.random() * 10) - 5;
+        }
+      } else {
+        // Añadir posición actual al trail
+        data.trail.push(currentPos);
+        // Limitar longitud del trail (20 posiciones = estela visible)
+        if (data.trail.length > 20) {
+          data.trail.shift(); // Quitar la posición más antigua
+        }
+      }
+
+      // Suave transición entre carriles
+      const targetX = data.lane * 2.5;
+      positions[i3] += (targetX - positions[i3]) * 0.02;
+
+      // Cambio de carril ocasional
+      if (elapsedTime > data.changeTimer && Math.random() > 0.95) {
+        const newLane = data.lane + (Math.random() > 0.5 ? 1 : -1);
+        if (newLane >= -5 && newLane <= 5) {
+          data.lane = newLane;
+        }
+        data.changeTimer = elapsedTime + Math.random() * 10 + 5;
+      }
+
+      positions[i3 + 1] = 0.1; // Siempre a nivel del grid
+
+      // Guardar el trail de esta partícula para dibujarlo
+      trails.push({
+        trail: data.trail,
+        color: data.color
+      });
+    }
+
+    // Sin rotación para mantener vista frontal del grid
+    return {
+      rotationY: 0,
+      rotationX: -0.15, // Ligeramente inclinado para perspectiva
+      trails: trails // Devolver los trails para que ThreeBackground los dibuje
+    };
+  },
+
+  plasmaShader: `
+    uniform float time;
+    uniform vec3 color1;
+    uniform vec3 color2;
+    varying vec2 vUv;
+
+    // Bitmap font 5x5 para letras (simplificado pero legible)
+    float getChar(int ch, vec2 p) {
+      int x = int(p.x);
+      int y = 4 - int(p.y); // Invertir Y para que las letras no salgan al revés
+
+      // Cada letra es una matriz 5x5 codificada como bits
+      // Letras A-Z: 65-90
+      // Números 0-9: 48-57
+      // Especiales: 32(espacio), 33(!), 36($), 40((), 41()), 45(-), 47(/), 58(:), 59(;), 61(=), 63(?), 92(\), 161(¿), 164(€), 209(Ñ)
+
+      if (ch == 65) { // A
+        if (y==0 && x>=1 && x<=3) return 1.0;
+        if ((y==1||y==2||y==3||y==4) && (x==0||x==4)) return 1.0;
+        if (y==2 && x>=1 && x<=3) return 1.0;
+      }
+      else if (ch == 66) { // B
+        if ((y==0||y==2||y==4) && x>=0 && x<=3) return 1.0;
+        if ((y==1||y==3) && (x==0||x==4)) return 1.0;
+      }
+      else if (ch == 67) { // C
+        if (y==0 && x>=1 && x<=3) return 1.0;
+        if (y==4 && x>=1 && x<=3) return 1.0;
+        if ((y==1||y==2||y==3) && x==0) return 1.0;
+      }
+      else if (ch == 68) { // D
+        if ((y==0||y==4) && x>=0 && x<=3) return 1.0;
+        if ((y==1||y==2||y==3) && (x==0||x==4)) return 1.0;
+      }
+      else if (ch == 69) { // E
+        if ((y==0||y==2||y==4) && x>=0 && x<=4) return 1.0;
+        if ((y==1||y==3) && x==0) return 1.0;
+      }
+      else if (ch == 70) { // F
+        if ((y==0||y==2) && x>=0 && x<=4) return 1.0;
+        if ((y==1||y==3||y==4) && x==0) return 1.0;
+      }
+      else if (ch == 71) { // G
+        if (y==0 && x>=1 && x<=3) return 1.0;
+        if (y==4 && x>=1 && x<=3) return 1.0;
+        if ((y==1||y==2||y==3) && x==0) return 1.0;
+        if ((y==2||y==3||y==4) && x==4) return 1.0;
+      }
+      else if (ch == 72) { // H
+        if ((y==0||y==1||y==2||y==3||y==4) && (x==0||x==4)) return 1.0;
+        if (y==2 && x>=1 && x<=3) return 1.0;
+      }
+      else if (ch == 73) { // I
+        if ((y==0||y==4) && x>=0 && x<=4) return 1.0;
+        if ((y==1||y==2||y==3) && x==2) return 1.0;
+      }
+      else if (ch == 74) { // J
+        if (y==0 && x>=0 && x<=4) return 1.0;
+        if ((y==1||y==2||y==3) && x==2) return 1.0;
+        if (y==4 && x>=0 && x<=2) return 1.0;
+      }
+      else if (ch == 77) { // M
+        if ((y==0||y==1||y==2||y==3||y==4) && (x==0||x==4)) return 1.0;
+        if (y==1 && (x==1||x==3)) return 1.0;
+      }
+      else if (ch == 78) { // N
+        if ((y==0||y==1||y==2||y==3||y==4) && (x==0||x==4)) return 1.0;
+        if (y==1 && x==1) return 1.0;
+        if (y==2 && x==2) return 1.0;
+        if (y==3 && x==3) return 1.0;
+      }
+      else if (ch == 79) { // O
+        if ((y==0||y==4) && x>=1 && x<=3) return 1.0;
+        if ((y==1||y==2||y==3) && (x==0||x==4)) return 1.0;
+      }
+      else if (ch == 82) { // R
+        if ((y==0||y==2) && x>=0 && x<=3) return 1.0;
+        if ((y==1||y==3||y==4) && x==0) return 1.0;
+        if (y==1 && x==4) return 1.0;
+        if (y==3 && x==3) return 1.0;
+        if (y==4 && x==4) return 1.0;
+      }
+      else if (ch == 83) { // S
+        if ((y==0||y==2||y==4) && x>=1 && x<=3) return 1.0;
+        if (y==1 && x==0) return 1.0;
+        if (y==3 && x==4) return 1.0;
+      }
+      else if (ch == 84) { // T
+        if (y==0 && x>=0 && x<=4) return 1.0;
+        if ((y==1||y==2||y==3||y==4) && x==2) return 1.0;
+      }
+      else if (ch == 85) { // U
+        if ((y==0||y==1||y==2||y==3) && (x==0||x==4)) return 1.0;
+        if (y==4 && x>=1 && x<=3) return 1.0;
+      }
+      else if (ch == 86) { // V
+        if ((y==0||y==1) && (x==0||x==4)) return 1.0;
+        if (y==2 && (x==1||x==3)) return 1.0;
+        if (y==3 && x==2) return 1.0;
+        if (y==4 && x==2) return 1.0;
+      }
+      else if (ch == 87) { // W
+        if ((y==0||y==1||y==2||y==3||y==4) && (x==0||x==4)) return 1.0;
+        if (y==3 && (x==1||x==3)) return 1.0;
+        if (y==4 && x==2) return 1.0;
+      }
+      else if (ch == 88) { // X
+        if ((y==0||y==4) && (x==0||x==4)) return 1.0;
+        if (y==1 && (x==1||x==3)) return 1.0;
+        if (y==2 && x==2) return 1.0;
+        if (y==3 && (x==1||x==3)) return 1.0;
+      }
+      else if (ch == 89) { // Y
+        if ((y==0||y==1) && (x==0||x==4)) return 1.0;
+        if ((y==2||y==3||y==4) && x==2) return 1.0;
+      }
+      else if (ch == 90) { // Z
+        if ((y==0||y==4) && x>=0 && x<=4) return 1.0;
+        if (y==1 && x==3) return 1.0;
+        if (y==2 && x==2) return 1.0;
+        if (y==3 && x==1) return 1.0;
+      }
+      else if (ch == 75) { // K
+        if ((y==0||y==1||y==2||y==3||y==4) && x==0) return 1.0;
+        if (y==0 && x==4) return 1.0;
+        if (y==1 && x==3) return 1.0;
+        if (y==2 && x==2) return 1.0;
+        if (y==3 && x==3) return 1.0;
+        if (y==4 && x==4) return 1.0;
+      }
+      else if (ch == 76) { // L
+        if ((y==0||y==1||y==2||y==3||y==4) && x==0) return 1.0;
+        if (y==4 && x>=1 && x<=4) return 1.0;
+      }
+      else if (ch == 80) { // P
+        if ((y==0||y==2) && x>=0 && x<=3) return 1.0;
+        if ((y==1||y==3||y==4) && x==0) return 1.0;
+        if (y==1 && x==4) return 1.0;
+      }
+      else if (ch == 81) { // Q
+        if ((y==0||y==4) && x>=1 && x<=3) return 1.0;
+        if ((y==1||y==2) && (x==0||x==4)) return 1.0;
+        if (y==3 && (x==0||x==3)) return 1.0;
+        if (y==4 && x==4) return 1.0;
+      }
+      else if (ch == 209) { // Ñ (UTF-8: Ñ en código ASCII extendido)
+        if ((y==0||y==1||y==2||y==3||y==4) && (x==0||x==4)) return 1.0;
+        if (y==1 && x==1) return 1.0;
+        if (y==2 && x==2) return 1.0;
+        if (y==3 && x==3) return 1.0;
+      }
+      // Números 0-9
+      else if (ch == 48) { // 0
+        if ((y==0||y==4) && x>=1 && x<=3) return 1.0;
+        if ((y==1||y==2||y==3) && (x==0||x==4)) return 1.0;
+      }
+      else if (ch == 49) { // 1
+        if ((y==0||y==1||y==2||y==3||y==4) && x==2) return 1.0;
+        if (y==0 && x==1) return 1.0;
+        if (y==4 && x>=1 && x<=3) return 1.0;
+      }
+      else if (ch == 50) { // 2
+        if ((y==0||y==2||y==4) && x>=0 && x<=4) return 1.0;
+        if (y==1 && x==4) return 1.0;
+        if (y==3 && x==0) return 1.0;
+      }
+      else if (ch == 51) { // 3
+        if ((y==0||y==2||y==4) && x>=0 && x<=4) return 1.0;
+        if ((y==1||y==3) && x==4) return 1.0;
+      }
+      else if (ch == 52) { // 4
+        if ((y==0||y==1||y==2) && x==0) return 1.0;
+        if (y==2 && x>=1 && x<=4) return 1.0;
+        if ((y==3||y==4) && x==3) return 1.0;
+      }
+      else if (ch == 53) { // 5
+        if ((y==0||y==2||y==4) && x>=0 && x<=4) return 1.0;
+        if (y==1 && x==0) return 1.0;
+        if (y==3 && x==4) return 1.0;
+      }
+      else if (ch == 54) { // 6
+        if ((y==0||y==2||y==4) && x>=1 && x<=3) return 1.0;
+        if ((y==1||y==2||y==3) && x==0) return 1.0;
+        if (y==3 && x==4) return 1.0;
+      }
+      else if (ch == 55) { // 7
+        if (y==0 && x>=0 && x<=4) return 1.0;
+        if (y==1 && x==4) return 1.0;
+        if (y==2 && x==3) return 1.0;
+        if ((y==3||y==4) && x==2) return 1.0;
+      }
+      else if (ch == 56) { // 8
+        if ((y==0||y==2||y==4) && x>=1 && x<=3) return 1.0;
+        if ((y==1||y==3) && (x==0||x==4)) return 1.0;
+      }
+      else if (ch == 57) { // 9
+        if ((y==0||y==2) && x>=1 && x<=3) return 1.0;
+        if (y==1 && (x==0||x==4)) return 1.0;
+        if ((y==3||y==4) && x==4) return 1.0;
+        if (y==4 && x>=1 && x<=3) return 1.0;
+      }
+      // Caracteres especiales
+      else if (ch == 33) { // !
+        if ((y==0||y==1||y==2) && x==2) return 1.0;
+        if (y==4 && x==2) return 1.0;
+      }
+      else if (ch == 161) { // ¿
+        if ((y==2||y==3||y==4) && x==2) return 1.0;
+        if (y==0 && x==2) return 1.0;
+      }
+      else if (ch == 63) { // ?
+        if ((y==0||y==1) && x>=1 && x<=3) return 1.0;
+        if (y==1 && x==4) return 1.0;
+        if (y==2 && x==3) return 1.0;
+        if (y==4 && x==2) return 1.0;
+      }
+      else if (ch == 45) { // -
+        if (y==2 && x>=1 && x<=3) return 1.0;
+      }
+      else if (ch == 58) { // :
+        if (y==1 && x==2) return 1.0;
+        if (y==3 && x==2) return 1.0;
+      }
+      else if (ch == 59) { // ;
+        if (y==1 && x==2) return 1.0;
+        if (y==3 && x==2) return 1.0;
+        if (y==4 && x==1) return 1.0;
+      }
+      else if (ch == 40) { // (
+        if ((y==0||y==4) && x==2) return 1.0;
+        if ((y==1||y==2||y==3) && x==1) return 1.0;
+      }
+      else if (ch == 41) { // )
+        if ((y==0||y==4) && x==1) return 1.0;
+        if ((y==1||y==2||y==3) && x==2) return 1.0;
+      }
+      else if (ch == 61) { // =
+        if ((y==2||y==3) && x>=1 && x<=3) return 1.0;
+      }
+      else if (ch == 47) { // /
+        if (y==0 && x==4) return 1.0;
+        if (y==1 && x==3) return 1.0;
+        if (y==2 && x==2) return 1.0;
+        if (y==3 && x==1) return 1.0;
+        if (y==4 && x==0) return 1.0;
+      }
+      else if (ch == 92) { // backslash
+        if (y==0 && x==0) return 1.0;
+        if (y==1 && x==1) return 1.0;
+        if (y==2 && x==2) return 1.0;
+        if (y==3 && x==3) return 1.0;
+        if (y==4 && x==4) return 1.0;
+      }
+      else if (ch == 36) { // $
+        if ((y==0||y==2||y==4) && x>=1 && x<=3) return 1.0;
+        if (y==1 && x==0) return 1.0;
+        if (y==3 && x==4) return 1.0;
+        if (x==2) return 1.0; // línea vertical
+      }
+      else if (ch == 164) { // € (aproximación)
+        if ((y==0||y==2||y==4) && x>=1 && x<=4) return 1.0;
+        if ((y==1||y==3) && x==0) return 1.0;
+      }
+
+      return 0.0;
+    }
+
+    void main() {
+      vec2 uv = vUv * 2.0 - 1.0;
+
+      // Grid TRON alineado con el plano de las partículas
+      // Las partículas viajan en carriles horizontales (X) y avanzan en profundidad (Z)
+      // El grid debe estar en el mismo plano XZ, visto desde arriba con ligera inclinación
+
+      // Grid plano sin distorsión de perspectiva artificial
+      vec2 gridUV = uv * 8.0;
+
+      // Líneas verticales (carriles donde viajan las motos) - fijas en X
+      float gridX = abs(fract(gridUV.x) - 0.5);
+      // Líneas horizontales (profundidad) - se mueven hacia adelante con el tiempo
+      float gridY = abs(fract(gridUV.y - time * 0.3) - 0.5);
+
+      float grid = 1.0 - min(gridX, gridY) * 30.0;
+      grid = smoothstep(0.0, 0.3, grid);
+
+      // Pulsos de energía que viajan por el grid en profundidad
+      float pulse = sin(gridUV.y * 2.0 - time * 2.0) * 0.5 + 0.5;
+      float energyPulse = pulse * 0.3;
+
+      // Fade vertical para dar sensación de profundidad
+      float depthFade = smoothstep(-1.0, 0.5, uv.y);
+
+      // Texto scrolling: "GREETINGS TO JUANDA HECTOR JAIME VICENTE FRAN"
+      // Codificado como array de ASCII
+      int text[47];
+      text[0]=71; text[1]=82; text[2]=69; text[3]=69; text[4]=84; text[5]=73; text[6]=78; text[7]=71; text[8]=83; text[9]=32; // GREETINGS
+      text[10]=84; text[11]=79; text[12]=32; // TO
+      text[13]=74; text[14]=85; text[15]=65; text[16]=78; text[17]=68; text[18]=65; text[19]=32; // JUANDA
+      text[20]=72; text[21]=69; text[22]=67; text[23]=84; text[24]=79; text[25]=82; text[26]=32; // HECTOR
+      text[27]=74; text[28]=65; text[29]=73; text[30]=77; text[31]=69; text[32]=32; // JAIME
+      text[33]=86; text[34]=73; text[35]=67; text[36]=69; text[37]=78; text[38]=84; text[39]=69; text[40]=32; // VICENTE
+      text[41]=70; text[42]=82; text[43]=65; text[44]=78; // FRAN
+      text[45]=32; text[46]=32; // Espacios finales
+
+      float scrollSpeed = 0.3; // Velocidad de scroll (más rápido)
+      float charWidth = 0.15;  // Ancho de cada carácter
+      float charHeight = 0.2;  // Alto de cada carácter
+      float charSpacing = 0.02; // Espacio entre letras
+
+      // Calcular el ancho total del texto
+      float totalTextWidth = float(47) * (charWidth + charSpacing);
+
+      // El texto debe empezar desde el borde derecho (fuera de pantalla)
+      // y moverse hacia la izquierda hasta salir por el borde izquierdo
+      // uv.x va de -1 (izquierda) a +1 (derecha) en coordenadas normalizadas
+      // Necesitamos que el texto empiece en +1 y termine en -1 - totalTextWidth
+      float scrollRange = 2.0 + totalTextWidth; // Ancho total de pantalla + ancho del texto
+      float scrollProgress = mod(time * scrollSpeed, scrollRange);
+      float scrollX = 1.0 - scrollProgress; // Empieza en +1 (derecha) y va hacia la izquierda
+
+      vec2 textPos = vec2(uv.x - scrollX, uv.y + 0.7); // Parte superior
+
+      float textBrightness = 0.0;
+
+      // Dibujar cada carácter
+      for (int i = 0; i < 47; i++) {
+        float charX = float(i) * (charWidth + charSpacing);
+        vec2 charPos = textPos - vec2(charX, 0.0);
+
+        // Mostrar el carácter si está visible en pantalla
+        if (charPos.x > -charWidth && charPos.x < charWidth &&
+            charPos.y > -charHeight && charPos.y < charHeight) {
+
+          vec2 pixelPos = (charPos + vec2(charWidth * 0.5, charHeight * 0.5)) / vec2(charWidth, charHeight);
+          vec2 p = floor(pixelPos * 5.0);
+
+          if (text[i] != 32) { // No es espacio
+            float charPixel = getChar(text[i], p);
+
+            // Suavizar los bordes para mejor legibilidad
+            vec2 pixelFrac = fract(pixelPos * 5.0);
+            float smoothFactor = smoothstep(0.1, 0.3, pixelFrac.x) * smoothstep(0.9, 0.7, pixelFrac.x) *
+                                 smoothstep(0.1, 0.3, pixelFrac.y) * smoothstep(0.9, 0.7, pixelFrac.y);
+
+            textBrightness = max(textBrightness, charPixel * smoothFactor);
+          }
+        }
+      }
+
+      // Color del texto: naranja brillante tipo TRON con glow
+      vec3 textColor = vec3(1.0, 0.7, 0.0) * textBrightness * 2.5;
+
+      // Añadir glow alrededor del texto
+      float glowRadius = 0.02;
+      float glow = 0.0;
+      for (int i = 0; i < 47; i++) {
+        float charX = float(i) * (charWidth + charSpacing);
+        vec2 charPos = textPos - vec2(charX, 0.0);
+        float dist = length(charPos) / charWidth;
+        if (dist < 1.5) {
+          glow += (1.0 - dist / 1.5) * 0.1;
+        }
+      }
+      textColor += vec3(1.0, 0.5, 0.0) * glow;
+
+      // Color de fondo muy oscuro (casi invisible porque tenemos grid 3D)
+      vec3 backgroundColor = vec3(0.0, 0.1, 0.15) * 0.1;
+
+      // El texto scrolling sigue visible
+      vec3 finalColor = backgroundColor + textColor;
+
+      // Alpha muy bajo para el fondo, solo el texto debe ser visible
+      float alpha = textBrightness * 0.8;
+
+      gl_FragColor = vec4(finalColor, alpha);
+    }
+  `
+};
+
+/**
  * Array of all available effects
  * Add new effects here to make them selectable
  */
@@ -403,6 +916,7 @@ export const availableEffects = [
   hyperspaceEffect,
   waveEffect,
   energyGridEffect,
+  tronGridEffect,
 ];
 
 /**
