@@ -1,10 +1,15 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
 const ThreeBackground = ({ variant = "admin" }) => {
   const containerRef = useRef(null);
   const mouseRef = useRef({ x: 0, y: 0 });
   const targetMouseRef = useRef({ x: 0, y: 0 });
+  const [isVisible, setIsVisible] = useState(() => {
+    // Leer preferencia de localStorage, por defecto true
+    const saved = localStorage.getItem('backgroundEnabled');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
 
   useEffect(() => {
     const container = containerRef.current;
@@ -362,6 +367,21 @@ const ThreeBackground = ({ variant = "admin" }) => {
       renderer.dispose();
     };
   }, [variant]);
+
+  // Escuchar eventos de cambio de visibilidad
+  useEffect(() => {
+    const handleToggle = (event) => {
+      setIsVisible(event.detail.enabled);
+    };
+
+    window.addEventListener('backgroundToggle', handleToggle);
+    return () => window.removeEventListener('backgroundToggle', handleToggle);
+  }, []);
+
+  // No renderizar si está desactivado
+  if (!isVisible) {
+    return null;
+  }
 
   return (
     <div

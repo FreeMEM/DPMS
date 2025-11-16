@@ -4,11 +4,13 @@ import { Link } from 'react-router-dom';
 import MainBar from '../../@dpms-freemem/MainBar';
 import Content from '../../@dpms-freemem/Content';
 import ThreeBackground from '../common/ThreeBackground';
+import BackgroundToggle from '../common/BackgroundToggle';
 
 const AdminLayout = ({ children, title, breadcrumbs = [] }) => {
   return (
     <Box sx={{ display: 'flex' }}>
       <ThreeBackground variant="admin" />
+      <BackgroundToggle />
       <MainBar value={0} />
       <Content>
         <Container maxWidth="xl" sx={{ pt: 10, pb: 4 }}>
