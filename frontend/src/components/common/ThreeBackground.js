@@ -92,7 +92,15 @@ const ThreeBackground = ({ variant = "admin" }) => {
     // Scene setup
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 5;
+
+    // Ajustar cámara según el efecto
+    if (currentEffect.use3DGrid) {
+      // Para TRON grid: cámara elevada mirando hacia abajo y adelante
+      camera.position.set(0, 8, 12);  // Elevada y atrás
+      camera.lookAt(0, 0, -20);  // Mirando hacia el grid
+    } else {
+      camera.position.z = 5;
+    }
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -205,6 +213,32 @@ const ThreeBackground = ({ variant = "admin" }) => {
 
     const lines = new THREE.LineSegments(lineGeometry, lineMaterial);
     scene.add(lines);
+
+    // Create 3D grid for TRON effect (if needed)
+    let grid3D = null;
+    if (currentEffect.use3DGrid) {
+      const gridSize = 100; // Tamaño del grid en profundidad
+      const gridDivisions = 40; // Número de divisiones
+      const gridHelper = new THREE.GridHelper(gridSize, gridDivisions,
+        variant === "admin" ? 0x6020c0 : 0x20c0a0,  // Color principal
+        variant === "admin" ? 0x301060 : 0x105050   // Color secundario
+      );
+
+      // GridHelper está por defecto en el plano XZ (horizontal), que es correcto para las motos
+      // Las motos viajan en X (carriles) y Z (profundidad), con Y=0.1 constante
+      // Solo necesitamos posicionar el grid exactamente donde están las motos
+
+      gridHelper.position.y = 0; // A nivel del suelo (Y=0), las motos están en Y=0.1 justo encima
+      gridHelper.position.z = -25; // Centrado en la zona de las motos (van de Z=-60 a Z=+10)
+
+      // Hacer el grid más transparente y brillante
+      gridHelper.material.transparent = true;
+      gridHelper.material.opacity = 0.4;
+      gridHelper.material.blending = THREE.AdditiveBlending;
+
+      scene.add(gridHelper);
+      grid3D = gridHelper;
+    }
 
     // Create plasma background plane
     const aspect = window.innerWidth / window.innerHeight;
@@ -353,18 +387,43 @@ const ThreeBackground = ({ variant = "admin" }) => {
 
         // Add mouse-driven rotation (suave y sutil)
         const mouseRotationY = mouseRef.current.x * 0.3; // Horizontal mouse -> Y rotation
-        const mouseRotationX = -mouseRef.current.y * 0.2; // Vertical mouse -> X rotation
+        let mouseRotationX = -mouseRef.current.y * 0.2; // Vertical mouse -> X rotation
+
+        // Limitar rotación X hacia arriba para TRON grid (mantener grid visible)
+        // Cuando mouseY > 0 (mouse arriba), limitar la rotación X a un máximo
+        if (currentEffect.use3DGrid && mouseRotationX < -0.1) {
+          mouseRotationX = Math.max(mouseRotationX, -0.1); // No rotar más de -0.1 radianes hacia arriba
+        }
 
         particles.rotation.y = baseRotationY + mouseRotationY;
         particles.rotation.x = baseRotationX + mouseRotationX;
         lines.rotation.y = baseRotationY + mouseRotationY;
         lines.rotation.x = baseRotationX + mouseRotationX;
+
+        // También rotar el grid 3D si existe (para TRON effect)
+        if (grid3D) {
+          grid3D.rotation.y = baseRotationY + mouseRotationY;
+          grid3D.rotation.x = baseRotationX + mouseRotationX;
+        }
       } else {
         // Si el efecto no devuelve rotación, aplicar solo rotación del mouse
+        let mouseRotationX = -mouseRef.current.y * 0.2;
+
+        // Limitar rotación X hacia arriba para TRON grid
+        if (currentEffect.use3DGrid && mouseRotationX < -0.1) {
+          mouseRotationX = Math.max(mouseRotationX, -0.1);
+        }
+
         particles.rotation.y = mouseRef.current.x * 0.3;
-        particles.rotation.x = -mouseRef.current.y * 0.2;
+        particles.rotation.x = mouseRotationX;
         lines.rotation.y = mouseRef.current.x * 0.3;
-        lines.rotation.x = -mouseRef.current.y * 0.2;
+        lines.rotation.x = mouseRotationX;
+
+        // También rotar el grid 3D si existe
+        if (grid3D) {
+          grid3D.rotation.y = mouseRef.current.x * 0.3;
+          grid3D.rotation.x = mouseRotationX;
+        }
       }
 
       particles.geometry.attributes.position.needsUpdate = true;
@@ -569,6 +628,25 @@ const ThreeBackground = ({ variant = "admin" }) => {
           linePositions[lineIndex + 4] = positions[j3 + 1];
           linePositions[lineIndex + 5] = positions[j3 + 2];
           connectionIndex += 2;
+        }
+      } else if (currentEffect.useLightTrails && rotation && rotation.trails) {
+        // Light trails mode (for TRON effect) - draw sequential trails for each particle
+        for (let i = 0; i < rotation.trails.length && connectionIndex < maxConnections * 2; i++) {
+          const trailData = rotation.trails[i];
+          const trail = trailData.trail;
+          const color = trailData.color;
+
+          // Draw trail as connected line segments
+          for (let j = 0; j < trail.length - 1 && connectionIndex < maxConnections * 2; j++) {
+            const lineIndex = connectionIndex * 3;
+            linePositions[lineIndex] = trail[j].x;
+            linePositions[lineIndex + 1] = trail[j].y;
+            linePositions[lineIndex + 2] = trail[j].z;
+            linePositions[lineIndex + 3] = trail[j + 1].x;
+            linePositions[lineIndex + 4] = trail[j + 1].y;
+            linePositions[lineIndex + 5] = trail[j + 1].z;
+            connectionIndex += 2;
+          }
         }
       } else {
         // Modo normal de conexiones (partículas cercanas)
