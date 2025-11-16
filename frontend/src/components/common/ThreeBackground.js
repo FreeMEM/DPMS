@@ -33,142 +33,79 @@ const ThreeBackground = ({ variant = "admin" }) => {
     container.appendChild(renderer.domElement);
     console.log("ThreeBackground: Canvas appended to container");
 
-    // Function to create 8-bit spaceship sprite texture with different ship types
-    const createShipSprite = (color, shipType) => {
-      const canvas = document.createElement("canvas");
-      canvas.width = 16;
-      canvas.height = 16;
-      const ctx = canvas.getContext("2d");
+    // Create particle system for hyperspace effect
+    const particlesCount = variant === "admin" ? 500 : 350;
+    const particlesGeometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particlesCount * 3);
+    const colors = new Float32Array(particlesCount * 3);
+    const sizes = new Float32Array(particlesCount);
 
-      // Clear canvas
-      ctx.clearRect(0, 0, 16, 16);
-
-      // Draw 8-bit spaceship pattern (inspired by Galaxian/Space Invaders)
-      ctx.fillStyle = color;
-
-      // Different ship patterns for variety
-      const patterns = {
-        // Type 1: Classic invader shape
-        invader: [
-          [0,0,0,0,0,1,1,0,0,1,1,0,0,0,0,0],
-          [0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0],
-          [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0],
-          [0,0,1,1,0,1,1,1,1,1,1,0,1,1,0,0],
-          [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
-          [0,1,0,1,1,1,1,1,1,1,1,1,1,0,1,0],
-          [0,1,0,1,0,0,0,0,0,0,0,0,1,0,1,0],
-          [0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0],
-        ],
-        // Type 2: Galaga-style fighter
-        fighter: [
-          [0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0],
-          [0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0],
-          [0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0],
-          [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],
-          [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
-          [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
-          [0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0],
-          [0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0],
-        ],
-        // Type 3: Diamond/crystal shape
-        diamond: [
-          [0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0],
-          [0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0],
-          [0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0],
-          [0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0],
-          [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0],
-          [0,0,1,1,1,1,0,1,1,0,1,1,1,1,0,0],
-          [0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0],
-          [0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0],
-        ],
-        // Type 4: TIE Fighter style
-        tie: [
-          [0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0],
-          [0,1,1,1,0,0,0,1,1,0,0,0,1,1,1,0],
-          [0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0],
-          [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
-          [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
-          [0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0],
-          [0,1,1,1,0,0,0,1,1,0,0,0,1,1,1,0],
-          [0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0],
-        ],
-      };
-
-      const pattern = patterns[shipType];
-
-      for (let y = 0; y < pattern.length; y++) {
-        for (let x = 0; x < pattern[y].length; x++) {
-          if (pattern[y][x] === 1) {
-            ctx.fillRect(x, y + 4, 1, 1);
-          }
-        }
-      }
-
-      const texture = new THREE.CanvasTexture(canvas);
-      texture.needsUpdate = true;
-      return texture;
-    };
-
-    // Create ship sprite system
-    const shipsCount = variant === "admin" ? 300 : 200;
-    const ships = [];
-    const shipData = [];
-
-    // Get ship colors based on variant
-    const getShipColors = () => {
+    // Get particle colors based on variant
+    const getParticleColors = () => {
       if (variant === "admin") {
         return [
-          "rgb(51, 102, 204)",   // Blue
-          "rgb(153, 51, 204)",   // Purple
-          "rgb(230, 51, 153)",   // Pink
+          new THREE.Color(0.2, 0.4, 0.8),   // Blue
+          new THREE.Color(0.6, 0.2, 0.8),   // Purple
+          new THREE.Color(0.9, 0.2, 0.6),   // Pink
         ];
       } else {
         return [
-          "rgb(51, 204, 204)",   // Cyan
-          "rgb(51, 230, 102)",   // Green
-          "rgb(230, 230, 51)",   // Yellow
+          new THREE.Color(0.2, 0.8, 0.8),   // Cyan
+          new THREE.Color(0.2, 0.9, 0.4),   // Green
+          new THREE.Color(0.9, 0.9, 0.2),   // Yellow
         ];
       }
     };
 
-    const shipColors = getShipColors();
-    const shipTypes = ["invader", "fighter", "diamond", "tie"];
+    const particleColors = getParticleColors();
+    const particleData = [];
 
-    for (let i = 0; i < shipsCount; i++) {
-      // Random position
-      const x = (Math.random() - 0.5) * 10;
-      const y = (Math.random() - 0.5) * 10;
-      const z = (Math.random() - 0.5) * 10;
+    for (let i = 0; i < particlesCount; i++) {
+      // Random position in cylindrical space (tunnel effect)
+      const angle = Math.random() * Math.PI * 2;
+      const radius = Math.random() * 8 + 2;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      const z = Math.random() * -50 - 10; // Start far back
 
-      // Random color and ship type from palettes
-      const color = shipColors[Math.floor(Math.random() * shipColors.length)];
-      const shipType = shipTypes[Math.floor(Math.random() * shipTypes.length)];
-      const texture = createShipSprite(color, shipType);
+      positions[i * 3] = x;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = z;
 
-      const spriteMaterial = new THREE.SpriteMaterial({
-        map: texture,
-        transparent: true,
-        opacity: 0.8,
-        blending: THREE.AdditiveBlending,
-      });
+      // Random color from the palette
+      const color = particleColors[Math.floor(Math.random() * particleColors.length)];
+      colors[i * 3] = color.r;
+      colors[i * 3 + 1] = color.g;
+      colors[i * 3 + 2] = color.b;
 
-      const sprite = new THREE.Sprite(spriteMaterial);
-      sprite.position.set(x, y, z);
-      sprite.scale.set(0.3, 0.3, 0.3);
+      // Random size
+      sizes[i] = Math.random() * 3 + 1;
 
-      scene.add(sprite);
-      ships.push(sprite);
-
-      // Store original position and rotation speed for animation
-      shipData.push({
-        originalX: x,
-        originalY: y,
-        originalZ: z,
-        rotationSpeed: (Math.random() - 0.5) * 0.5, // Random rotation speed
+      // Store data for hyperspace tunnel animation
+      particleData.push({
+        angle: angle,
+        radius: radius,
+        speed: Math.random() * 0.5 + 0.3, // Speed towards camera
       });
     }
 
-    console.log("ThreeBackground: Ships created with", shipsCount, "spaceships");
+    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    particlesGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+    const particlesMaterial = new THREE.PointsMaterial({
+      size: 0.08,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.8,
+      blending: THREE.AdditiveBlending,
+      sizeAttenuation: true,
+    });
+
+    const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+    scene.add(particles);
+
+    console.log("ThreeBackground: Particles created with", particlesCount, "particles");
 
     // Create lines to connect nearby particles
     const maxConnections = variant === "admin" ? 100 : 50;
@@ -190,7 +127,7 @@ const ThreeBackground = ({ variant = "admin" }) => {
     const aspect = window.innerWidth / window.innerHeight;
     const plasmaGeometry = new THREE.PlaneGeometry(20 * aspect, 20);
 
-    // Shader para el efecto plasma
+    // Shader para el efecto plasma con túnel de velocidad de luz
     const plasmaMaterial = new THREE.ShaderMaterial({
       uniforms: {
         time: { value: 0 },
@@ -223,25 +160,48 @@ const ThreeBackground = ({ variant = "admin" }) => {
         void main() {
           vec2 uv = vUv * 2.0 - 1.0; // Center UV
 
-          // Multiple sine wave layers for complex plasma - reduced frequency for larger patterns
-          float wave1 = sin(uv.x * 2.0 + time * 0.3) * cos(uv.y * 1.5 - time * 0.2);
-          float wave2 = sin(uv.y * 2.5 + time * 0.25) * cos(uv.x * 2.0 + time * 0.15);
-          float wave3 = sin((uv.x + uv.y) * 1.5 + time * 0.35);
-
-          // Circular waves emanating from center - slower and larger
+          // Distance from center
           float dist = length(uv);
-          float wave4 = sin(dist * 4.0 - time * 0.8) * 0.5;
 
-          // Combine waves
-          float plasma = (wave1 + wave2 + wave3 + wave4) * 0.25;
+          // Angle from center for radial effect
+          float angle = atan(uv.y, uv.x);
 
-          // Increase contrast but keep it subtle
-          plasma = smoothstep(-0.3, 0.3, plasma);
+          // Create star streaks effect - lines emanating from center
+          // Multiple layers of radial lines moving outward
+          float streaks1 = sin(angle * 20.0 - dist * 8.0 + time * 3.0);
+          float streaks2 = sin(angle * 15.0 - dist * 10.0 + time * 2.5);
+          float streaks3 = sin(angle * 25.0 - dist * 6.0 + time * 3.5);
+
+          // Combine streaks
+          float streaks = (streaks1 + streaks2 + streaks3) * 0.333;
+
+          // Make streaks more visible near edges (faster stretching effect)
+          float stretchFactor = smoothstep(0.0, 1.5, dist);
+          streaks *= stretchFactor;
+
+          // Radial waves flowing outward (tunnel effect)
+          float tunnel = sin(dist * 5.0 - time * 2.0);
+
+          // Pulsing from center
+          float pulse = sin(dist * 3.0 - time * 1.5) * 0.5;
+
+          // Combine all effects
+          float plasma = (streaks * 0.6 + tunnel * 0.3 + pulse * 0.1);
+
+          // Normalize and add contrast
+          plasma = smoothstep(-0.4, 0.4, plasma);
+
+          // Add radial gradient for depth (darker at center, brighter at edges)
+          float radialGradient = smoothstep(0.0, 1.2, dist);
+          plasma = mix(plasma * 0.5, plasma, radialGradient);
 
           // Mix colors based on plasma value
           vec3 color = mix(color1, color2, plasma);
 
-          gl_FragColor = vec4(color, 0.4);
+          // Fade out at edges
+          float edgeFade = 1.0 - smoothstep(0.8, 1.5, dist);
+
+          gl_FragColor = vec4(color, 0.4 * edgeFade);
         }
       `,
       transparent: true,
@@ -295,54 +255,59 @@ const ThreeBackground = ({ variant = "admin" }) => {
       mouseRef.current.x += (targetMouseRef.current.x - mouseRef.current.x) * 0.05;
       mouseRef.current.y += (targetMouseRef.current.y - mouseRef.current.y) * 0.05;
 
-      // Update ship positions with wave effect
-      for (let i = 0; i < shipsCount; i++) {
-        const ship = ships[i];
-        const data = shipData[i];
+      // Update particle positions with hyperspace tunnel effect
+      const positions = particles.geometry.attributes.position.array;
 
-        // Wave effect - create flowing motion
-        const waveX = Math.sin(elapsedTime * 0.3 + data.originalY * 0.5) * 0.3;
-        const waveY = Math.cos(elapsedTime * 0.2 + data.originalX * 0.5) * 0.3;
-        const waveZ = Math.sin(elapsedTime * 0.25 + data.originalX * 0.3 + data.originalY * 0.3) * 0.2;
+      for (let i = 0; i < particlesCount; i++) {
+        const data = particleData[i];
+        const i3 = i * 3;
 
-        // Apply wave to position
-        ship.position.x = data.originalX + waveX;
-        ship.position.y = data.originalY + waveY;
-        ship.position.z = data.originalZ + waveZ;
+        // Move particle towards camera (hyperspace effect)
+        positions[i3 + 2] += data.speed;
 
-        // Add subtle rotation for more dynamic feel
-        ship.material.rotation = elapsedTime * data.rotationSpeed;
-
-        // Mouse interaction - repulsion
-        const dx = mouseRef.current.x * 5 - ship.position.x;
-        const dy = mouseRef.current.y * 5 - ship.position.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        // Apply smooth repulsion when mouse is near
-        if (distance < 3) {
-          const force = ((3 - distance) / 3) * 0.5;
-          ship.position.x -= dx * force;
-          ship.position.y -= dy * force;
+        // Reset particle to back when it passes camera
+        if (positions[i3 + 2] > 5) {
+          positions[i3 + 2] = Math.random() * -50 - 10;
+          // Randomize angle and radius on reset for variety
+          data.angle = Math.random() * Math.PI * 2;
+          data.radius = Math.random() * 8 + 2;
         }
+
+        // Mouse interaction - particles fly towards mouse position
+        const targetAngle = Math.atan2(mouseRef.current.y * 5, mouseRef.current.x * 5);
+        let angleDiff = targetAngle - data.angle;
+
+        // Normalize angle difference to avoid sudden jumps (-PI to PI)
+        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+
+        // Smooth angle transition towards mouse (very gentle)
+        data.angle += angleDiff * 0.005;
+
+        // Update X and Y based on current angle and radius
+        positions[i3] = Math.cos(data.angle) * data.radius;
+        positions[i3 + 1] = Math.sin(data.angle) * data.radius;
       }
 
-      // Update connections between nearby ships
+      particles.geometry.attributes.position.needsUpdate = true;
+
+      // Update connections between nearby particles
       const linePositions = lines.geometry.attributes.position.array;
       let connectionIndex = 0;
       const maxDistance = 2.5;
 
-      for (let i = 0; i < shipsCount && connectionIndex < maxConnections * 2; i++) {
-        const ship1 = ships[i];
-        const x1 = ship1.position.x;
-        const y1 = ship1.position.y;
-        const z1 = ship1.position.z;
+      for (let i = 0; i < particlesCount && connectionIndex < maxConnections * 2; i++) {
+        const i3 = i * 3;
+        const x1 = positions[i3];
+        const y1 = positions[i3 + 1];
+        const z1 = positions[i3 + 2];
 
-        // Check a subset of other ships to avoid O(n²) complexity
-        for (let j = i + 1; j < Math.min(i + 15, shipsCount) && connectionIndex < maxConnections * 2; j++) {
-          const ship2 = ships[j];
-          const x2 = ship2.position.x;
-          const y2 = ship2.position.y;
-          const z2 = ship2.position.z;
+        // Check a subset of other particles to avoid O(n²) complexity
+        for (let j = i + 1; j < Math.min(i + 15, particlesCount) && connectionIndex < maxConnections * 2; j++) {
+          const j3 = j * 3;
+          const x2 = positions[j3];
+          const y2 = positions[j3 + 1];
+          const z2 = positions[j3 + 2];
 
           const dx = x2 - x1;
           const dy = y2 - y1;
@@ -350,7 +315,7 @@ const ThreeBackground = ({ variant = "admin" }) => {
           const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
           if (distance < maxDistance) {
-            // Add line between these two ships
+            // Add line between these two particles
             const lineIndex = connectionIndex * 3;
             linePositions[lineIndex] = x1;
             linePositions[lineIndex + 1] = y1;
@@ -386,13 +351,9 @@ const ThreeBackground = ({ variant = "admin" }) => {
         container.removeChild(renderer.domElement);
       }
 
-      // Dispose ship sprites
-      ships.forEach((ship) => {
-        if (ship.material.map) {
-          ship.material.map.dispose();
-        }
-        ship.material.dispose();
-      });
+      // Dispose particles
+      particlesGeometry.dispose();
+      particlesMaterial.dispose();
 
       lineGeometry.dispose();
       lineMaterial.dispose();
