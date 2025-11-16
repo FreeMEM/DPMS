@@ -13,11 +13,49 @@ const ThreeBackground = ({ variant = "admin" }) => {
   });
 
   // Estado para alternar entre efectos
-  const [effectIndex, setEffectIndex] = useState(0);
+  const [effectIndex, setEffectIndex] = useState(() => {
+    const saved = localStorage.getItem('selectedEffect');
+    if (saved && saved !== 'auto') {
+      return parseInt(saved, 10);
+    }
+    return 0;
+  });
   const [isFading, setIsFading] = useState(false);
+  const [autoRotate, setAutoRotate] = useState(() => {
+    const saved = localStorage.getItem('selectedEffect');
+    return !saved || saved === 'auto';
+  });
 
-  // Alternar efecto cada 30 segundos con fade
+  // Escuchar cambios de efecto desde el selector
   useEffect(() => {
+    const handleEffectChange = (event) => {
+      const selectedEffect = event.detail.effect;
+
+      if (selectedEffect === 'auto') {
+        setAutoRotate(true);
+      } else {
+        setAutoRotate(false);
+        const effectIdx = parseInt(selectedEffect, 10);
+
+        // Hacer fade al cambiar manualmente
+        setIsFading(true);
+        setTimeout(() => {
+          setEffectIndex(effectIdx);
+          setTimeout(() => {
+            setIsFading(false);
+          }, 50);
+        }, 1000);
+      }
+    };
+
+    window.addEventListener('effectChange', handleEffectChange);
+    return () => window.removeEventListener('effectChange', handleEffectChange);
+  }, []);
+
+  // Alternar efecto cada 30 segundos con fade (solo en modo auto)
+  useEffect(() => {
+    if (!autoRotate) return;
+
     const interval = setInterval(() => {
       // Iniciar fade out
       setIsFading(true);
@@ -34,7 +72,7 @@ const ThreeBackground = ({ variant = "admin" }) => {
     }, 30000); // 30 segundos
 
     return () => clearInterval(interval);
-  }, []);
+  }, [autoRotate]);
 
   useEffect(() => {
     const container = containerRef.current;
