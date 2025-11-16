@@ -132,9 +132,9 @@ export const waveEffect = {
 
   // Line connection settings - más brillantes y abundantes
   maxConnections: (variant) => variant === "admin" ? 250 : 150,
-  lineOpacity: 0.4,  // Más brillante que hyperspace
+  lineOpacity: 0.5,  // Aumentado para ver mejor la energía
   maxConnectionDistance: 3.5,  // Distancia mayor para más conexiones
-  animateLines: false,  // Sin animación de energía
+  animateLines: true,  // ¡CON animación de energía!
 
   initializeParticles: (particlesCount, variant, particleColors) => {
     const positions = new Float32Array(particlesCount * 3);
