@@ -130,7 +130,7 @@ const ComposPage = () => {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => navigate('/app/admin/compos/new')}
+          onClick={() => navigate('/admin/compos/new')}
         >
           Nueva Competición
         </Button>

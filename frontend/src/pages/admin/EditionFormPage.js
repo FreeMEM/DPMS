@@ -87,7 +87,7 @@ const EditionFormPage = () => {
 
       setSuccess(true);
       setTimeout(() => {
-        navigate('/app/admin/editions');
+        navigate('/admin/editions');
       }, 1500);
     } catch (err) {
       console.error('Error saving edition:', err);
@@ -115,7 +115,7 @@ const EditionFormPage = () => {
     <AdminLayout
       title={isEdit ? 'Editar Edición' : 'Nueva Edición'}
       breadcrumbs={[
-        { label: 'Ediciones', href: '/app/admin/editions' },
+        { label: 'Ediciones', href: '/admin/editions' },
         { label: isEdit ? 'Editar' : 'Nueva', href: '#' },
       ]}
     >
@@ -202,7 +202,7 @@ const EditionFormPage = () => {
               <Button
                 variant="outlined"
                 startIcon={<BackIcon />}
-                onClick={() => navigate('/app/admin/editions')}
+                onClick={() => navigate('/admin/editions')}
                 disabled={loading}
               >
                 Cancelar

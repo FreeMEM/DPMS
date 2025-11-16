@@ -87,7 +87,7 @@ const CompoDetailPage = () => {
     <AdminLayout
       title={compo.name}
       breadcrumbs={[
-        { label: 'Competiciones', href: '/app/admin/compos' },
+        { label: 'Competiciones', href: '/admin/compos' },
         { label: compo.name, href: '#' },
       ]}
     >
@@ -96,7 +96,7 @@ const CompoDetailPage = () => {
         <Button
           variant="outlined"
           startIcon={<BackIcon />}
-          onClick={() => navigate('/app/admin/compos')}
+          onClick={() => navigate('/admin/compos')}
         >
           Volver
         </Button>

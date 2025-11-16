@@ -17,7 +17,7 @@ const AdminLayout = ({ children, title, breadcrumbs = [] }) => {
             <Breadcrumbs sx={{ mb: 3 }}>
               <MuiLink
                 component={Link}
-                to="/app/admin/dashboard"
+                to="/admin/dashboard"
                 underline="hover"
                 color="inherit"
               >
