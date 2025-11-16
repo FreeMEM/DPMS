@@ -104,7 +104,7 @@ const EditionsPage = () => {
   return (
     <AdminLayout
       title="Gestión de Ediciones"
-      breadcrumbs={[{ label: 'Ediciones', href: '/app/admin/editions' }]}
+      breadcrumbs={[{ label: 'Ediciones', href: '/admin/editions' }]}
     >
       {error && (
         <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
@@ -124,7 +124,7 @@ const EditionsPage = () => {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => navigate('/app/admin/editions/new')}
+          onClick={() => navigate('/admin/editions/new')}
         >
           Nueva Edición
         </Button>
@@ -202,14 +202,14 @@ const EditionsPage = () => {
                   <TableCell align="right">
                     <IconButton
                       size="small"
-                      onClick={() => navigate(`/app/admin/editions/${edition.id}`)}
+                      onClick={() => navigate(`/admin/editions/${edition.id}`)}
                       title="Ver detalle"
                     >
                       <ViewIcon fontSize="small" />
                     </IconButton>
                     <IconButton
                       size="small"
-                      onClick={() => navigate(`/app/admin/editions/${edition.id}/edit`)}
+                      onClick={() => navigate(`/admin/editions/${edition.id}/edit`)}
                       title="Editar"
                     >
                       <EditIcon fontSize="small" />

@@ -124,7 +124,7 @@ const AdminDashboard = () => {
               <Button
                 variant="contained"
                 fullWidth
-                onClick={() => navigate('/app/admin/editions')}
+                onClick={() => navigate('/admin/editions')}
               >
                 Gestionar Ediciones
               </Button>
@@ -145,7 +145,7 @@ const AdminDashboard = () => {
               <Button
                 variant="contained"
                 fullWidth
-                onClick={() => navigate('/app/admin/compos')}
+                onClick={() => navigate('/admin/compos')}
               >
                 Gestionar Compos
               </Button>
@@ -166,7 +166,7 @@ const AdminDashboard = () => {
               <Button
                 variant="contained"
                 fullWidth
-                onClick={() => navigate('/app/admin/voting')}
+                onClick={() => navigate('/admin/voting')}
               >
                 Configurar Votación
               </Button>

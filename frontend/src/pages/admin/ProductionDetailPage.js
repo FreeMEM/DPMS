@@ -133,7 +133,7 @@ const ProductionDetailPage = () => {
     <AdminLayout
       title={production.title}
       breadcrumbs={[
-        { label: 'Producciones', href: '/app/admin/productions' },
+        { label: 'Producciones', href: '/admin/productions' },
         { label: production.title, href: '#' },
       ]}
     >
@@ -148,7 +148,7 @@ const ProductionDetailPage = () => {
         <Button
           variant="outlined"
           startIcon={<BackIcon />}
-          onClick={() => navigate('/app/admin/productions')}
+          onClick={() => navigate('/admin/productions')}
         >
           Volver
         </Button>

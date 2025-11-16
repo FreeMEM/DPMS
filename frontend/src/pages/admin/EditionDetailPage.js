@@ -88,7 +88,7 @@ const EditionDetailPage = () => {
     <AdminLayout
       title={edition.title}
       breadcrumbs={[
-        { label: 'Ediciones', href: '/app/admin/editions' },
+        { label: 'Ediciones', href: '/admin/editions' },
         { label: edition.title, href: '#' },
       ]}
     >
@@ -97,7 +97,7 @@ const EditionDetailPage = () => {
         <Button
           variant="outlined"
           startIcon={<BackIcon />}
-          onClick={() => navigate('/app/admin/editions')}
+          onClick={() => navigate('/admin/editions')}
         >
           Volver
         </Button>

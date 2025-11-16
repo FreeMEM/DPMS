@@ -87,7 +87,7 @@ const CompoFormPage = () => {
 
       setSuccess(true);
       setTimeout(() => {
-        navigate('/app/admin/compos');
+        navigate('/admin/compos');
       }, 1500);
     } catch (err) {
       console.error('Error saving compo:', err);
@@ -115,7 +115,7 @@ const CompoFormPage = () => {
     <AdminLayout
       title={isEdit ? 'Editar Competición' : 'Nueva Competición'}
       breadcrumbs={[
-        { label: 'Competiciones', href: '/app/admin/compos' },
+        { label: 'Competiciones', href: '/admin/compos' },
         { label: isEdit ? 'Editar' : 'Nueva', href: '#' },
       ]}
     >
@@ -207,7 +207,7 @@ const CompoFormPage = () => {
                 <Button
                   variant="outlined"
                   startIcon={<BackIcon />}
-                  onClick={() => navigate('/app/admin/compos')}
+                  onClick={() => navigate('/admin/compos')}
                   disabled={saving}
                 >
                   Cancelar

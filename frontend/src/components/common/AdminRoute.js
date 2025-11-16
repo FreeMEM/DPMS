@@ -27,11 +27,11 @@ const AdminRoute = ({ children }) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/app/login" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   if (!groups || !groups.includes('DPMS Admins')) {
-    return <Navigate to="/app/demo-party/dashboard" replace />;
+    return <Navigate to="/demo-party/dashboard" replace />;
   }
 
   return children;
