@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { getEffect, getEffectCount } from "./backgroundEffects";
 
 const ThreeBackground = ({ variant = "admin" }) => {
   const containerRef = useRef(null);
@@ -11,10 +12,37 @@ const ThreeBackground = ({ variant = "admin" }) => {
     return saved !== null ? JSON.parse(saved) : true;
   });
 
+  // Estado para alternar entre efectos
+  const [effectIndex, setEffectIndex] = useState(0);
+  const [isFading, setIsFading] = useState(false);
+
+  // Alternar efecto cada 30 segundos con fade
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Iniciar fade out
+      setIsFading(true);
+
+      // Después de 1 segundo (fade out completo), cambiar efecto
+      setTimeout(() => {
+        setEffectIndex(prev => (prev + 1) % getEffectCount());
+
+        // Después de cambiar, hacer fade in
+        setTimeout(() => {
+          setIsFading(false);
+        }, 50);
+      }, 1000);
+    }, 30000); // 30 segundos
+
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     const container = containerRef.current;
+    const currentEffect = getEffect(effectIndex);
+
     console.log("ThreeBackground: Container ref:", container);
     console.log("ThreeBackground: Variant:", variant);
+    console.log("ThreeBackground: Effect:", currentEffect.name);
 
     if (!container) {
       console.log("ThreeBackground: No container found!");
@@ -38,13 +66,6 @@ const ThreeBackground = ({ variant = "admin" }) => {
     container.appendChild(renderer.domElement);
     console.log("ThreeBackground: Canvas appended to container");
 
-    // Create particle system for hyperspace effect
-    const particlesCount = variant === "admin" ? 500 : 350;
-    const particlesGeometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(particlesCount * 3);
-    const colors = new Float32Array(particlesCount * 3);
-    const sizes = new Float32Array(particlesCount);
-
     // Get particle colors based on variant
     const getParticleColors = () => {
       if (variant === "admin") {
@@ -63,37 +84,16 @@ const ThreeBackground = ({ variant = "admin" }) => {
     };
 
     const particleColors = getParticleColors();
-    const particleData = [];
 
-    for (let i = 0; i < particlesCount; i++) {
-      // Random position in cylindrical space (tunnel effect)
-      const angle = Math.random() * Math.PI * 2;
-      const radius = Math.random() * 8 + 2;
-      const x = Math.cos(angle) * radius;
-      const y = Math.sin(angle) * radius;
-      const z = Math.random() * -50 - 10; // Start far back
+    // Initialize particles using current effect
+    const particlesCount = currentEffect.particleCount(variant);
+    const { positions, colors, sizes, particleData } = currentEffect.initializeParticles(
+      particlesCount,
+      variant,
+      particleColors
+    );
 
-      positions[i * 3] = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = z;
-
-      // Random color from the palette
-      const color = particleColors[Math.floor(Math.random() * particleColors.length)];
-      colors[i * 3] = color.r;
-      colors[i * 3 + 1] = color.g;
-      colors[i * 3 + 2] = color.b;
-
-      // Random size
-      sizes[i] = Math.random() * 3 + 1;
-
-      // Store data for hyperspace tunnel animation
-      particleData.push({
-        angle: angle,
-        radius: radius,
-        speed: Math.random() * 0.5 + 0.3, // Speed towards camera
-      });
-    }
-
+    const particlesGeometry = new THREE.BufferGeometry();
     particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     particlesGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
@@ -115,7 +115,7 @@ const ThreeBackground = ({ variant = "admin" }) => {
     // Create lines to connect nearby particles
     const maxConnections = variant === "admin" ? 100 : 50;
     const lineGeometry = new THREE.BufferGeometry();
-    const linePositions = new Float32Array(maxConnections * 2 * 3); // 2 points per line, 3 coords per point
+    const linePositions = new Float32Array(maxConnections * 2 * 3);
     lineGeometry.setAttribute("position", new THREE.BufferAttribute(linePositions, 3));
 
     const lineMaterial = new THREE.LineBasicMaterial({
@@ -128,26 +128,28 @@ const ThreeBackground = ({ variant = "admin" }) => {
     const lines = new THREE.LineSegments(lineGeometry, lineMaterial);
     scene.add(lines);
 
-    // Create plasma background plane - make it much larger to cover the screen
+    // Create plasma background plane
     const aspect = window.innerWidth / window.innerHeight;
     const plasmaGeometry = new THREE.PlaneGeometry(20 * aspect, 20);
 
-    // Shader para el efecto plasma con túnel de velocidad de luz
+    // Use plasma shader from current effect
+    const plasmaFragmentShader = currentEffect.plasmaShader;
+
     const plasmaMaterial = new THREE.ShaderMaterial({
       uniforms: {
         time: { value: 0 },
         color1: {
           value:
             variant === "admin"
-              ? new THREE.Color(0.15, 0.0, 0.25) // Dark purple para admin
+              ? new THREE.Color(0.15, 0.0, 0.25)
               : new THREE.Color(0.0, 0.15, 0.25),
-        }, // Dark cyan para user
+        },
         color2: {
           value:
             variant === "admin"
-              ? new THREE.Color(0.35, 0.1, 0.45) // Medium purple para admin
+              ? new THREE.Color(0.35, 0.1, 0.45)
               : new THREE.Color(0.1, 0.35, 0.45),
-        }, // Medium cyan para user
+        },
       },
       vertexShader: `
         varying vec2 vUv;
@@ -156,65 +158,13 @@ const ThreeBackground = ({ variant = "admin" }) => {
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
       `,
-      fragmentShader: `
-        uniform float time;
-        uniform vec3 color1;
-        uniform vec3 color2;
-        varying vec2 vUv;
-
-        void main() {
-          vec2 uv = vUv * 2.0 - 1.0; // Center UV
-
-          // Distance from center
-          float dist = length(uv);
-
-          // Angle from center for radial effect
-          float angle = atan(uv.y, uv.x);
-
-          // Create star streaks effect - lines emanating from center
-          // Multiple layers of radial lines moving outward
-          float streaks1 = sin(angle * 20.0 - dist * 8.0 + time * 3.0);
-          float streaks2 = sin(angle * 15.0 - dist * 10.0 + time * 2.5);
-          float streaks3 = sin(angle * 25.0 - dist * 6.0 + time * 3.5);
-
-          // Combine streaks
-          float streaks = (streaks1 + streaks2 + streaks3) * 0.333;
-
-          // Make streaks more visible near edges (faster stretching effect)
-          float stretchFactor = smoothstep(0.0, 1.5, dist);
-          streaks *= stretchFactor;
-
-          // Radial waves flowing outward (tunnel effect)
-          float tunnel = sin(dist * 5.0 - time * 2.0);
-
-          // Pulsing from center
-          float pulse = sin(dist * 3.0 - time * 1.5) * 0.5;
-
-          // Combine all effects
-          float plasma = (streaks * 0.6 + tunnel * 0.3 + pulse * 0.1);
-
-          // Normalize and add contrast
-          plasma = smoothstep(-0.4, 0.4, plasma);
-
-          // Add radial gradient for depth (darker at center, brighter at edges)
-          float radialGradient = smoothstep(0.0, 1.2, dist);
-          plasma = mix(plasma * 0.5, plasma, radialGradient);
-
-          // Mix colors based on plasma value
-          vec3 color = mix(color1, color2, plasma);
-
-          // Fade out at edges
-          float edgeFade = 1.0 - smoothstep(0.8, 1.5, dist);
-
-          gl_FragColor = vec4(color, 0.4 * edgeFade);
-        }
-      `,
+      fragmentShader: plasmaFragmentShader,
       transparent: true,
       side: THREE.DoubleSide,
     });
 
     const plasma = new THREE.Mesh(plasmaGeometry, plasmaMaterial);
-    plasma.position.z = -8; // Mucho más lejos, como telón de fondo
+    plasma.position.z = -8;
     scene.add(plasma);
 
     // Add ambient light
@@ -247,6 +197,9 @@ const ThreeBackground = ({ variant = "admin" }) => {
     };
     window.addEventListener("resize", handleResize);
 
+    // Store original positions for wave effect (only used in wave mode)
+    const originalPositions = new Float32Array(positions);
+
     // Animation loop
     const clock = new THREE.Clock();
 
@@ -260,38 +213,22 @@ const ThreeBackground = ({ variant = "admin" }) => {
       mouseRef.current.x += (targetMouseRef.current.x - mouseRef.current.x) * 0.05;
       mouseRef.current.y += (targetMouseRef.current.y - mouseRef.current.y) * 0.05;
 
-      // Update particle positions with hyperspace tunnel effect
+      // Update particle positions using current effect
       const positions = particles.geometry.attributes.position.array;
+      const rotation = currentEffect.animateParticles(
+        particlesCount,
+        positions,
+        particleData || originalPositions,
+        mouseRef,
+        elapsedTime
+      );
 
-      for (let i = 0; i < particlesCount; i++) {
-        const data = particleData[i];
-        const i3 = i * 3;
-
-        // Move particle towards camera (hyperspace effect)
-        positions[i3 + 2] += data.speed;
-
-        // Reset particle to back when it passes camera
-        if (positions[i3 + 2] > 5) {
-          positions[i3 + 2] = Math.random() * -50 - 10;
-          // Randomize angle and radius on reset for variety
-          data.angle = Math.random() * Math.PI * 2;
-          data.radius = Math.random() * 8 + 2;
-        }
-
-        // Mouse interaction - particles fly towards mouse position
-        const targetAngle = Math.atan2(mouseRef.current.y * 5, mouseRef.current.x * 5);
-        let angleDiff = targetAngle - data.angle;
-
-        // Normalize angle difference to avoid sudden jumps (-PI to PI)
-        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
-
-        // Smooth angle transition towards mouse (very gentle)
-        data.angle += angleDiff * 0.005;
-
-        // Update X and Y based on current angle and radius
-        positions[i3] = Math.cos(data.angle) * data.radius;
-        positions[i3 + 1] = Math.sin(data.angle) * data.radius;
+      // Apply rotation if effect returns it
+      if (rotation) {
+        particles.rotation.y = rotation.rotationY;
+        particles.rotation.x = rotation.rotationX;
+        lines.rotation.y = rotation.rotationY;
+        lines.rotation.x = rotation.rotationX;
       }
 
       particles.geometry.attributes.position.needsUpdate = true;
@@ -307,7 +244,6 @@ const ThreeBackground = ({ variant = "admin" }) => {
         const y1 = positions[i3 + 1];
         const z1 = positions[i3 + 2];
 
-        // Check a subset of other particles to avoid O(n²) complexity
         for (let j = i + 1; j < Math.min(i + 15, particlesCount) && connectionIndex < maxConnections * 2; j++) {
           const j3 = j * 3;
           const x2 = positions[j3];
@@ -320,7 +256,6 @@ const ThreeBackground = ({ variant = "admin" }) => {
           const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
           if (distance < maxDistance) {
-            // Add line between these two particles
             const lineIndex = connectionIndex * 3;
             linePositions[lineIndex] = x1;
             linePositions[lineIndex + 1] = y1;
@@ -333,7 +268,6 @@ const ThreeBackground = ({ variant = "admin" }) => {
         }
       }
 
-      // Fill remaining lines with zeros (invisible)
       for (let i = connectionIndex * 3; i < linePositions.length; i++) {
         linePositions[i] = 0;
       }
@@ -356,17 +290,15 @@ const ThreeBackground = ({ variant = "admin" }) => {
         container.removeChild(renderer.domElement);
       }
 
-      // Dispose particles
       particlesGeometry.dispose();
       particlesMaterial.dispose();
-
       lineGeometry.dispose();
       lineMaterial.dispose();
       plasmaGeometry.dispose();
       plasmaMaterial.dispose();
       renderer.dispose();
     };
-  }, [variant]);
+  }, [variant, effectIndex]);
 
   // Escuchar eventos de cambio de visibilidad
   useEffect(() => {
@@ -390,6 +322,8 @@ const ThreeBackground = ({ variant = "admin" }) => {
         zIndex: -1,
         pointerEvents: "none",
         display: isVisible ? "block" : "none",
+        opacity: isFading ? 0 : 1,
+        transition: "opacity 1s ease-in-out",
       }}
     />
   );
