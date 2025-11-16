@@ -33,82 +33,142 @@ const ThreeBackground = ({ variant = "admin" }) => {
     container.appendChild(renderer.domElement);
     console.log("ThreeBackground: Canvas appended to container");
 
-    // Create particle system
-    const particlesCount = variant === "admin" ? 1000 : 500;
-    const positions = new Float32Array(particlesCount * 3);
-    const colors = new Float32Array(particlesCount * 3);
-    const sizes = new Float32Array(particlesCount);
+    // Function to create 8-bit spaceship sprite texture with different ship types
+    const createShipSprite = (color, shipType) => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 16;
+      canvas.height = 16;
+      const ctx = canvas.getContext("2d");
 
-    for (let i = 0; i < particlesCount; i++) {
-      const i3 = i * 3;
+      // Clear canvas
+      ctx.clearRect(0, 0, 16, 16);
 
-      // Positions
-      positions[i3] = (Math.random() - 0.5) * 10;
-      positions[i3 + 1] = (Math.random() - 0.5) * 10;
-      positions[i3 + 2] = (Math.random() - 0.5) * 10;
+      // Draw 8-bit spaceship pattern (inspired by Galaxian/Space Invaders)
+      ctx.fillStyle = color;
 
-      // Colors - diferentes según variante
-      const colorValue = Math.random();
-      if (variant === "admin") {
-        // Admin: gradient from blue to purple to pink (más intenso)
-        if (colorValue < 0.33) {
-          // Blue
-          colors[i3] = 0.2;
-          colors[i3 + 1] = 0.4;
-          colors[i3 + 2] = 0.8;
-        } else if (colorValue < 0.66) {
-          // Purple
-          colors[i3] = 0.6;
-          colors[i3 + 1] = 0.2;
-          colors[i3 + 2] = 0.8;
-        } else {
-          // Pink
-          colors[i3] = 0.9;
-          colors[i3 + 1] = 0.2;
-          colors[i3 + 2] = 0.6;
-        }
-      } else {
-        // User: gradient from cyan to green to yellow (más suave)
-        if (colorValue < 0.33) {
-          // Cyan
-          colors[i3] = 0.2;
-          colors[i3 + 1] = 0.8;
-          colors[i3 + 2] = 0.8;
-        } else if (colorValue < 0.66) {
-          // Green
-          colors[i3] = 0.2;
-          colors[i3 + 1] = 0.9;
-          colors[i3 + 2] = 0.4;
-        } else {
-          // Yellow
-          colors[i3] = 0.9;
-          colors[i3 + 1] = 0.9;
-          colors[i3 + 2] = 0.2;
+      // Different ship patterns for variety
+      const patterns = {
+        // Type 1: Classic invader shape
+        invader: [
+          [0,0,0,0,0,1,1,0,0,1,1,0,0,0,0,0],
+          [0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0],
+          [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0],
+          [0,0,1,1,0,1,1,1,1,1,1,0,1,1,0,0],
+          [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+          [0,1,0,1,1,1,1,1,1,1,1,1,1,0,1,0],
+          [0,1,0,1,0,0,0,0,0,0,0,0,1,0,1,0],
+          [0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0],
+        ],
+        // Type 2: Galaga-style fighter
+        fighter: [
+          [0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0],
+          [0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0],
+          [0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0],
+          [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],
+          [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+          [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+          [0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0],
+          [0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0],
+        ],
+        // Type 3: Diamond/crystal shape
+        diamond: [
+          [0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0],
+          [0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0],
+          [0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0],
+          [0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0],
+          [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0],
+          [0,0,1,1,1,1,0,1,1,0,1,1,1,1,0,0],
+          [0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0],
+          [0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0],
+        ],
+        // Type 4: TIE Fighter style
+        tie: [
+          [0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0],
+          [0,1,1,1,0,0,0,1,1,0,0,0,1,1,1,0],
+          [0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0],
+          [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+          [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+          [0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0],
+          [0,1,1,1,0,0,0,1,1,0,0,0,1,1,1,0],
+          [0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0],
+        ],
+      };
+
+      const pattern = patterns[shipType];
+
+      for (let y = 0; y < pattern.length; y++) {
+        for (let x = 0; x < pattern[y].length; x++) {
+          if (pattern[y][x] === 1) {
+            ctx.fillRect(x, y + 4, 1, 1);
+          }
         }
       }
 
-      // Sizes
-      sizes[i] = Math.random() * 3;
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.needsUpdate = true;
+      return texture;
+    };
+
+    // Create ship sprite system
+    const shipsCount = variant === "admin" ? 300 : 200;
+    const ships = [];
+    const shipData = [];
+
+    // Get ship colors based on variant
+    const getShipColors = () => {
+      if (variant === "admin") {
+        return [
+          "rgb(51, 102, 204)",   // Blue
+          "rgb(153, 51, 204)",   // Purple
+          "rgb(230, 51, 153)",   // Pink
+        ];
+      } else {
+        return [
+          "rgb(51, 204, 204)",   // Cyan
+          "rgb(51, 230, 102)",   // Green
+          "rgb(230, 230, 51)",   // Yellow
+        ];
+      }
+    };
+
+    const shipColors = getShipColors();
+    const shipTypes = ["invader", "fighter", "diamond", "tie"];
+
+    for (let i = 0; i < shipsCount; i++) {
+      // Random position
+      const x = (Math.random() - 0.5) * 10;
+      const y = (Math.random() - 0.5) * 10;
+      const z = (Math.random() - 0.5) * 10;
+
+      // Random color and ship type from palettes
+      const color = shipColors[Math.floor(Math.random() * shipColors.length)];
+      const shipType = shipTypes[Math.floor(Math.random() * shipTypes.length)];
+      const texture = createShipSprite(color, shipType);
+
+      const spriteMaterial = new THREE.SpriteMaterial({
+        map: texture,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending,
+      });
+
+      const sprite = new THREE.Sprite(spriteMaterial);
+      sprite.position.set(x, y, z);
+      sprite.scale.set(0.3, 0.3, 0.3);
+
+      scene.add(sprite);
+      ships.push(sprite);
+
+      // Store original position and rotation speed for animation
+      shipData.push({
+        originalX: x,
+        originalY: y,
+        originalZ: z,
+        rotationSpeed: (Math.random() - 0.5) * 0.5, // Random rotation speed
+      });
     }
 
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-    geometry.setAttribute("size", new THREE.BufferAttribute(sizes, 1));
-
-    const material = new THREE.PointsMaterial({
-      size: 0.05,
-      vertexColors: true,
-      blending: THREE.AdditiveBlending,
-      transparent: true,
-      opacity: 0.8,
-      sizeAttenuation: true,
-    });
-
-    const particles = new THREE.Points(geometry, material);
-    scene.add(particles);
-
-    console.log("ThreeBackground: Particles created with", particlesCount, "particles");
+    console.log("ThreeBackground: Ships created with", shipsCount, "spaceships");
 
     // Create lines to connect nearby particles
     const maxConnections = variant === "admin" ? 100 : 50;
@@ -222,9 +282,6 @@ const ThreeBackground = ({ variant = "admin" }) => {
     };
     window.addEventListener("resize", handleResize);
 
-    // Store original positions for wave effect
-    const originalPositions = new Float32Array(positions);
-
     // Animation loop
     const clock = new THREE.Clock();
 
@@ -238,59 +295,54 @@ const ThreeBackground = ({ variant = "admin" }) => {
       mouseRef.current.x += (targetMouseRef.current.x - mouseRef.current.x) * 0.05;
       mouseRef.current.y += (targetMouseRef.current.y - mouseRef.current.y) * 0.05;
 
-      // Update particle positions with wave effect
-      const positions = particles.geometry.attributes.position.array;
-
-      for (let i = 0; i < particlesCount; i++) {
-        const i3 = i * 3;
-
-        // Get original position
-        const originalX = originalPositions[i3];
-        const originalY = originalPositions[i3 + 1];
-        const originalZ = originalPositions[i3 + 2];
+      // Update ship positions with wave effect
+      for (let i = 0; i < shipsCount; i++) {
+        const ship = ships[i];
+        const data = shipData[i];
 
         // Wave effect - create flowing motion
-        const waveX = Math.sin(elapsedTime * 0.3 + originalY * 0.5) * 0.3;
-        const waveY = Math.cos(elapsedTime * 0.2 + originalX * 0.5) * 0.3;
-        const waveZ = Math.sin(elapsedTime * 0.25 + originalX * 0.3 + originalY * 0.3) * 0.2;
+        const waveX = Math.sin(elapsedTime * 0.3 + data.originalY * 0.5) * 0.3;
+        const waveY = Math.cos(elapsedTime * 0.2 + data.originalX * 0.5) * 0.3;
+        const waveZ = Math.sin(elapsedTime * 0.25 + data.originalX * 0.3 + data.originalY * 0.3) * 0.2;
 
         // Apply wave to position
-        positions[i3] = originalX + waveX;
-        positions[i3 + 1] = originalY + waveY;
-        positions[i3 + 2] = originalZ + waveZ;
+        ship.position.x = data.originalX + waveX;
+        ship.position.y = data.originalY + waveY;
+        ship.position.z = data.originalZ + waveZ;
 
-        // Mouse interaction - attraction/repulsion
-        const dx = mouseRef.current.x * 5 - positions[i3];
-        const dy = mouseRef.current.y * 5 - positions[i3 + 1];
+        // Add subtle rotation for more dynamic feel
+        ship.material.rotation = elapsedTime * data.rotationSpeed;
+
+        // Mouse interaction - repulsion
+        const dx = mouseRef.current.x * 5 - ship.position.x;
+        const dy = mouseRef.current.y * 5 - ship.position.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         // Apply smooth repulsion when mouse is near
         if (distance < 3) {
           const force = ((3 - distance) / 3) * 0.5;
-          positions[i3] -= dx * force;
-          positions[i3 + 1] -= dy * force;
+          ship.position.x -= dx * force;
+          ship.position.y -= dy * force;
         }
       }
 
-      particles.geometry.attributes.position.needsUpdate = true;
-
-      // Update connections between nearby particles
+      // Update connections between nearby ships
       const linePositions = lines.geometry.attributes.position.array;
       let connectionIndex = 0;
       const maxDistance = 2.5;
 
-      for (let i = 0; i < particlesCount && connectionIndex < maxConnections * 2; i++) {
-        const i3 = i * 3;
-        const x1 = positions[i3];
-        const y1 = positions[i3 + 1];
-        const z1 = positions[i3 + 2];
+      for (let i = 0; i < shipsCount && connectionIndex < maxConnections * 2; i++) {
+        const ship1 = ships[i];
+        const x1 = ship1.position.x;
+        const y1 = ship1.position.y;
+        const z1 = ship1.position.z;
 
-        // Check a subset of other particles to avoid O(n²) complexity
-        for (let j = i + 1; j < Math.min(i + 15, particlesCount) && connectionIndex < maxConnections * 2; j++) {
-          const j3 = j * 3;
-          const x2 = positions[j3];
-          const y2 = positions[j3 + 1];
-          const z2 = positions[j3 + 2];
+        // Check a subset of other ships to avoid O(n²) complexity
+        for (let j = i + 1; j < Math.min(i + 15, shipsCount) && connectionIndex < maxConnections * 2; j++) {
+          const ship2 = ships[j];
+          const x2 = ship2.position.x;
+          const y2 = ship2.position.y;
+          const z2 = ship2.position.z;
 
           const dx = x2 - x1;
           const dy = y2 - y1;
@@ -298,7 +350,7 @@ const ThreeBackground = ({ variant = "admin" }) => {
           const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
           if (distance < maxDistance) {
-            // Add line between these two particles
+            // Add line between these two ships
             const lineIndex = connectionIndex * 3;
             linePositions[lineIndex] = x1;
             linePositions[lineIndex + 1] = y1;
@@ -318,12 +370,6 @@ const ThreeBackground = ({ variant = "admin" }) => {
 
       lines.geometry.attributes.position.needsUpdate = true;
 
-      // Very slow rotation for subtle movement
-      particles.rotation.y = Math.sin(elapsedTime * 0.1) * 0.2;
-      particles.rotation.x = Math.cos(elapsedTime * 0.15) * 0.1;
-      lines.rotation.y = particles.rotation.y;
-      lines.rotation.x = particles.rotation.x;
-
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
     };
@@ -340,8 +386,14 @@ const ThreeBackground = ({ variant = "admin" }) => {
         container.removeChild(renderer.domElement);
       }
 
-      geometry.dispose();
-      material.dispose();
+      // Dispose ship sprites
+      ships.forEach((ship) => {
+        if (ship.material.map) {
+          ship.material.map.dispose();
+        }
+        ship.material.dispose();
+      });
+
       lineGeometry.dispose();
       lineMaterial.dispose();
       plasmaGeometry.dispose();
