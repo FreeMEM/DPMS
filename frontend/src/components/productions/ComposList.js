@@ -18,7 +18,8 @@ import { useNavigate } from 'react-router-dom';
 import { EmojiEvents as TrophyIcon } from '@mui/icons-material';
 import { editionsAPI } from '../../services/api';
 import MainBar from '../../@dpms-freemem/MainBar';
-
+import ThreeBackground from '../common/ThreeBackground';
+import BackgroundToggle from '../common/BackgroundToggle';
 
 const ComposList = () => {
   const navigate = useNavigate();
@@ -172,8 +173,10 @@ const ComposList = () => {
 
   return (
     <Box sx={{ display: 'flex' }}>
+      <ThreeBackground variant="user" />
+      <BackgroundToggle />
       <MainBar />
-      <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8, ml: { sm: '64px' } }}>
+      <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8, ml: { sm: '64px' }, position: 'relative', zIndex: 1 }}>
         {pageContent}
       </Box>
     </Box>

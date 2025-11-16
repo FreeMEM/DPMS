@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { Box, Button, Typography, Paper } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
+import ThreeBackground from "./common/ThreeBackground";
+import BackgroundToggle from "./common/BackgroundToggle";
 
 const theme = createTheme({
   palette: {
@@ -24,7 +26,9 @@ const Error404 = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh" bgcolor="background.default">
+      <ThreeBackground variant="user" />
+      <BackgroundToggle />
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh" bgcolor="background.default" sx={{ position: 'relative', zIndex: 1 }}>
         <Paper
           elevation={3}
           sx={{

@@ -132,7 +132,7 @@ export const waveEffect = {
 
   // Line connection settings - más brillantes y abundantes
   maxConnections: (variant) => variant === "admin" ? 250 : 150,
-  lineOpacity: 0.5,  // Aumentado para ver mejor la energía
+  lineOpacity: 0.8,  // Aumentado para ver mejor la energía
   maxConnectionDistance: 3.5,  // Distancia mayor para más conexiones
   animateLines: true,  // ¡CON animación de energía!
 
@@ -246,10 +246,13 @@ export const energyGridEffect = {
   particleCount: (variant) => variant === "admin" ? 400 : 250,
 
   // Line connection settings - energía visible fluyendo
-  maxConnections: (variant) => variant === "admin" ? 200 : 120,
+  maxConnections: (variant) => variant === "admin" ? 250 : 180,
   lineOpacity: 0.6,  // Muy brillante para ver la energía
-  maxConnectionDistance: 5.0,  // Partículas más espaciadas
+  maxConnectionDistance: 3.0,  // Distancia corta para conexiones solo entre partículas cercanas
   animateLines: true,  // ¡CON animación de energía!
+  randomConnections: true,  // Conexiones aleatorias dispersas
+  connectionProbability: 0.35,  // 35% de las partículas conectadas
+  maxConnectionsPerParticle: 4,  // Máximo 4 conexiones por partícula
 
   initializeParticles: (particlesCount, variant, particleColors) => {
     const positions = new Float32Array(particlesCount * 3);
@@ -337,23 +340,53 @@ export const energyGridEffect = {
     uniform float time;
     uniform vec3 color1;
     uniform vec3 color2;
+    uniform float pulsePositions[20]; // maxPulses * 2
+    uniform float pulseTimes[10]; // maxPulses
+    uniform int maxPulses;
     varying vec2 vUv;
 
     void main() {
       vec2 uv = vUv * 2.0 - 1.0;
 
-      // Grid pattern con energía fluyendo
+      // Grid pattern con energía fluyendo (más sutil ahora)
       float gridX = sin(uv.x * 8.0 + time * 0.5) * 0.5;
       float gridY = sin(uv.y * 8.0 + time * 0.5) * 0.5;
       float grid = (gridX + gridY) * 0.5;
 
-      // Pulsos de energía
-      float dist = length(uv);
-      float pulse1 = sin(dist * 6.0 - time * 1.2);
-      float pulse2 = sin(dist * 4.0 - time * 0.8 + 1.5);
+      // Pulsos desde partículas que perdieron conexión (muy sutiles)
+      float particlePulses = 0.0;
+      for (int i = 0; i < 10; i++) {
+        if (i >= maxPulses) break;
 
-      float plasma = (grid * 0.4 + pulse1 * 0.3 + pulse2 * 0.3);
-      plasma = smoothstep(-0.2, 0.2, plasma);
+        float pulseAge = time - pulseTimes[i];
+
+        // Pulsos más largos y sutiles (primeros 5 segundos)
+        if (pulseAge > 0.0 && pulseAge < 5.0) {
+          vec2 pulsePos = vec2(pulsePositions[i * 2], pulsePositions[i * 2 + 1]);
+          float distToPulse = length(uv - pulsePos);
+
+          // Radio del pulso crece más lentamente
+          float pulseRadius = pulseAge * 0.4;
+
+          // Intensidad disminuye muy suavemente
+          float intensity = exp(-pulseAge * 0.8); // Decae más lentamente
+
+          // Onda más difusa y ancha
+          float wave = smoothstep(pulseRadius + 0.6, pulseRadius, distToPulse) *
+                       smoothstep(pulseRadius - 0.2, pulseRadius, distToPulse);
+
+          particlePulses += wave * intensity * 0.3; // Mucho más sutil (30% de intensidad)
+        }
+      }
+
+      // Pulsos de energía base (mucho más sutiles)
+      float dist = length(uv);
+      float pulse1 = sin(dist * 6.0 - time * 1.2) * 0.15;
+      float pulse2 = sin(dist * 4.0 - time * 0.8 + 1.5) * 0.15;
+
+      // Combinar todos los elementos con mucho menos peso en los pulsos
+      float plasma = (grid * 0.4 + pulse1 * 0.15 + pulse2 * 0.15 + particlePulses * 0.3);
+      plasma = smoothstep(-0.4, 0.4, plasma);
 
       vec3 color = mix(color1, color2, plasma);
 

@@ -184,10 +184,10 @@ const ThreeBackground = ({ variant = "admin" }) => {
             float flow = fract(vPosition.x * 0.5 + vPosition.y * 0.5 + vPosition.z * 0.5 - time * 0.5);
             float pulse = sin(flow * 3.14159 * 4.0) * 0.5 + 0.5;
 
-            // Brillo pulsante
-            float brightness = mix(0.3, 1.0, pulse);
+            // Brillo pulsante más intenso
+            float brightness = mix(0.6, 1.8, pulse);
 
-            gl_FragColor = vec4(color * brightness, opacity * (0.5 + pulse * 0.5));
+            gl_FragColor = vec4(color * brightness, opacity * (0.7 + pulse * 0.3));
           }
         `,
         transparent: true,
@@ -213,6 +213,11 @@ const ThreeBackground = ({ variant = "admin" }) => {
     // Use plasma shader from current effect
     const plasmaFragmentShader = currentEffect.plasmaShader;
 
+    // Array para guardar eventos de pérdida de conexión (máximo 10 pulsos simultáneos)
+    const maxPulses = 10;
+    const pulsePositions = new Float32Array(maxPulses * 2); // x, y en coordenadas de pantalla
+    const pulseTimes = new Float32Array(maxPulses); // tiempo de inicio de cada pulso
+
     const plasmaMaterial = new THREE.ShaderMaterial({
       uniforms: {
         time: { value: 0 },
@@ -228,6 +233,9 @@ const ThreeBackground = ({ variant = "admin" }) => {
               ? new THREE.Color(0.35, 0.1, 0.45)
               : new THREE.Color(0.1, 0.35, 0.45),
         },
+        pulsePositions: { value: pulsePositions },
+        pulseTimes: { value: pulseTimes },
+        maxPulses: { value: maxPulses },
       },
       vertexShader: `
         varying vec2 vUv;
@@ -278,6 +286,37 @@ const ThreeBackground = ({ variant = "admin" }) => {
     // Store original positions for wave effect (only used in wave mode)
     const originalPositions = new Float32Array(positions);
 
+    // Random connections state (for energy-grid effect)
+    // Inicializar partículas activas con tiempos de cambio aleatorios y opacidad
+    const particleActiveTimes = new Array(particlesCount);
+    for (let i = 0; i < particlesCount; i++) {
+      const isActive = Math.random() < (currentEffect.connectionProbability || 0.25);
+      particleActiveTimes[i] = {
+        isActive: isActive,
+        opacity: isActive ? 1.0 : 0.0, // Opacidad inicial
+        targetOpacity: isActive ? 1.0 : 0.0,
+        nextChange: Math.random() * 20.0 + 15.0 // Tiempo aleatorio hasta el próximo cambio (15-35 segundos)
+      };
+    }
+
+    // Estado para conexiones estables (no se redefinen cada frame)
+    let connectionPairs = [];
+    let nextConnectionUpdate = 0;
+    const connectionUpdateInterval = 0.1; // Actualizar UNA conexión cada 0.1 segundos (10 por segundo)
+
+    // Índice rotativo para guardar pulsos (sistema circular de buffer)
+    let nextPulseIndex = 0;
+
+    // Función helper para proyectar coordenadas 3D a coordenadas UV del shader
+    const projectToScreenUV = (x, y, z) => {
+      const vector = new THREE.Vector3(x, y, z);
+      vector.project(camera);
+      return {
+        x: vector.x,
+        y: vector.y
+      };
+    };
+
     // Animation loop
     const clock = new THREE.Clock();
 
@@ -306,12 +345,26 @@ const ThreeBackground = ({ variant = "admin" }) => {
         elapsedTime
       );
 
-      // Apply rotation if effect returns it
+      // Apply rotation if effect returns it, with mouse interaction
       if (rotation) {
-        particles.rotation.y = rotation.rotationY;
-        particles.rotation.x = rotation.rotationX;
-        lines.rotation.y = rotation.rotationY;
-        lines.rotation.x = rotation.rotationX;
+        // Base rotation from effect
+        const baseRotationY = rotation.rotationY;
+        const baseRotationX = rotation.rotationX;
+
+        // Add mouse-driven rotation (suave y sutil)
+        const mouseRotationY = mouseRef.current.x * 0.3; // Horizontal mouse -> Y rotation
+        const mouseRotationX = -mouseRef.current.y * 0.2; // Vertical mouse -> X rotation
+
+        particles.rotation.y = baseRotationY + mouseRotationY;
+        particles.rotation.x = baseRotationX + mouseRotationX;
+        lines.rotation.y = baseRotationY + mouseRotationY;
+        lines.rotation.x = baseRotationX + mouseRotationX;
+      } else {
+        // Si el efecto no devuelve rotación, aplicar solo rotación del mouse
+        particles.rotation.y = mouseRef.current.x * 0.3;
+        particles.rotation.x = -mouseRef.current.y * 0.2;
+        lines.rotation.y = mouseRef.current.x * 0.3;
+        lines.rotation.x = -mouseRef.current.y * 0.2;
       }
 
       particles.geometry.attributes.position.needsUpdate = true;
@@ -321,32 +374,231 @@ const ThreeBackground = ({ variant = "admin" }) => {
       let connectionIndex = 0;
       const maxDistance = currentEffect.maxConnectionDistance;
 
-      for (let i = 0; i < particlesCount && connectionIndex < maxConnections * 2; i++) {
-        const i3 = i * 3;
-        const x1 = positions[i3];
-        const y1 = positions[i3 + 1];
-        const z1 = positions[i3 + 2];
+      // Random connections mode (for energy-grid)
+      if (currentEffect.randomConnections) {
+        // Actualizar estado de partículas de forma gradual con transiciones suaves
+        for (let i = 0; i < particlesCount; i++) {
+          const particle = particleActiveTimes[i];
 
-        for (let j = i + 1; j < Math.min(i + 15, particlesCount) && connectionIndex < maxConnections * 2; j++) {
-          const j3 = j * 3;
-          const x2 = positions[j3];
-          const y2 = positions[j3 + 1];
-          const z2 = positions[j3 + 2];
+          // Cambiar estado cuando llegue el momento
+          if (elapsedTime >= particle.nextChange) {
+            particle.isActive = !particle.isActive;
+            particle.targetOpacity = particle.isActive ? 1.0 : 0.0;
+            // Siguiente cambio en 15-35 segundos aleatorios (muy lento)
+            particle.nextChange = elapsedTime + 15.0 + Math.random() * 20.0;
+          }
 
-          const dx = x2 - x1;
-          const dy = y2 - y1;
-          const dz = z2 - z1;
-          const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+          // Interpolar opacidad suavemente hacia el objetivo (transición muy lenta)
+          const fadeSpeed = 0.005; // Velocidad de transición muy lenta
+          if (Math.abs(particle.opacity - particle.targetOpacity) > 0.01) {
+            particle.opacity += (particle.targetOpacity - particle.opacity) * fadeSpeed;
+          } else {
+            particle.opacity = particle.targetOpacity;
+          }
+        }
 
-          if (distance < maxDistance) {
-            const lineIndex = connectionIndex * 3;
-            linePositions[lineIndex] = x1;
-            linePositions[lineIndex + 1] = y1;
-            linePositions[lineIndex + 2] = z1;
-            linePositions[lineIndex + 3] = x2;
-            linePositions[lineIndex + 4] = y2;
-            linePositions[lineIndex + 5] = z2;
-            connectionIndex += 2;
+        // Cambiar solo UNA conexión cada vez (no todas de golpe)
+        if (elapsedTime >= nextConnectionUpdate) {
+          nextConnectionUpdate = elapsedTime + connectionUpdateInterval;
+
+          // Si no hay conexiones todavía, crear la lista inicial
+          if (connectionPairs.length === 0) {
+            // Conectar partículas con opacidad > 0 (visibles o en transición)
+            const visibleParticles = [];
+            for (let i = 0; i < particlesCount; i++) {
+              if (particleActiveTimes[i].opacity > 0.01) {
+                visibleParticles.push({ index: i, opacity: particleActiveTimes[i].opacity });
+              }
+            }
+
+            // Crear conexiones dispersas iniciales
+            const maxConnectionsPerParticle = currentEffect.maxConnectionsPerParticle || 2;
+            const particleConnections = new Map();
+            const shuffledParticles = [...visibleParticles].sort(() => Math.random() - 0.5);
+
+            for (let i = 0; i < shuffledParticles.length && connectionPairs.length < maxConnections; i++) {
+              const particleI = shuffledParticles[i].index;
+              const connectionsI = particleConnections.get(particleI) || 0;
+              if (connectionsI >= maxConnectionsPerParticle) continue;
+
+              const i3 = particleI * 3;
+              const x1 = positions[i3];
+              const y1 = positions[i3 + 1];
+              const z1 = positions[i3 + 2];
+
+              const remainingParticles = shuffledParticles.slice(i + 1);
+              const numConnectionsToMake = Math.min(
+                maxConnectionsPerParticle - connectionsI,
+                Math.floor(Math.random() * 2) + 1
+              );
+
+              let madeConnections = 0;
+              for (let j = 0; j < remainingParticles.length && madeConnections < numConnectionsToMake && connectionPairs.length < maxConnections; j++) {
+                const particleJ = remainingParticles[j].index;
+                const connectionsJ = particleConnections.get(particleJ) || 0;
+                if (connectionsJ >= maxConnectionsPerParticle) continue;
+
+                const j3 = particleJ * 3;
+                const x2 = positions[j3];
+                const y2 = positions[j3 + 1];
+                const z2 = positions[j3 + 2];
+
+                const dx = x2 - x1;
+                const dy = y2 - y1;
+                const dz = z2 - z1;
+                const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+                if (distance < maxDistance) {
+                  connectionPairs.push({
+                    i: particleI,
+                    j: particleJ,
+                    opacity: Math.min(particleActiveTimes[particleI].opacity, particleActiveTimes[particleJ].opacity)
+                  });
+
+                  particleConnections.set(particleI, connectionsI + 1);
+                  particleConnections.set(particleJ, connectionsJ + 1);
+                  madeConnections++;
+                }
+              }
+            }
+          } else {
+            // Reemplazar solo UNA conexión - la energía fluye de una partícula anterior a la siguiente cercana
+            if (connectionPairs.length > 0) {
+              // Elegir índice aleatorio para reemplazar
+              const indexToReplace = Math.floor(Math.random() * connectionPairs.length);
+              const oldConnection = connectionPairs[indexToReplace];
+
+              // Elegir una de las dos partículas de la conexión anterior como punto de partida
+              // Esto simula que la energía continúa desde donde estaba
+              const useFirstParticle = Math.random() > 0.5;
+              const particleI = useFirstParticle ? oldConnection.i : oldConnection.j;
+
+              // Encontrar partículas visibles
+              const visibleParticles = [];
+              for (let i = 0; i < particlesCount; i++) {
+                if (particleActiveTimes[i].opacity > 0.01) {
+                  visibleParticles.push({ index: i, opacity: particleActiveTimes[i].opacity });
+                }
+              }
+
+              if (visibleParticles.length >= 2) {
+                const i3 = particleI * 3;
+                const x1 = positions[i3];
+                const y1 = positions[i3 + 1];
+                const z1 = positions[i3 + 2];
+
+                // Buscar partículas cercanas a esta (no cualquier partícula)
+                // Excluir la otra partícula de la conexión anterior para que la energía fluya hacia adelante
+                const otherOldParticle = useFirstParticle ? oldConnection.j : oldConnection.i;
+                const nearbyParticles = [];
+
+                for (let k = 0; k < visibleParticles.length; k++) {
+                  const particleJ = visibleParticles[k].index;
+
+                  // No conectar consigo misma ni volver a la partícula anterior (flujo hacia adelante)
+                  if (particleJ === particleI || particleJ === otherOldParticle) continue;
+
+                  const j3 = particleJ * 3;
+                  const x2 = positions[j3];
+                  const y2 = positions[j3 + 1];
+                  const z2 = positions[j3 + 2];
+
+                  const dx = x2 - x1;
+                  const dy = y2 - y1;
+                  const dz = z2 - z1;
+                  const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+                  // Solo considerar partículas cercanas (dentro del rango)
+                  if (distance < maxDistance) {
+                    nearbyParticles.push({ index: particleJ, distance: distance });
+                  }
+                }
+
+                // Si hay partículas cercanas, elegir la MÁS CERCANA (flujo natural de energía)
+                if (nearbyParticles.length > 0) {
+                  // Ordenar por distancia y elegir la más cercana
+                  nearbyParticles.sort((a, b) => a.distance - b.distance);
+                  const closestParticle = nearbyParticles[0];
+                  const particleJ = closestParticle.index;
+
+                  // Registrar pulso en la partícula que perdió su conexión
+                  // (la otra partícula del par anterior que NO se reutiliza)
+                  const lostParticleIndex = otherOldParticle;
+                  const lostI3 = lostParticleIndex * 3;
+                  const lostPos = projectToScreenUV(
+                    positions[lostI3],
+                    positions[lostI3 + 1],
+                    positions[lostI3 + 2]
+                  );
+
+                  // Guardar en buffer circular
+                  pulsePositions[nextPulseIndex * 2] = lostPos.x;
+                  pulsePositions[nextPulseIndex * 2 + 1] = lostPos.y;
+                  pulseTimes[nextPulseIndex] = elapsedTime;
+
+                  // Avanzar índice circular
+                  nextPulseIndex = (nextPulseIndex + 1) % maxPulses;
+
+                  // Actualizar uniforms del shader
+                  plasmaMaterial.uniforms.pulsePositions.value = pulsePositions;
+                  plasmaMaterial.uniforms.pulseTimes.value = pulseTimes;
+
+                  connectionPairs[indexToReplace] = {
+                    i: particleI,
+                    j: particleJ,
+                    opacity: Math.min(particleActiveTimes[particleI].opacity, particleActiveTimes[particleJ].opacity)
+                  };
+                }
+              }
+            }
+          }
+        }
+
+        // Dibujar las conexiones actuales usando los pares guardados
+        for (const pair of connectionPairs) {
+          if (connectionIndex >= maxConnections * 2) break;
+
+          const i3 = pair.i * 3;
+          const j3 = pair.j * 3;
+
+          const lineIndex = connectionIndex * 3;
+          linePositions[lineIndex] = positions[i3];
+          linePositions[lineIndex + 1] = positions[i3 + 1];
+          linePositions[lineIndex + 2] = positions[i3 + 2];
+          linePositions[lineIndex + 3] = positions[j3];
+          linePositions[lineIndex + 4] = positions[j3 + 1];
+          linePositions[lineIndex + 5] = positions[j3 + 2];
+          connectionIndex += 2;
+        }
+      } else {
+        // Modo normal de conexiones (partículas cercanas)
+        for (let i = 0; i < particlesCount && connectionIndex < maxConnections * 2; i++) {
+          const i3 = i * 3;
+          const x1 = positions[i3];
+          const y1 = positions[i3 + 1];
+          const z1 = positions[i3 + 2];
+
+          for (let j = i + 1; j < Math.min(i + 15, particlesCount) && connectionIndex < maxConnections * 2; j++) {
+            const j3 = j * 3;
+            const x2 = positions[j3];
+            const y2 = positions[j3 + 1];
+            const z2 = positions[j3 + 2];
+
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const dz = z2 - z1;
+            const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+            if (distance < maxDistance) {
+              const lineIndex = connectionIndex * 3;
+              linePositions[lineIndex] = x1;
+              linePositions[lineIndex + 1] = y1;
+              linePositions[lineIndex + 2] = z1;
+              linePositions[lineIndex + 3] = x2;
+              linePositions[lineIndex + 4] = y2;
+              linePositions[lineIndex + 5] = z2;
+              connectionIndex += 2;
+            }
           }
         }
       }
