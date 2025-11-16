@@ -92,6 +92,7 @@ class EditionDetailSerializer(serializers.ModelSerializer):
 
     uploaded_by = ResumedUserModelSerializer(read_only=True)
     hascompo_set = HasCompoInlineSerializer(many=True, read_only=True)
+    compos_count = serializers.SerializerMethodField()
     productions_count = serializers.SerializerMethodField()
 
     class Meta:
@@ -105,11 +106,16 @@ class EditionDetailSerializer(serializers.ModelSerializer):
             'open_to_upload',
             'open_to_update',
             'hascompo_set',
+            'compos_count',
             'productions_count',
             'created',
             'modified',
         ]
         read_only_fields = ['id', 'created', 'modified', 'uploaded_by']
+
+    def get_compos_count(self, obj):
+        """Return count of associated compos"""
+        return obj.compos.count()
 
     def get_productions_count(self, obj):
         """Return count of productions in this edition"""
