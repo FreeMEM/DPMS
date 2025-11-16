@@ -150,8 +150,8 @@ const ThreeBackground = ({ variant = "admin" }) => {
 
     console.log("ThreeBackground: Particles created with", particlesCount, "particles");
 
-    // Create lines to connect nearby particles
-    const maxConnections = variant === "admin" ? 100 : 50;
+    // Create lines to connect nearby particles - using effect settings
+    const maxConnections = currentEffect.maxConnections(variant);
     const lineGeometry = new THREE.BufferGeometry();
     const linePositions = new Float32Array(maxConnections * 2 * 3);
     lineGeometry.setAttribute("position", new THREE.BufferAttribute(linePositions, 3));
@@ -159,7 +159,7 @@ const ThreeBackground = ({ variant = "admin" }) => {
     const lineMaterial = new THREE.LineBasicMaterial({
       color: variant === "admin" ? 0x6020c0 : 0x20c0a0,
       transparent: true,
-      opacity: 0.15,
+      opacity: currentEffect.lineOpacity,
       blending: THREE.AdditiveBlending,
     });
 
@@ -271,10 +271,10 @@ const ThreeBackground = ({ variant = "admin" }) => {
 
       particles.geometry.attributes.position.needsUpdate = true;
 
-      // Update connections between nearby particles
+      // Update connections between nearby particles - using effect settings
       const linePositions = lines.geometry.attributes.position.array;
       let connectionIndex = 0;
-      const maxDistance = 2.5;
+      const maxDistance = currentEffect.maxConnectionDistance;
 
       for (let i = 0; i < particlesCount && connectionIndex < maxConnections * 2; i++) {
         const i3 = i * 3;

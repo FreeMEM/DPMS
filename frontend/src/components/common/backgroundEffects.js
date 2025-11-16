@@ -12,6 +12,11 @@ export const hyperspaceEffect = {
 
   particleCount: (variant) => variant === "admin" ? 500 : 350,
 
+  // Line connection settings
+  maxConnections: (variant) => variant === "admin" ? 100 : 50,
+  lineOpacity: 0.15,
+  maxConnectionDistance: 2.5,
+
   initializeParticles: (particlesCount, variant, particleColors) => {
     const positions = new Float32Array(particlesCount * 3);
     const colors = new Float32Array(particlesCount * 3);
@@ -123,6 +128,11 @@ export const waveEffect = {
   name: 'wave',
 
   particleCount: (variant) => variant === "admin" ? 1000 : 500,
+
+  // Line connection settings - más brillantes y abundantes
+  maxConnections: (variant) => variant === "admin" ? 250 : 150,
+  lineOpacity: 0.4,  // Más brillante que hyperspace
+  maxConnectionDistance: 3.5,  // Distancia mayor para más conexiones
 
   initializeParticles: (particlesCount, variant, particleColors) => {
     const positions = new Float32Array(particlesCount * 3);
