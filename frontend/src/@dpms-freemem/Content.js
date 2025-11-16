@@ -12,7 +12,8 @@ const Content = ({ page, children }) => {
         sx={{
           flexGrow: 1,
           minHeight: '100vh',
-          backgroundColor: 'background.default',
+          position: 'relative',
+          zIndex: 1,
         }}
       >
         {children}

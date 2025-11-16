@@ -3,13 +3,15 @@ import { Box, Container, Breadcrumbs, Link as MuiLink, Typography } from '@mui/m
 import { Link } from 'react-router-dom';
 import MainBar from '../../@dpms-freemem/MainBar';
 import Content from '../../@dpms-freemem/Content';
+import ThreeBackground from '../common/ThreeBackground';
 
 const AdminLayout = ({ children, title, breadcrumbs = [] }) => {
   return (
     <Box sx={{ display: 'flex' }}>
+      <ThreeBackground variant="admin" />
       <MainBar value={0} />
       <Content>
-        <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Container maxWidth="xl" sx={{ pt: 10, pb: 4 }}>
           {/* Breadcrumbs */}
           {breadcrumbs.length > 0 && (
             <Breadcrumbs sx={{ mb: 3 }}>
