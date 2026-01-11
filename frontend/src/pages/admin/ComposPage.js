@@ -25,11 +25,13 @@ import {
   Visibility as ViewIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { ConfirmDialog, LoadingSpinner } from '../../components/admin/common';
 import axiosWrapper from '../../utils/AxiosWrapper';
 
 const ComposPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [compos, setCompos] = useState([]);
@@ -91,7 +93,7 @@ const ComposPage = () => {
 
   if (loading) {
     return (
-      <AdminLayout title="Gestión de Competiciones">
+      <AdminLayout title={t("Competitions Management")}>
         <LoadingSpinner />
       </AdminLayout>
     );
@@ -99,8 +101,8 @@ const ComposPage = () => {
 
   return (
     <AdminLayout
-      title="Gestión de Competiciones"
-      breadcrumbs={[{ label: 'Competiciones', href: '#' }]}
+      title={t("Competitions Management")}
+      breadcrumbs={[{ label: t('Competitions'), href: '#' }]}
     >
       {error && (
         <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
@@ -110,7 +112,7 @@ const ComposPage = () => {
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
         <TextField
-          placeholder="Buscar competiciones..."
+          placeholder={t("Search competitions...")}
           variant="outlined"
           size="small"
           value={searchTerm}
@@ -129,7 +131,7 @@ const ComposPage = () => {
           startIcon={<AddIcon />}
           onClick={() => navigate('/admin/compos/new')}
         >
-          Nueva Competición
+          {t("New Competition")}
         </Button>
       </Box>
 
@@ -138,12 +140,12 @@ const ComposPage = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Nombre</TableCell>
-                <TableCell>Descripción</TableCell>
-                <TableCell align="center">Icono</TableCell>
-                <TableCell align="center">Orden</TableCell>
-                <TableCell align="center">Ediciones</TableCell>
-                <TableCell align="right">Acciones</TableCell>
+                <TableCell>{t("Name")}</TableCell>
+                <TableCell>{t("Description")}</TableCell>
+                <TableCell align="center">{t("Icon")}</TableCell>
+                <TableCell align="center">{t("Order")}</TableCell>
+                <TableCell align="center">{t("Editions")}</TableCell>
+                <TableCell align="right">{t("Actions")}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -152,8 +154,8 @@ const ComposPage = () => {
                   <TableCell colSpan={6} align="center">
                     <Typography variant="body2" color="text.secondary" sx={{ py: 4 }}>
                       {searchTerm
-                        ? 'No se encontraron competiciones'
-                        : 'No hay competiciones. Crea una nueva para comenzar.'}
+                        ? t('No competitions found')
+                        : t('No competitions. Create a new one to get started.')}
                     </Typography>
                   </TableCell>
                 </TableRow>
@@ -205,21 +207,21 @@ const ComposPage = () => {
                       <IconButton
                         size="small"
                         onClick={() => navigate(`/admin/compos/${compo.id}`)}
-                        title="Ver detalle"
+                        title={t("View detail")}
                       >
                         <ViewIcon fontSize="small" />
                       </IconButton>
                       <IconButton
                         size="small"
                         onClick={() => navigate(`/admin/compos/${compo.id}/edit`)}
-                        title="Editar"
+                        title={t("Edit")}
                       >
                         <EditIcon fontSize="small" />
                       </IconButton>
                       <IconButton
                         size="small"
                         onClick={() => setDeleteDialog({ open: true, compo })}
-                        title="Eliminar"
+                        title={t("Delete")}
                         color="error"
                       >
                         <DeleteIcon fontSize="small" />
@@ -239,8 +241,8 @@ const ComposPage = () => {
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={handleChangeRowsPerPage}
           rowsPerPageOptions={[5, 10, 25, 50]}
-          labelRowsPerPage="Filas por página:"
-          labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+          labelRowsPerPage={t("Rows per page:")}
+          labelDisplayedRows={({ from, to, count }) => `${from}-${to} ${t("of")} ${count}`}
         />
       </Paper>
 
@@ -248,8 +250,8 @@ const ComposPage = () => {
         open={deleteDialog.open}
         onClose={() => setDeleteDialog({ open: false, compo: null })}
         onConfirm={handleDelete}
-        title="Eliminar Competición"
-        message={`¿Estás seguro de que deseas eliminar la competición "${deleteDialog.compo?.name}"? Esta acción no se puede deshacer.`}
+        title={t("Delete Competition")}
+        message={t('Are you sure you want to delete the competition "{{name}}"? This action cannot be undone.', { name: deleteDialog.compo?.name })}
       />
     </AdminLayout>
   );
