@@ -13,7 +13,6 @@ import {
   Chip,
   TextField,
   Alert,
-  CircularProgress,
   Typography,
 } from '@mui/material';
 import {
@@ -24,7 +23,8 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
-import ConfirmDialog from '../../components/admin/common/ConfirmDialog';
+import { ConfirmDialog, LoadingSpinner } from '../../components/admin/common';
+import { formatDate } from '../../utils/dateFormatting';
 import axiosWrapper from '../../utils/AxiosWrapper';
 
 const EditionsPage = () => {
@@ -81,22 +81,10 @@ const EditionsPage = () => {
     }
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
   if (loading) {
     return (
       <AdminLayout title="Gestión de Ediciones">
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-          <CircularProgress />
-        </Box>
+        <LoadingSpinner />
       </AdminLayout>
     );
   }

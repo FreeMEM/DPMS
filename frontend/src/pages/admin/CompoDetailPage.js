@@ -10,7 +10,6 @@ import {
   CardContent,
   Divider,
   Alert,
-  CircularProgress,
   Table,
   TableBody,
   TableCell,
@@ -24,6 +23,8 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
+import { LoadingSpinner, InfoField, EmptyState } from '../../components/admin/common';
+import { formatDateTime } from '../../utils/dateFormatting';
 import axiosWrapper from '../../utils/AxiosWrapper';
 
 const CompoDetailPage = () => {
@@ -53,24 +54,10 @@ const CompoDetailPage = () => {
     }
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    return date.toLocaleString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
   if (loading) {
     return (
       <AdminLayout title="Detalle de Competición">
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-          <CircularProgress />
-        </Box>
+        <LoadingSpinner />
       </AdminLayout>
     );
   }
@@ -172,14 +159,14 @@ const CompoDetailPage = () => {
               <Typography variant="body2" color="text.secondary">
                 Fecha de creación
               </Typography>
-              <Typography variant="body1">{formatDate(compo.created)}</Typography>
+              <Typography variant="body1">{formatDateTime(compo.created)}</Typography>
             </Box>
 
             <Box>
               <Typography variant="body2" color="text.secondary">
                 Última modificación
               </Typography>
-              <Typography variant="body1">{formatDate(compo.modified)}</Typography>
+              <Typography variant="body1">{formatDateTime(compo.modified)}</Typography>
             </Box>
           </Paper>
         </Grid>
@@ -243,7 +230,7 @@ const CompoDetailPage = () => {
                             {hasCompo.edition_title}
                           </Typography>
                         </TableCell>
-                        <TableCell>{formatDate(hasCompo.start)}</TableCell>
+                        <TableCell>{formatDateTime(hasCompo.start)}</TableCell>
                         <TableCell align="center">
                           <Chip
                             label={hasCompo.open_to_upload ? 'Abierto' : 'Cerrado'}
@@ -279,9 +266,7 @@ const CompoDetailPage = () => {
                 </Table>
               </TableContainer>
             ) : (
-              <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 4 }}>
-                Esta competición no está asociada a ninguna edición
-              </Typography>
+              <EmptyState message="Esta competición no está asociada a ninguna edición" />
             )}
           </Paper>
         </Grid>

@@ -10,7 +10,6 @@ import {
   CardContent,
   Divider,
   Alert,
-  CircularProgress,
   Table,
   TableBody,
   TableCell,
@@ -24,13 +23,11 @@ import {
   CheckCircle as ApproveIcon,
   Cancel as RejectIcon,
   Download as DownloadIcon,
-  CheckCircle as ApprovedIcon,
-  Cancel as RejectedIcon,
-  HourglassEmpty as PendingIcon,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
-import ConfirmDialog from '../../components/admin/common/ConfirmDialog';
+import { ConfirmDialog, LoadingSpinner, StatusChip, InfoField, EmptyState } from '../../components/admin/common';
+import { formatDateTime } from '../../utils/dateFormatting';
 import axiosWrapper from '../../utils/AxiosWrapper';
 
 const ProductionDetailPage = () => {
@@ -80,43 +77,10 @@ const ProductionDetailPage = () => {
     }
   };
 
-  const getStatusChip = (status) => {
-    const statusConfig = {
-      pending: { label: 'Pendiente', color: 'warning', icon: <PendingIcon fontSize="small" /> },
-      approved: { label: 'Aprobada', color: 'success', icon: <ApprovedIcon fontSize="small" /> },
-      rejected: { label: 'Rechazada', color: 'error', icon: <RejectedIcon fontSize="small" /> },
-    };
-
-    const config = statusConfig[status] || statusConfig.pending;
-
-    return (
-      <Chip
-        label={config.label}
-        color={config.color}
-        size="medium"
-        icon={config.icon}
-      />
-    );
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    return date.toLocaleString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
   if (loading) {
     return (
       <AdminLayout title="Detalle de Producción">
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-          <CircularProgress />
-        </Box>
+        <LoadingSpinner />
       </AdminLayout>
     );
   }
@@ -226,7 +190,7 @@ const ProductionDetailPage = () => {
               <Typography variant="body2" color="text.secondary">
                 Estado
               </Typography>
-              <Box sx={{ mt: 1 }}>{getStatusChip(production.status)}</Box>
+              <Box sx={{ mt: 1 }}><StatusChip status={production.status} size="medium" /></Box>
             </Box>
 
             <Box sx={{ mb: 2 }}>
@@ -242,14 +206,14 @@ const ProductionDetailPage = () => {
               <Typography variant="body2" color="text.secondary">
                 Fecha de envío
               </Typography>
-              <Typography variant="body1">{formatDate(production.created)}</Typography>
+              <Typography variant="body1">{formatDateTime(production.created)}</Typography>
             </Box>
 
             <Box>
               <Typography variant="body2" color="text.secondary">
                 Última modificación
               </Typography>
-              <Typography variant="body1">{formatDate(production.modified)}</Typography>
+              <Typography variant="body1">{formatDateTime(production.modified)}</Typography>
             </Box>
           </Paper>
         </Grid>
@@ -352,9 +316,7 @@ const ProductionDetailPage = () => {
                 </Table>
               </TableContainer>
             ) : (
-              <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 4 }}>
-                No hay archivos asociados a esta producción
-              </Typography>
+              <EmptyState message="No hay archivos asociados a esta producción" />
             )}
           </Paper>
         </Grid>
