@@ -83,11 +83,15 @@ class EditionAdmin(admin.ModelAdmin):
 
     inlines = [HasCompoInlineForEdition, ProductionInlineForEdition]
 
-    readonly_fields = ("created", "modified", "compos_count", "productions_count")
+    readonly_fields = ("created", "modified", "compos_count", "productions_count", "logo_preview", "poster_preview")
 
     fieldsets = (
         ("Basic Information", {
             "fields": ("title", "description", "uploaded_by")
+        }),
+        ("Images", {
+            "fields": ("logo", "logo_preview", "logo_border_color", "logo_border_width", "poster", "poster_preview"),
+            "description": "Logo and poster images for the edition. Configure border to add glow effect around logo."
         }),
         ("Status", {
             "fields": ("public", "open_to_upload", "open_to_update")
@@ -181,6 +185,26 @@ class EditionAdmin(admin.ModelAdmin):
         return obj.modified.strftime("%Y-%m-%d %H:%M")
     modified_display.short_description = "Modified"
     modified_display.admin_order_field = "modified"
+
+    def logo_preview(self, obj):
+        """Display logo preview"""
+        if obj.logo:
+            return format_html(
+                '<img src="{}" style="max-height: 100px; max-width: 200px; object-fit: contain;"/>',
+                obj.logo.url
+            )
+        return "No logo"
+    logo_preview.short_description = "Logo Preview"
+
+    def poster_preview(self, obj):
+        """Display poster preview"""
+        if obj.poster:
+            return format_html(
+                '<img src="{}" style="max-height: 200px; max-width: 300px; object-fit: contain;"/>',
+                obj.poster.url
+            )
+        return "No poster"
+    poster_preview.short_description = "Poster Preview"
 
     def make_public(self, request, queryset):
         """Make selected editions public"""

@@ -1,0 +1,14 @@
+#!/bin/bash
+# Hook para filtrar mensajes de coautoría de IA
+
+COMMIT_MSG_FILE=$1
+
+# Filtrar líneas con coautoría de IA
+sed -i '/🤖 Generated with/d' "$COMMIT_MSG_FILE"
+sed -i '/Generated with \[Claude/d' "$COMMIT_MSG_FILE"
+sed -i '/Co-Authored-By: Claude/d' "$COMMIT_MSG_FILE"
+sed -i '/Co-Authored-By:.*anthropic/d' "$COMMIT_MSG_FILE"
+sed -i '/Co-Authored-By:.*noreply@anthropic/d' "$COMMIT_MSG_FILE"
+
+# Eliminar líneas vacías consecutivas al final
+sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$COMMIT_MSG_FILE"

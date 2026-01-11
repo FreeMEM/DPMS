@@ -4,6 +4,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.db.models import Q
 
 from dpms.compos.models import Edition
@@ -32,6 +33,7 @@ class EditionViewSet(viewsets.ModelViewSet):
 
     queryset = Edition.objects.all().select_related('uploaded_by').prefetch_related('compos')
     permission_classes = [IsAdminOrReadOnly]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         """Filter editions based on user authentication"""

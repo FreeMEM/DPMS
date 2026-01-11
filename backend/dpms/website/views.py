@@ -72,8 +72,12 @@ def editions_list(request):
 
     editions = Edition.objects.filter(public=True).order_by('-created')
 
+    # Get current edition for navbar
+    current_edition = editions.first() if editions.exists() else None
+
     context = {
         'site_title': 'Ediciones - DPMS',
         'editions': editions,
+        'current_edition': current_edition,
     }
     return render(request, 'website/editions.html', context)

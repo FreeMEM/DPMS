@@ -33,6 +33,7 @@ import FolderIcon from "@mui/icons-material/Folder";
 import CategoryIcon from "@mui/icons-material/Category";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../AuthContext";
+import axiosWrapper from "../utils/AxiosWrapper";
 
 const MainBar = () => {
   const { t } = useTranslation();
@@ -43,6 +44,11 @@ const MainBar = () => {
     return saved !== null ? JSON.parse(saved) : false;
   });
   const [anchorEl, setAnchorEl] = useState(null);
+  const [editionLogo, setEditionLogo] = useState(null);
+  const [editionTitle, setEditionTitle] = useState(null);
+  const [editionLoaded, setEditionLoaded] = useState(false);
+  const [logoBorderColor, setLogoBorderColor] = useState('#FFA500');
+  const [logoBorderWidth, setLogoBorderWidth] = useState(0);
   const theme = useTheme();
 
   const isDesktop = useMediaQuery(theme.breakpoints.up("sm")); // sm, md, lg, xl (≥600px)
@@ -52,6 +58,40 @@ const MainBar = () => {
 
   // Determina el panel basándose en la ruta actual
   const panel = location.pathname.startsWith("/admin") ? "admin" : "user";
+
+  // Fetch current edition data (logo, title, border settings)
+  useEffect(() => {
+    const fetchEditionData = async () => {
+      try {
+        const client = axiosWrapper();
+        const response = await client.get('/api/editions/?public=true');
+        if (response.data && response.data.length > 0) {
+          // Get the first (most recent) public edition
+          const currentEdition = response.data[0];
+          setEditionTitle(currentEdition.title);
+          if (currentEdition.logo) {
+            setEditionLogo(currentEdition.logo);
+          }
+          if (currentEdition.logo_border_color) {
+            setLogoBorderColor(currentEdition.logo_border_color);
+          }
+          if (currentEdition.logo_border_width !== undefined) {
+            setLogoBorderWidth(currentEdition.logo_border_width);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching edition data:', err);
+      } finally {
+        setEditionLoaded(true);
+      }
+    };
+    fetchEditionData();
+  }, []);
+
+  // Generate logo style with drop-shadow for transparent PNGs
+  const logoStyle = logoBorderWidth > 0
+    ? { filter: `drop-shadow(0 0 ${logoBorderWidth}px ${logoBorderColor})` }
+    : {};
 
   // Guardar estado del drawer en localStorage cuando cambia
   useEffect(() => {
@@ -83,11 +123,6 @@ const MainBar = () => {
     handleClose();
   };
 
-  const handleUserPanel = () => {
-    navigate("/demo-party/dashboard");
-    handleClose();
-  };
-
   const handleAdminPanel = () => {
     navigate("/admin/dashboard");
     handleClose();
@@ -111,6 +146,32 @@ const MainBar = () => {
 
   // Función para verificar si una ruta está activa
   const isActive = (path) => location.pathname === path;
+
+  // Estilos comunes para ListItemButton y ListItemIcon
+  const listItemButtonSx = { justifyContent: open ? 'initial' : 'center' };
+  const listItemIconSx = { minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' };
+
+  // Componente de marca reutilizable (logo > título > "DPMS")
+  const renderBrand = (fontSize = 'h6') => {
+    if (editionLogo) {
+      return <img src={editionLogo} alt={editionTitle || "Edition Logo"} className="logo" style={logoStyle} />;
+    }
+    if (editionLoaded && editionTitle) {
+      return (
+        <Typography variant={fontSize} sx={{ fontWeight: 700, color: 'primary.main', letterSpacing: 1 }}>
+          {editionTitle}
+        </Typography>
+      );
+    }
+    if (editionLoaded) {
+      return (
+        <Typography variant={fontSize} sx={{ fontWeight: 700, color: 'primary.main', letterSpacing: 1 }}>
+          DPMS
+        </Typography>
+      );
+    }
+    return null;
+  };
 
   return (
     <Box>
@@ -149,7 +210,7 @@ const MainBar = () => {
               <MenuIcon />
             </IconButton>
           )}
-          <img src={`${process.env.PUBLIC_URL}/assets/logo_navbar2025.png`} alt="Posadas Party Logo" className="logo" />
+          {renderBrand()}
         </Box>
         <Box display="flex" alignItems="center">
           <Typography variant="body1" color="inherit" sx={{ marginRight: 1 }}>
@@ -225,7 +286,7 @@ const MainBar = () => {
         }}
       >
         <Box className="drawer-header" display="flex" justifyContent={open ? "space-between" : "center"} alignItems="center" p={1}>
-          {open && <img src={`${process.env.PUBLIC_URL}/assets/logo_navbar2025.png`} alt="Posadas Party Logo" className="logo" />}
+          {open && renderBrand()}
           <IconButton onClick={toggleDrawer}>
             {open ? <ChevronLeftIcon /> : <MenuIcon />}
           </IconButton>
@@ -233,38 +294,38 @@ const MainBar = () => {
         {panel === "user" && (
           <Box className="drawer-content">
             <List sx={{ width: "100%" }}>
-              <ListItemButton selected={isActive("/")} onClick={() => navigate("/")} sx={{ justifyContent: open ? 'initial' : 'center' }}>
-                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+              <ListItemButton selected={isActive("/")} onClick={() => navigate("/")} sx={listItemButtonSx}>
+                <ListItemIcon sx={listItemIconSx}>
                   <HomeIcon />
                 </ListItemIcon>
                 {open && <ListItemText primary={t("Home")} />}
               </ListItemButton>
-              <ListItemButton selected={isActive("/compos")} onClick={() => navigate("/compos")} sx={{ justifyContent: open ? 'initial' : 'center' }}>
-                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+              <ListItemButton selected={isActive("/compos")} onClick={() => navigate("/compos")} sx={listItemButtonSx}>
+                <ListItemIcon sx={listItemIconSx}>
                   <EmojiEventsIcon />
                 </ListItemIcon>
                 {open && <ListItemText primary={t("Competitions")} />}
               </ListItemButton>
-              <ListItemButton selected={isActive("/my-productions")} onClick={() => navigate("/my-productions")} sx={{ justifyContent: open ? 'initial' : 'center' }}>
-                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+              <ListItemButton selected={isActive("/my-productions")} onClick={() => navigate("/my-productions")} sx={listItemButtonSx}>
+                <ListItemIcon sx={listItemIconSx}>
                   <FolderIcon />
                 </ListItemIcon>
                 {open && <ListItemText primary={t("My Productions")} />}
               </ListItemButton>
-              <ListItemButton selected={isActive("/rules")} onClick={() => navigate("/rules")} sx={{ justifyContent: open ? 'initial' : 'center' }}>
-                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+              <ListItemButton selected={isActive("/rules")} onClick={() => navigate("/rules")} sx={listItemButtonSx}>
+                <ListItemIcon sx={listItemIconSx}>
                   <GavelIcon />
                 </ListItemIcon>
                 {open && <ListItemText primary={t("Rules")} />}
               </ListItemButton>
-              <ListItemButton selected={isActive("/gallery")} onClick={() => navigate("/gallery")} sx={{ justifyContent: open ? 'initial' : 'center' }}>
-                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+              <ListItemButton selected={isActive("/gallery")} onClick={() => navigate("/gallery")} sx={listItemButtonSx}>
+                <ListItemIcon sx={listItemIconSx}>
                   <PhotoLibraryIcon />
                 </ListItemIcon>
                 {open && <ListItemText primary={t("Gallery")} />}
               </ListItemButton>
-              <ListItemButton selected={isActive("/contact")} onClick={() => navigate("/contact")} sx={{ justifyContent: open ? 'initial' : 'center' }}>
-                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+              <ListItemButton selected={isActive("/contact")} onClick={() => navigate("/contact")} sx={listItemButtonSx}>
+                <ListItemIcon sx={listItemIconSx}>
                   <ContactMailIcon />
                 </ListItemIcon>
                 {open && <ListItemText primary={t("Contact")} />}
@@ -275,8 +336,8 @@ const MainBar = () => {
         {panel === "admin" && (
           <Box className="drawer-content">
             <List sx={{ width: "100%" }}>
-              <ListItemButton selected={isActive("/admin/dashboard")} onClick={() => navigate("/admin/dashboard")} sx={{ justifyContent: open ? 'initial' : 'center' }}>
-                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+              <ListItemButton selected={isActive("/admin/dashboard")} onClick={() => navigate("/admin/dashboard")} sx={listItemButtonSx}>
+                <ListItemIcon sx={listItemIconSx}>
                   <DashboardIcon />
                 </ListItemIcon>
                 {open && <ListItemText primary={t("Dashboard")} />}
@@ -284,9 +345,9 @@ const MainBar = () => {
               <ListItemButton
                 selected={location.pathname.startsWith("/admin/editions")}
                 onClick={() => navigate("/admin/editions")}
-                sx={{ justifyContent: open ? 'initial' : 'center' }}
+                sx={listItemButtonSx}
               >
-                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+                <ListItemIcon sx={listItemIconSx}>
                   <EmojiEventsIcon />
                 </ListItemIcon>
                 {open && <ListItemText primary={t("Editions")} />}
@@ -294,9 +355,9 @@ const MainBar = () => {
               <ListItemButton
                 selected={location.pathname.startsWith("/admin/compos")}
                 onClick={() => navigate("/admin/compos")}
-                sx={{ justifyContent: open ? 'initial' : 'center' }}
+                sx={listItemButtonSx}
               >
-                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+                <ListItemIcon sx={listItemIconSx}>
                   <CategoryIcon />
                 </ListItemIcon>
                 {open && <ListItemText primary={t("Competitions")} />}
@@ -304,9 +365,9 @@ const MainBar = () => {
               <ListItemButton
                 selected={location.pathname.startsWith("/admin/productions")}
                 onClick={() => navigate("/admin/productions")}
-                sx={{ justifyContent: open ? 'initial' : 'center' }}
+                sx={listItemButtonSx}
               >
-                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+                <ListItemIcon sx={listItemIconSx}>
                   <FolderIcon />
                 </ListItemIcon>
                 {open && <ListItemText primary={t("Productions")} />}
@@ -314,9 +375,9 @@ const MainBar = () => {
               <ListItemButton
                 selected={location.pathname.startsWith("/admin/voting-config")}
                 onClick={() => navigate("/admin/voting-config")}
-                sx={{ justifyContent: open ? 'initial' : 'center' }}
+                sx={listItemButtonSx}
               >
-                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+                <ListItemIcon sx={listItemIconSx}>
                   <SettingsIcon />
                 </ListItemIcon>
                 {open && <ListItemText primary={t("Voting Config")} />}
@@ -324,9 +385,9 @@ const MainBar = () => {
               <ListItemButton
                 selected={location.pathname.startsWith("/admin/jury")}
                 onClick={() => navigate("/admin/jury")}
-                sx={{ justifyContent: open ? 'initial' : 'center' }}
+                sx={listItemButtonSx}
               >
-                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
+                <ListItemIcon sx={listItemIconSx}>
                   <PeopleIcon />
                 </ListItemIcon>
                 {open && <ListItemText primary={t("Jury")} />}

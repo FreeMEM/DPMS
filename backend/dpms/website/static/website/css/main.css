@@ -91,6 +91,14 @@ main {
     text-shadow: 0 0 20px var(--glow-color);
 }
 
+.navbar-logo {
+    height: 50px;
+    width: auto;
+    max-width: 200px;
+    object-fit: contain;
+    vertical-align: middle;
+}
+
 .navbar-menu {
     display: flex;
     gap: 1rem;
