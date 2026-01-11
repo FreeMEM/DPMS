@@ -26,6 +26,7 @@ class EditionListSerializer(serializers.ModelSerializer):
             'public',
             'open_to_upload',
             'open_to_update',
+            'productions_public',
             'compos_count',
             'productions_count',
             'created',
@@ -61,6 +62,7 @@ class EditionSerializer(serializers.ModelSerializer):
             'public',
             'open_to_upload',
             'open_to_update',
+            'productions_public',
             'created',
             'modified',
         ]
@@ -117,6 +119,7 @@ class EditionDetailSerializer(serializers.ModelSerializer):
             'public',
             'open_to_upload',
             'open_to_update',
+            'productions_public',
             'hascompo_set',
             'compos_count',
             'productions_count',

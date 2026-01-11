@@ -69,6 +69,11 @@ class Edition(BaseModel):
     public = models.BooleanField(default=False)
     open_to_upload = models.BooleanField(default=False)
     open_to_update = models.BooleanField(default=False)
+    productions_public = models.BooleanField(
+        "Productions Public",
+        default=False,
+        help_text="If False, users can only see their own productions. Enable after voting to publish all productions."
+    )
     compos = models.ManyToManyField(
         "compos.Compo",
         through="compos.HasCompo",
