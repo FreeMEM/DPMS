@@ -55,9 +55,19 @@ Create the environment files in `.envs/` directory:
 
 **.envs/.django**
 ```env
-DJANGO_DEBUG=True
+# Django
 DJANGO_SECRET_KEY=your-secret-key-here-change-in-production
-DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,backend_party
+
+# Redis (for Celery)
+REDIS_URL=redis://redis:6379/0
+
+# Celery Flower (task monitoring)
+CELERY_FLOWER_USER=your-flower-user
+CELERY_FLOWER_PASSWORD=your-flower-password
+
+# SceneID OAuth (optional, for SceneID login)
+SCENE_CLIENT_ID=your-sceneid-client-id
+SCENEID_CLIENT_SECRET=your-sceneid-client-secret
 ```
 
 **.envs/.postgres**
@@ -67,6 +77,11 @@ POSTGRES_PORT=5432
 POSTGRES_DB=dpms
 POSTGRES_USER=dpms_user
 POSTGRES_PASSWORD=dpms_password
+```
+
+**frontend/.env** (optional, for development)
+```env
+REACT_APP_BACKEND_ADDRESS=http://localhost:8000
 ```
 
 ### 3. Start the backend with Docker Compose
@@ -175,6 +190,18 @@ docker compose -f production.yml up -d
 - Use strong database passwords
 - Set up HTTPS/SSL certificates
 - Configure proper CORS settings
+
+**Additional production environment variables (.envs/.django):**
+```env
+# Email configuration (required for user verification)
+EMAIL_HOST=smtp.your-provider.com
+EMAIL_HOST_USER=your-email@domain.com
+EMAIL_HOST_PASSWORD=your-email-password
+EMAIL_PORT=587
+
+# Frontend URL (for email links)
+FRONTEND_URL=https://your-domain.com/app
+```
 
 ## Project Structure
 
