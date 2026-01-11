@@ -4,7 +4,7 @@ import { AuthContext } from "../../AuthContext";
 import { Box, Button, TextField, Typography, Paper, FormControl, FormLabel } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
-import axios from "axios";
+import axiosWrapper from "../../utils/AxiosWrapper";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -26,7 +26,8 @@ const Signup = () => {
   useEffect(() => {
     const fetchCurrentEdition = async () => {
       try {
-        const response = await axios.get('/api/editions/?public=true');
+        const client = axiosWrapper();
+        const response = await client.get('/api/editions/?public=true');
         if (response.data && response.data.length > 0) {
           setEdition(response.data[0]);
         } else {
