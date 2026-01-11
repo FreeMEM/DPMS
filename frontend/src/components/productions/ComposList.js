@@ -41,14 +41,17 @@ const ComposList = () => {
 
   const fetchEditions = async () => {
     try {
-      const response = await editionsAPI.list({ open_to_upload: true });
+      // Fetch all public editions (not just open_to_upload)
+      const response = await editionsAPI.list({ public: true });
       const editionsList = response.data;
 
       if (editionsList.length > 0) {
         setEditions(editionsList);
-        setSelectedEdition(editionsList[0].id);
+        // Prefer an edition that's open for upload, otherwise use the first one
+        const openEdition = editionsList.find(e => e.open_to_upload);
+        setSelectedEdition(openEdition?.id || editionsList[0].id);
       } else {
-        setError('No editions currently open for submissions');
+        setError('No editions available');
       }
     } catch (err) {
       console.error('Error fetching editions:', err);
@@ -102,9 +105,12 @@ const ComposList = () => {
             {editions.map((edition) => (
               <MenuItem key={edition.id} value={edition.id}>
                 {edition.title}
-                {edition.open_to_upload && (
-                  <Chip label="Open" size="small" color="success" sx={{ ml: 1 }} />
-                )}
+                <Chip
+                  label={edition.open_to_upload ? "Open" : "Closed"}
+                  size="small"
+                  color={edition.open_to_upload ? "success" : "default"}
+                  sx={{ ml: 1 }}
+                />
               </MenuItem>
             ))}
           </Select>

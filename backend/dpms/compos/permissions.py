@@ -54,3 +54,16 @@ class IsOwner(permissions.BasePermission):
             return obj.created_by == request.user
 
         return False
+
+
+class IsAdminUser(permissions.BasePermission):
+    """
+    Custom permission to only allow DPMS Admins.
+    """
+
+    def has_permission(self, request, view):
+        return (
+            request.user and
+            request.user.is_authenticated and
+            request.user.groups.filter(name='DPMS Admins').exists()
+        )

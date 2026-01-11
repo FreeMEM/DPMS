@@ -85,3 +85,35 @@ export const galleryAPI = {
   byEdition: (editionId) => getAxios().get(`/api/gallery/by-edition/${editionId}/`),
   editionsWithImages: () => getAxios().get('/api/gallery/editions_with_images/'),
 };
+
+// Sponsors API
+export const sponsorsAPI = {
+  list: (params) => getAxios().get('/api/sponsors/', { params }),
+  get: (id) => getAxios().get(`/api/sponsors/${id}/`),
+  create: (formData) => {
+    const client = getAxios();
+    return client.post('/api/sponsors/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+  update: (id, formData) => {
+    const client = getAxios();
+    return client.put(`/api/sponsors/${id}/`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+  patch: (id, formData) => {
+    const client = getAxios();
+    return client.patch(`/api/sponsors/${id}/`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+  delete: (id) => getAxios().delete(`/api/sponsors/${id}/`),
+  byEdition: (editionId) => getAxios().get('/api/sponsors/by_edition/', { params: { edition: editionId } }),
+};
