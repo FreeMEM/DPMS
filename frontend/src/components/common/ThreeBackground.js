@@ -2,6 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { getEffect, getEffectCount } from "./backgroundEffects";
 
+// Constantes de rendimiento
+const TARGET_FPS = 30;
+const FRAME_INTERVAL = 1000 / TARGET_FPS;
+
 const ThreeBackground = ({ variant = "admin" }) => {
   const containerRef = useRef(null);
   const rendererRef = useRef(null);
@@ -9,6 +13,8 @@ const ThreeBackground = ({ variant = "admin" }) => {
   const isInitializedRef = useRef(false);
   const mouseRef = useRef({ x: 0, y: 0 });
   const targetMouseRef = useRef({ x: 0, y: 0 });
+  const lastFrameTimeRef = useRef(0);
+  const isTabVisibleRef = useRef(true);
   const [isVisible, setIsVisible] = useState(() => {
     // Leer preferencia de localStorage, por defecto true
     const saved = localStorage.getItem('backgroundEnabled');
@@ -358,6 +364,22 @@ const ThreeBackground = ({ variant = "admin" }) => {
     const clock = new THREE.Clock();
 
     const animate = () => {
+      // Detener si la pestaña no está visible
+      if (!isTabVisibleRef.current) {
+        animationFrameRef.current = null;
+        return;
+      }
+
+      // Limitar FPS para menor consumo de CPU
+      const now = performance.now();
+      const elapsed = now - lastFrameTimeRef.current;
+
+      if (elapsed < FRAME_INTERVAL) {
+        animationFrameRef.current = requestAnimationFrame(animate);
+        return;
+      }
+      lastFrameTimeRef.current = now - (elapsed % FRAME_INTERVAL);
+
       const elapsedTime = clock.getElapsedTime();
 
       // Update plasma shader time
@@ -735,7 +757,7 @@ const ThreeBackground = ({ variant = "admin" }) => {
     };
   }, [variant, effectIndex]);
 
-  // Escuchar eventos de cambio de visibilidad
+  // Escuchar eventos de cambio de visibilidad del background
   useEffect(() => {
     const handleToggle = (event) => {
       setIsVisible(event.detail.enabled);
@@ -744,6 +766,22 @@ const ThreeBackground = ({ variant = "admin" }) => {
     window.addEventListener('backgroundToggle', handleToggle);
     return () => window.removeEventListener('backgroundToggle', handleToggle);
   }, []);
+
+  // Detectar cuando la pestaña pierde/gana foco para pausar animación
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      isTabVisibleRef.current = !document.hidden;
+
+      // Reanudar animación si vuelve a ser visible
+      if (!document.hidden && isVisible && !animationFrameRef.current && rendererRef.current) {
+        lastFrameTimeRef.current = performance.now();
+        // El animate se reiniciará en el próximo ciclo de efecto
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [isVisible]);
 
   return (
     <div
