@@ -256,7 +256,7 @@ const DemoPartyDashboard = () => {
                             color="text.secondary"
                             sx={{ textAlign: 'center', mb: 2, textTransform: 'uppercase', letterSpacing: 2 }}
                           >
-                            Cuenta Regresiva
+                            Cuenta Atrás
                           </Typography>
                           <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                             <CountdownBox value={countdown.days} label="Días" />
