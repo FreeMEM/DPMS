@@ -313,24 +313,26 @@ main {
 /* Scroll Indicator */
 .scroll-indicator {
     position: absolute;
-    bottom: 30px;
+    bottom: 25px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
     color: var(--text-muted);
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 2px;
     animation: bounce 2s infinite;
-    opacity: 0.6;
+    opacity: 0.5;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.scroll-indicator:hover {
+    opacity: 0.8;
 }
 
 .scroll-indicator svg {
-    width: 20px;
-    height: 20px;
+    width: 28px;
+    height: 28px;
 }
 
 @keyframes bounce {
@@ -338,10 +340,10 @@ main {
         transform: translateX(-50%) translateY(0);
     }
     40% {
-        transform: translateX(-50%) translateY(-10px);
+        transform: translateX(-50%) translateY(8px);
     }
     60% {
-        transform: translateX(-50%) translateY(-5px);
+        transform: translateX(-50%) translateY(4px);
     }
 }
 
@@ -519,74 +521,120 @@ footer {
     border-top: 1px solid var(--border-color);
 }
 
-/* Effect Selector */
-.effect-selector {
+/* Effect Selector Bar - Horizontal React-style */
+.effect-selector-bar {
     position: fixed;
     bottom: 20px;
     right: 20px;
     z-index: 1000;
+    background: var(--bg-card);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 8px 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
-.effect-toggle {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    cursor: pointer;
+.effect-selector-content {
     display: flex;
     align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
+    gap: 12px;
 }
 
-.effect-toggle:hover {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 20px var(--glow-color);
-}
-
-.effect-toggle svg {
-    color: var(--primary-color);
-}
-
-.effect-menu {
-    position: absolute;
-    bottom: 60px;
-    right: 0;
-    background: var(--bg-card);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 0.5rem;
-    min-width: 180px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-}
-
-.effect-option {
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.effect-option:hover {
-    background: rgba(255, 165, 0, 0.1);
-}
-
-.effect-name {
-    color: var(--text-primary);
-    font-size: 0.9rem;
-}
-
-.effect-divider {
-    height: 1px;
-    background: var(--border-color);
-    margin: 0.5rem 0;
-}
-
-.effect-toggle-visibility .effect-name {
+.effect-label {
     color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Toggle Switch */
+.effect-switch {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.effect-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.effect-switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: 0.3s;
+    border-radius: 24px;
+}
+
+.effect-switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--text-secondary);
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+.effect-switch input:checked + .effect-switch-slider {
+    background-color: var(--primary-color);
+}
+
+.effect-switch input:checked + .effect-switch-slider:before {
+    transform: translateX(18px);
+    background-color: var(--bg-dark);
+}
+
+.effect-switch input:focus + .effect-switch-slider {
+    box-shadow: 0 0 1px var(--primary-color);
+}
+
+/* Effect Dropdown */
+.effect-dropdown {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    color: var(--text-primary);
+    padding: 6px 28px 6px 10px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23b0b0b0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    min-width: 110px;
+}
+
+.effect-dropdown:hover:not(:disabled) {
+    border-color: var(--primary-color);
+}
+
+.effect-dropdown:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(255, 165, 0, 0.2);
+}
+
+.effect-dropdown:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.effect-dropdown option {
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    padding: 8px;
 }
 
 /* Responsive Design */
@@ -657,13 +705,37 @@ footer {
         font-size: 0.65rem;
     }
 
-    .effect-selector {
+    .effect-selector-bar {
         bottom: 15px;
         right: 15px;
+        padding: 6px 12px;
     }
 
-    .effect-toggle {
-        width: 42px;
-        height: 42px;
+    .effect-selector-content {
+        gap: 8px;
+    }
+
+    .effect-label {
+        font-size: 0.75rem;
+    }
+
+    .effect-switch {
+        width: 36px;
+        height: 20px;
+    }
+
+    .effect-switch-slider:before {
+        height: 14px;
+        width: 14px;
+    }
+
+    .effect-switch input:checked + .effect-switch-slider:before {
+        transform: translateX(16px);
+    }
+
+    .effect-dropdown {
+        font-size: 0.75rem;
+        min-width: 90px;
+        padding: 4px 24px 4px 8px;
     }
 }
