@@ -8,6 +8,7 @@ import {
   Grid,
   Card,
   CardContent,
+  CardMedia,
   Divider,
   Alert,
   CircularProgress,
@@ -22,6 +23,7 @@ import {
   Edit as EditIcon,
   ArrowBack as BackIcon,
   Add as AddIcon,
+  Image as ImageIcon,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -206,6 +208,96 @@ const EditionDetailPage = () => {
               </Box>
             </CardContent>
           </Card>
+        </Grid>
+
+        {/* Images Section */}
+        <Grid item xs={12}>
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Imágenes
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+
+            <Grid container spacing={3}>
+              {/* Logo */}
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                  Logo
+                </Typography>
+                {edition.logo ? (
+                  <Card sx={{ bgcolor: 'grey.900' }}>
+                    <CardMedia
+                      component="img"
+                      image={edition.logo}
+                      alt="Logo de la edición"
+                      sx={{
+                        height: 150,
+                        objectFit: 'contain',
+                        p: 1,
+                      }}
+                    />
+                  </Card>
+                ) : (
+                  <Box
+                    sx={{
+                      height: 150,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: 'grey.900',
+                      borderRadius: 1,
+                      border: '1px dashed',
+                      borderColor: 'grey.700',
+                    }}
+                  >
+                    <Box sx={{ textAlign: 'center', color: 'text.secondary' }}>
+                      <ImageIcon sx={{ fontSize: 40, opacity: 0.5 }} />
+                      <Typography variant="body2">Sin logo</Typography>
+                    </Box>
+                  </Box>
+                )}
+              </Grid>
+
+              {/* Poster */}
+              <Grid item xs={12} sm={6} md={8}>
+                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                  Cartel
+                </Typography>
+                {edition.poster ? (
+                  <Card sx={{ bgcolor: 'grey.900' }}>
+                    <CardMedia
+                      component="img"
+                      image={edition.poster}
+                      alt="Cartel de la edición"
+                      sx={{
+                        height: 250,
+                        objectFit: 'contain',
+                        p: 1,
+                      }}
+                    />
+                  </Card>
+                ) : (
+                  <Box
+                    sx={{
+                      height: 250,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: 'grey.900',
+                      borderRadius: 1,
+                      border: '1px dashed',
+                      borderColor: 'grey.700',
+                    }}
+                  >
+                    <Box sx={{ textAlign: 'center', color: 'text.secondary' }}>
+                      <ImageIcon sx={{ fontSize: 48, opacity: 0.5 }} />
+                      <Typography variant="body2">Sin cartel</Typography>
+                    </Box>
+                  </Box>
+                )}
+              </Grid>
+            </Grid>
+          </Paper>
         </Grid>
 
         {/* Compos Table */}

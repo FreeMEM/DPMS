@@ -35,7 +35,22 @@
         <nav class="navbar">
             <div class="container">
                 <div class="navbar-brand">
-                    <a href="/" style="text-decoration: none;"><h1>DPMS</h1></a>
+                    <a href="/" style="text-decoration: none;">
+                        {% if current_edition and current_edition.logo %}
+                            <img
+                                src="{{ current_edition.logo.url }}"
+                                alt="{{ current_edition.title }}"
+                                class="navbar-logo"
+                                {% if current_edition.logo_border_width > 0 %}
+                                style="filter: drop-shadow(0 0 {{ current_edition.logo_border_width }}px {{ current_edition.logo_border_color }});"
+                                {% endif %}
+                            >
+                        {% elif current_edition %}
+                            <h1>{{ current_edition.title }}</h1>
+                        {% else %}
+                            <h1>DPMS</h1>
+                        {% endif %}
+                    </a>
                 </div>
                 <div class="navbar-menu">
                     <a href="/">Inicio</a>
