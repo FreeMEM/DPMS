@@ -1,5 +1,6 @@
 """Production ViewSet"""
 
+from django.db.models import Q
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -24,14 +25,26 @@ class ProductionViewSet(viewsets.ModelViewSet):
     update: Update production (owner or admin, if updates allowed)
     destroy: Delete production (owner or admin)
     my_productions: List current user's productions
+
+    Productions visibility:
+    - Admins can see all productions
+    - If edition.productions_public=True: everyone can see all productions
+    - If edition.productions_public=False: users can only see their own productions
     """
 
     queryset = Production.objects.all().select_related(
         'uploaded_by', 'edition', 'compo'
     ).prefetch_related('files')
 
+    def _is_admin(self):
+        """Check if current user is admin"""
+        user = self.request.user
+        if not user.is_authenticated:
+            return False
+        return user.is_staff or user.groups.filter(name='DPMS Admins').exists()
+
     def get_queryset(self):
-        """Filter productions based on query params"""
+        """Filter productions based on query params and visibility rules"""
         queryset = super().get_queryset()
 
         # Filter by edition
@@ -48,6 +61,19 @@ class ProductionViewSet(viewsets.ModelViewSet):
         my_productions = self.request.query_params.get('my_productions')
         if my_productions and self.request.user.is_authenticated:
             queryset = queryset.filter(uploaded_by=self.request.user)
+        else:
+            # Apply visibility rules if not explicitly requesting own productions
+            # Admins can see everything
+            if not self._is_admin():
+                # Non-admins: show productions from public editions OR their own
+                if self.request.user.is_authenticated:
+                    queryset = queryset.filter(
+                        Q(edition__productions_public=True) |
+                        Q(uploaded_by=self.request.user)
+                    )
+                else:
+                    # Anonymous users: only public productions
+                    queryset = queryset.filter(edition__productions_public=True)
 
         return queryset.order_by('-created')
 

@@ -62,6 +62,7 @@ class EditionAdmin(admin.ModelAdmin):
         "public_badge",
         "upload_badge",
         "update_badge",
+        "productions_public_badge",
         "compos_count",
         "productions_count",
         "created_display",
@@ -76,6 +77,7 @@ class EditionAdmin(admin.ModelAdmin):
         "public",
         "open_to_upload",
         "open_to_update",
+        "productions_public",
         "uploaded_by",
         "created",
         "modified",
@@ -94,7 +96,8 @@ class EditionAdmin(admin.ModelAdmin):
             "description": "Logo and poster images for the edition. Configure border to add glow effect around logo."
         }),
         ("Status", {
-            "fields": ("public", "open_to_upload", "open_to_update")
+            "fields": ("public", "open_to_upload", "open_to_update", "productions_public"),
+            "description": "productions_public: Enable to make all productions visible to everyone (after voting)."
         }),
         ("Statistics", {
             "fields": ("compos_count", "productions_count"),
@@ -110,7 +113,7 @@ class EditionAdmin(admin.ModelAdmin):
 
     ordering = ["-created"]
 
-    actions = ["make_public", "make_private", "open_uploads", "close_uploads", "open_updates", "close_updates"]
+    actions = ["make_public", "make_private", "open_uploads", "close_uploads", "open_updates", "close_updates", "publish_productions", "unpublish_productions"]
 
     def uploaded_by_link(self, obj):
         """Link to user admin page"""
@@ -156,6 +159,18 @@ class EditionAdmin(admin.ModelAdmin):
         )
     update_badge.short_description = "Updates"
     update_badge.admin_order_field = "open_to_update"
+
+    def productions_public_badge(self, obj):
+        """Display productions public status"""
+        if obj.productions_public:
+            return format_html(
+                '<span style="background-color: #28a745; color: white; padding: 3px 10px; border-radius: 3px;">Published</span>'
+            )
+        return format_html(
+            '<span style="background-color: #6c757d; color: white; padding: 3px 10px; border-radius: 3px;">Hidden</span>'
+        )
+    productions_public_badge.short_description = "Productions"
+    productions_public_badge.admin_order_field = "productions_public"
 
     def compos_count(self, obj):
         """Count of compos in edition"""
@@ -241,6 +256,18 @@ class EditionAdmin(admin.ModelAdmin):
         updated = queryset.update(open_to_update=False)
         self.message_user(request, f"{updated} editions are now closed for updates.")
     close_updates.short_description = "Close updates"
+
+    def publish_productions(self, request, queryset):
+        """Publish productions for selected editions (make all productions visible to everyone)"""
+        updated = queryset.update(productions_public=True)
+        self.message_user(request, f"{updated} editions now have all productions published and visible to everyone.")
+    publish_productions.short_description = "Publish productions (make visible to all)"
+
+    def unpublish_productions(self, request, queryset):
+        """Unpublish productions for selected editions (users only see their own)"""
+        updated = queryset.update(productions_public=False)
+        self.message_user(request, f"{updated} editions productions are now hidden (users can only see their own).")
+    unpublish_productions.short_description = "Unpublish productions (hide from others)"
 
 
 @admin.register(Compo)

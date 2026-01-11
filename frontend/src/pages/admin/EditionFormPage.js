@@ -41,6 +41,7 @@ const EditionFormPage = () => {
     public: false,
     open_to_upload: false,
     open_to_update: false,
+    productions_public: false,
   });
 
   // Image states
@@ -74,6 +75,7 @@ const EditionFormPage = () => {
         public: response.data.public || false,
         open_to_upload: response.data.open_to_upload || false,
         open_to_update: response.data.open_to_update || false,
+        productions_public: response.data.productions_public || false,
       });
       // Set existing images
       if (response.data.logo) {
@@ -169,6 +171,7 @@ const EditionFormPage = () => {
       submitData.append('public', formData.public);
       submitData.append('open_to_upload', formData.open_to_upload);
       submitData.append('open_to_update', formData.open_to_update);
+      submitData.append('productions_public', formData.productions_public);
 
       // Add files if selected
       if (logoFile) {
@@ -481,6 +484,22 @@ const EditionFormPage = () => {
                 }
                 label="Permitir actualizar producciones existentes"
               />
+            </Box>
+
+            <Box>
+              <FormControlLabel
+                control={
+                  <Switch
+                    name="productions_public"
+                    checked={formData.productions_public}
+                    onChange={handleChange}
+                  />
+                }
+                label="Publicar producciones (visibles para todos)"
+              />
+              <Typography variant="caption" display="block" sx={{ ml: 6, color: 'text.secondary' }}>
+                Si está desactivado, los usuarios solo ven sus propias producciones. Activar después de las votaciones.
+              </Typography>
             </Box>
 
             {/* Actions */}
