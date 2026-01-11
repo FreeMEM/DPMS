@@ -13,21 +13,26 @@ I'm computing passionated since 1984. I organized RadyKal Party at Granada, Spai
 ## Features
 
 - **User Management**: Secure registration and authentication system with email verification
+- **Edition Management**: Create party editions with custom logo, poster, and configurable glow effects
 - **Competition Management (Compos)**: Create and manage different competition categories
 - **Production Submissions**: Allow sceners to submit their productions (demos, music, graphics, etc.)
 - **Voting System**: Enable attendees to vote on competition entries
 - **StageRunner**: Fullscreen presentation system for displaying productions on projector/big screen during events
 - **Role-based Access**: Different permissions for Admins, Organizers, and Sceners
 - **Multi-language Support**: Built with i18n support (currently Spanish/English)
-- **SEO-friendly Landing Page**: Public-facing page with event information, news, and gallery
+- **Animated 3D Backgrounds**: Multiple WebGL effects (Hyperspace, Wave, Energy Grid, TRON Grid) with automatic rotation
+- **Dynamic Branding**: Edition logo with configurable glow effect displayed across login, signup, and main application
+- **SEO-friendly Landing Page**: Public-facing page with event information, countdown timer, and animated backgrounds
+- **Admin Dashboard**: Full-featured administration panel for managing editions, competitions, productions, and users
 - **REST API**: Full-featured API with Swagger documentation
 
 ## Technology Stack
 
 - **Backend**: Django 4.x + Django REST Framework + PostgreSQL
 - **Frontend**: React 18 + Material-UI + React Router v6
+- **3D Graphics**: Three.js for WebGL background effects
 - **Containerization**: Docker & Docker Compose
-- **Authentication**: Token-based authentication
+- **Authentication**: Token-based authentication (DRF Token + JWT)
 
 ## Prerequisites
 
@@ -185,12 +190,18 @@ DPMS/
 │   └── requirements/    # Python dependencies
 ├── frontend/            # React application (SPA)
 │   ├── src/
-│   │   ├── components/  # React components
-│   │   │   ├── user/           # Auth components
+│   │   ├── @dpms-freemem/      # Core UI components (MainBar, Content)
+│   │   ├── components/         # React components
+│   │   │   ├── admin/          # Admin panel components
+│   │   │   │   └── common/     # Shared admin components (LoadingSpinner, StatusChip, etc.)
+│   │   │   ├── common/         # Shared components (ThreeBackground, backgroundEffects)
+│   │   │   ├── user/           # Auth components (Login, Signup)
 │   │   │   └── productions/    # Production management
-│   │   ├── services/    # API clients
-│   │   ├── utils/       # Frontend utilities
-│   │   └── routes.js    # Application routing
+│   │   ├── pages/              # Page components
+│   │   │   └── admin/          # Admin pages (Editions, Compos, Productions)
+│   │   ├── effects/            # Visual effects (ParticleEffects)
+│   │   ├── utils/              # Frontend utilities (AxiosWrapper, dateFormatting)
+│   │   └── routes.js           # Application routing
 │   └── package.json
 ├── stagerunner/         # StageRunner presentation app (separate React app)
 │   ├── src/
