@@ -4,6 +4,9 @@ import { getEffect, getEffectCount } from "./backgroundEffects";
 
 const ThreeBackground = ({ variant = "admin" }) => {
   const containerRef = useRef(null);
+  const rendererRef = useRef(null);
+  const animationFrameRef = useRef(null);
+  const isInitializedRef = useRef(false);
   const mouseRef = useRef({ x: 0, y: 0 });
   const targetMouseRef = useRef({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(() => {
@@ -78,16 +81,24 @@ const ThreeBackground = ({ variant = "admin" }) => {
     const container = containerRef.current;
     const currentEffect = getEffect(effectIndex);
 
-    console.log("ThreeBackground: Container ref:", container);
-    console.log("ThreeBackground: Variant:", variant);
-    console.log("ThreeBackground: Effect:", currentEffect.name);
-
     if (!container) {
-      console.log("ThreeBackground: No container found!");
       return;
     }
 
-    console.log("ThreeBackground: Initializing Three.js...");
+    // Limpiar instancia anterior si existe
+    if (rendererRef.current) {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      rendererRef.current.dispose();
+      rendererRef.current = null;
+    }
+
+    // Limpiar canvas existentes
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
 
     // Scene setup
     const scene = new THREE.Scene();
@@ -95,9 +106,8 @@ const ThreeBackground = ({ variant = "admin" }) => {
 
     // Ajustar cámara según el efecto
     if (currentEffect.use3DGrid) {
-      // Para TRON grid: cámara elevada mirando hacia abajo y adelante
-      camera.position.set(0, 8, 12);  // Elevada y atrás
-      camera.lookAt(0, 0, -20);  // Mirando hacia el grid
+      camera.position.set(0, 8, 12);
+      camera.lookAt(0, 0, -20);
     } else {
       camera.position.z = 5;
     }
@@ -105,12 +115,9 @@ const ThreeBackground = ({ variant = "admin" }) => {
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-    console.log("ThreeBackground: Renderer created:", renderer);
-    console.log("ThreeBackground: Canvas element:", renderer.domElement);
+    rendererRef.current = renderer;
 
     container.appendChild(renderer.domElement);
-    console.log("ThreeBackground: Canvas appended to container");
 
     // Get particle colors based on variant
     const getParticleColors = () => {
@@ -155,8 +162,6 @@ const ThreeBackground = ({ variant = "admin" }) => {
 
     const particles = new THREE.Points(particlesGeometry, particlesMaterial);
     scene.add(particles);
-
-    console.log("ThreeBackground: Particles created with", particlesCount, "particles");
 
     // Create lines to connect nearby particles - using effect settings
     const maxConnections = currentEffect.maxConnections(variant);
@@ -290,8 +295,6 @@ const ThreeBackground = ({ variant = "admin" }) => {
     // Add ambient light
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
-
-    console.log("ThreeBackground: Scene setup complete, starting animation...");
 
     // Mouse/Touch handlers
     const handleMouseMove = (event) => {
@@ -688,28 +691,47 @@ const ThreeBackground = ({ variant = "admin" }) => {
       lines.geometry.attributes.position.needsUpdate = true;
 
       renderer.render(scene, camera);
-      requestAnimationFrame(animate);
+      animationFrameRef.current = requestAnimationFrame(animate);
     };
 
-    animate();
+    animationFrameRef.current = requestAnimationFrame(animate);
 
     // Cleanup
     return () => {
+      // Cancelar animation frame
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+
+      // Remover event listeners
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("resize", handleResize);
 
+      // Limpiar la escena
+      scene.traverse((object) => {
+        if (object.geometry) {
+          object.geometry.dispose();
+        }
+        if (object.material) {
+          if (Array.isArray(object.material)) {
+            object.material.forEach(material => material.dispose());
+          } else {
+            object.material.dispose();
+          }
+        }
+      });
+
+      // Limpiar canvas del DOM
       if (container && renderer.domElement && container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
 
-      particlesGeometry.dispose();
-      particlesMaterial.dispose();
-      lineGeometry.dispose();
-      lineMaterial.dispose();
-      plasmaGeometry.dispose();
-      plasmaMaterial.dispose();
+      // Dispose del renderer
       renderer.dispose();
+      renderer.forceContextLoss();
+      rendererRef.current = null;
     };
   }, [variant, effectIndex]);
 

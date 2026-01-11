@@ -74,6 +74,9 @@ const AuthProvider = ({ children }) => {
     setToken(null);
     setUser(null);
     setGroups([]);
+    // Redirect to backend home
+    const backendURL = process.env.REACT_APP_BACKEND_ADDRESS || "http://localhost:8000";
+    window.location.href = backendURL + "/";
   };
 
   const verifyAccount = async (token) => {

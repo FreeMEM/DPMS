@@ -10,6 +10,7 @@ from .models import (
     HasCompo,
     Production,
     File,
+    GalleryImage,
     VotingConfiguration,
     AttendanceCode,
     AttendeeVerification,
@@ -1512,3 +1513,167 @@ class VotingPeriodAdmin(admin.ModelAdmin):
         self.message_user(request, f"{updated} voting periods have been deactivated.")
 
     deactivate_periods.short_description = "Deactivate selected periods"
+
+
+# ============================================================================
+# GALLERY ADMIN
+# ============================================================================
+
+
+@admin.register(GalleryImage)
+class GalleryImageAdmin(admin.ModelAdmin):
+    """GalleryImage model admin"""
+
+    list_display = (
+        "id",
+        "thumbnail_preview",
+        "title",
+        "edition_link",
+        "uploaded_by_link",
+        "public_badge",
+        "active_badge",
+        "created_display",
+    )
+
+    list_display_links = ("id", "title")
+
+    search_fields = (
+        "title",
+        "description",
+        "original_filename",
+        "uploaded_by__email",
+        "uploaded_by__username",
+        "edition__title",
+    )
+
+    list_filter = (
+        "public",
+        "is_active",
+        "is_deleted",
+        "edition",
+        "uploaded_by",
+        "created",
+    )
+
+    readonly_fields = (
+        "original_filename",
+        "created",
+        "modified",
+        "image_preview",
+    )
+
+    fieldsets = (
+        ("Basic Information", {
+            "fields": ("title", "description", "edition", "uploaded_by")
+        }),
+        ("Image", {
+            "fields": ("image", "image_preview", "original_filename")
+        }),
+        ("Status", {
+            "fields": ("public", "is_active", "is_deleted")
+        }),
+        ("Timestamps", {
+            "fields": ("created", "modified"),
+            "classes": ("collapse",)
+        }),
+    )
+
+    list_per_page = 50
+
+    ordering = ["-created"]
+
+    autocomplete_fields = ["edition", "uploaded_by"]
+
+    actions = ["make_public", "make_private", "activate_images", "deactivate_images"]
+
+    def thumbnail_preview(self, obj):
+        """Display thumbnail"""
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="max-height: 50px; max-width: 80px; object-fit: cover; border-radius: 4px;"/>',
+                obj.image.url
+            )
+        return "-"
+    thumbnail_preview.short_description = "Preview"
+
+    def image_preview(self, obj):
+        """Display full image preview"""
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="max-height: 300px; max-width: 100%;"/>',
+                obj.image.url
+            )
+        return "No image"
+    image_preview.short_description = "Image Preview"
+
+    def edition_link(self, obj):
+        """Link to edition admin page"""
+        if obj.edition:
+            url = reverse("admin:compos_edition_change", args=[obj.edition.pk])
+            return format_html('<a href="{}">{}</a>', url, obj.edition.title)
+        return "-"
+    edition_link.short_description = "Edition"
+    edition_link.admin_order_field = "edition__title"
+
+    def uploaded_by_link(self, obj):
+        """Link to user admin page"""
+        if obj.uploaded_by:
+            url = reverse("admin:users_user_change", args=[obj.uploaded_by.pk])
+            return format_html('<a href="{}">{}</a>', url, obj.uploaded_by.email)
+        return "-"
+    uploaded_by_link.short_description = "Uploaded By"
+    uploaded_by_link.admin_order_field = "uploaded_by__email"
+
+    def public_badge(self, obj):
+        """Display public status"""
+        if obj.public:
+            return format_html(
+                '<span style="background-color: #28a745; color: white; padding: 3px 10px; border-radius: 3px;">Public</span>'
+            )
+        return format_html(
+            '<span style="background-color: #6c757d; color: white; padding: 3px 10px; border-radius: 3px;">Private</span>'
+        )
+    public_badge.short_description = "Public"
+    public_badge.admin_order_field = "public"
+
+    def active_badge(self, obj):
+        """Display active status"""
+        if obj.is_active:
+            return format_html(
+                '<span style="background-color: #28a745; color: white; padding: 3px 10px; border-radius: 3px;">Active</span>'
+            )
+        return format_html(
+            '<span style="background-color: #6c757d; color: white; padding: 3px 10px; border-radius: 3px;">Inactive</span>'
+        )
+    active_badge.short_description = "Active"
+    active_badge.admin_order_field = "is_active"
+
+    def created_display(self, obj):
+        """Format created date"""
+        return obj.created.strftime("%Y-%m-%d %H:%M")
+    created_display.short_description = "Created"
+    created_display.admin_order_field = "created"
+
+    def make_public(self, request, queryset):
+        """Make selected images public"""
+        updated = queryset.update(public=True)
+        self.message_user(request, f"{updated} images are now public.")
+    make_public.short_description = "Make public"
+
+    def make_private(self, request, queryset):
+        """Make selected images private"""
+        updated = queryset.update(public=False)
+        self.message_user(request, f"{updated} images are now private.")
+    make_private.short_description = "Make private"
+
+    def activate_images(self, request, queryset):
+        """Activate selected images"""
+        updated = queryset.update(is_active=True)
+        self.message_user(request, f"{updated} images are now active.")
+    activate_images.short_description = "Activate images"
+
+    def deactivate_images(self, request, queryset):
+        """Deactivate selected images"""
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f"{updated} images are now inactive.")
+    deactivate_images.short_description = "Deactivate images"

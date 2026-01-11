@@ -1,62 +1,160 @@
 {% extends 'website/base.html' %}
 {% load static %}
 
-{% block title %}{{ event_name }} - Demo Party{% endblock %}
+{% block title %}{% if current_edition %}{{ current_edition.title }} - {% endif %}DPMS Demo Party{% endblock %}
 
 {% block content %}
+<!-- Hero Section - Full Screen Landing -->
 <div class="hero-section">
-    <div class="container">
-        <h1>Bienvenidos a {{ event_name }}</h1>
-        <p class="lead">Sistema de gestión de demo parties</p>
+    <div class="hero-content">
+        {% if current_edition %}
+            <div class="edition-badge">Demo Party</div>
+            <h1 class="hero-title">{{ current_edition.title }}</h1>
+            {% if current_edition.description %}
+                <p class="hero-subtitle">{{ current_edition.description|truncatewords:15 }}</p>
+            {% endif %}
+
+            <!-- Countdown Timer -->
+            {% if countdown_data %}
+                <div class="countdown-container">
+                    <div class="countdown-label">Comienza en</div>
+                    <div class="countdown-timer" id="countdown"
+                         data-target="{{ countdown_data.target_date }}">
+                        <div class="countdown-item">
+                            <span class="countdown-value" id="days">{{ countdown_data.days }}</span>
+                            <span class="countdown-unit">Dias</span>
+                        </div>
+                        <div class="countdown-separator">:</div>
+                        <div class="countdown-item">
+                            <span class="countdown-value" id="hours">{{ countdown_data.hours|stringformat:"02d" }}</span>
+                            <span class="countdown-unit">Horas</span>
+                        </div>
+                        <div class="countdown-separator">:</div>
+                        <div class="countdown-item">
+                            <span class="countdown-value" id="minutes">{{ countdown_data.minutes|stringformat:"02d" }}</span>
+                            <span class="countdown-unit">Min</span>
+                        </div>
+                        <div class="countdown-separator">:</div>
+                        <div class="countdown-item">
+                            <span class="countdown-value" id="seconds">{{ countdown_data.seconds|stringformat:"02d" }}</span>
+                            <span class="countdown-unit">Seg</span>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Open Compos -->
+            {% if open_compos_count > 0 %}
+                <div class="open-compos-badge">
+                    <span class="compos-count">{{ open_compos_count }}</span>
+                    competicion{{ open_compos_count|pluralize:"es" }} abierta{{ open_compos_count|pluralize:"s" }}
+                </div>
+            {% endif %}
+
+        {% else %}
+            <h1 class="hero-title">DPMS</h1>
+            <p class="hero-subtitle">Demo Party Management System</p>
+        {% endif %}
+
+        <!-- CTA Buttons -->
         <div class="cta-buttons">
-            <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary">Regístrate Ahora</a>
-            <a href="{{ FRONTEND_URL }}/login" class="btn btn-secondary">Ya tengo cuenta</a>
+            <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">Registrarse</a>
+            <a href="{{ FRONTEND_URL }}/login" class="btn btn-secondary">Acceder</a>
+        </div>
+
+        <!-- Scroll indicator -->
+        <div class="scroll-indicator">
+            <span>Scroll</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M19 12l-7 7-7-7"/>
+            </svg>
         </div>
     </div>
 </div>
 
+<!-- Info Section -->
 <div class="info-section">
     <div class="container">
-        <h2>¿Qué es una Demo Party?</h2>
-        <p>
+        <h2>Demo Party</h2>
+        <p class="section-description">
             Una demo party es un encuentro de artistas digitales, programadores y creativos
-            de la escena demoscene donde se compite en diferentes categorías creando
-            obras audiovisuales, música, gráficos y más.
+            de la escena demoscene donde se compite en distintas categorias.
         </p>
 
         <div class="features">
             <div class="feature">
-                <h3>🎨 Competiciones</h3>
-                <p>Participa en diferentes categorías: demos, música, gráficos, wild...</p>
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                        <path d="M2 17l10 5 10-5"></path>
+                        <path d="M2 12l10 5 10-5"></path>
+                    </svg>
+                </div>
+                <h3>Competiciones</h3>
+                <p>Demos, intros, musica, graficos, wild...</p>
             </div>
             <div class="feature">
-                <h3>🏆 Votación</h3>
-                <p>Vota por tus producciones favoritas y ayuda a decidir los ganadores.</p>
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                </div>
+                <h3>Votacion</h3>
+                <p>Vota por tus producciones favoritas.</p>
             </div>
             <div class="feature">
-                <h3>👥 Comunidad</h3>
-                <p>Conoce a otros artistas y programadores de la demoscene.</p>
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </div>
+                <h3>Comunidad</h3>
+                <p>Conecta con la escena demoscene.</p>
             </div>
+        </div>
+
+        <div class="section-cta">
+            <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-large btn-glow">Unirse Ahora</a>
         </div>
     </div>
 </div>
 
-<div class="upcoming-section">
-    <div class="container">
-        <h2>Próximo Evento</h2>
-        <p class="placeholder-text">
-            La información del próximo evento se mostrará aquí próximamente.
-            <br>
-            (Esta sección se completará en la Fase 1 del desarrollo)
-        </p>
-    </div>
-</div>
+{% endblock %}
 
-<div class="cta-final">
-    <div class="container">
-        <h2>¿Listo para participar?</h2>
-        <p>Regístrate ahora y forma parte de la comunidad demoscene</p>
-        <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-large">Crear Cuenta Gratis</a>
-    </div>
-</div>
+{% block extra_js %}
+<script>
+// Countdown Timer
+(function() {
+    const countdownEl = document.getElementById('countdown');
+    if (!countdownEl) return;
+
+    const targetDate = new Date(countdownEl.dataset.target).getTime();
+
+    function updateCountdown() {
+        const now = Date.now();
+        const diff = targetDate - now;
+
+        if (diff <= 0) {
+            countdownEl.innerHTML = '<div class="countdown-ended">Evento en curso!</div>';
+            return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        document.getElementById('days').textContent = days;
+        document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+        document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+        document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+})();
+</script>
 {% endblock %}

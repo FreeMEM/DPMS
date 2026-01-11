@@ -1,0 +1,104 @@
+{% extends 'website/base.html' %}
+{% load static %}
+
+{% block title %}Past Editions - DPMS{% endblock %}
+
+{% block content %}
+<div class="editions-page">
+    <div class="container">
+        <h1>Past Editions</h1>
+        <p class="section-description">Browse through our archive of previous events.</p>
+
+        {% if editions %}
+        <div class="editions-grid">
+            {% for edition in editions %}
+            <div class="edition-card">
+                <h3>{{ edition.title }}</h3>
+                {% if edition.description %}
+                    <p>{{ edition.description|truncatewords:25 }}</p>
+                {% endif %}
+                <div class="edition-meta">
+                    <span class="edition-date">{{ edition.created|date:"F Y" }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="no-editions">No past editions available yet.</p>
+        {% endif %}
+
+        <div class="back-link">
+            <a href="{% url 'website:index' %}" class="btn btn-secondary">Back to Home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.editions-page {
+    padding-top: 100px;
+    min-height: 100vh;
+}
+
+.editions-page h1 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.editions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 3rem 0;
+}
+
+.edition-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+    padding: 2rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.edition-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 30px var(--glow-color);
+    transform: translateY(-5px);
+}
+
+.edition-card h3 {
+    color: var(--text-primary);
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+}
+
+.edition-card p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.edition-meta {
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.no-editions {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    padding: 3rem 0;
+}
+
+.back-link {
+    text-align: center;
+    margin-top: 2rem;
+}
+</style>
+{% endblock %}

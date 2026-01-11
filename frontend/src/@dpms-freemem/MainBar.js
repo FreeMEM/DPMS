@@ -36,10 +36,13 @@ import { AuthContext } from "../AuthContext";
 
 const MainBar = () => {
   const { t } = useTranslation();
-  const { logout, groups } = useContext(AuthContext);
-  const [open, setOpen] = useState(false);
+  const { logout, groups, user } = useContext(AuthContext);
+  const [open, setOpen] = useState(() => {
+    // Persistir estado del drawer en localStorage
+    const saved = localStorage.getItem('drawerOpen');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
   const [anchorEl, setAnchorEl] = useState(null);
-  const [panel, setPanel] = useState("user");
   const theme = useTheme();
 
   const isDesktop = useMediaQuery(theme.breakpoints.up("sm")); // sm, md, lg, xl (≥600px)
@@ -47,23 +50,21 @@ const MainBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Determina el panel correcto según la ruta
+  // Determina el panel basándose en la ruta actual
+  const panel = location.pathname.startsWith("/admin") ? "admin" : "user";
+
+  // Guardar estado del drawer en localStorage cuando cambia
   useEffect(() => {
-    if (location.pathname === "/demo-party/dashboard") {
-      setPanel("user");
-    } else if (groups.includes("DPMS Admins") && location.pathname.startsWith("/admin")) {
-      setPanel("admin");
-    } else if (groups.includes("DPMS Users")) {
-      setPanel("user");
-    }
-  }, [groups, location]);
+    localStorage.setItem('drawerOpen', JSON.stringify(open));
+  }, [open]);
 
   // Cierra el drawer en móvil cuando cambia la ubicación
   useEffect(() => {
-    if (isMobile && open) {
+    if (isMobile) {
       setOpen(false);
     }
-  }, [location.pathname, isMobile, open]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   const toggleDrawer = () => {
     setOpen(!open);
@@ -83,32 +84,29 @@ const MainBar = () => {
   };
 
   const handleUserPanel = () => {
-    setPanel("user");
-    navigate("/");
+    navigate("/demo-party/dashboard");
     handleClose();
   };
 
   const handleAdminPanel = () => {
-    setPanel("admin");
     navigate("/admin/dashboard");
     handleClose();
   };
 
   const handleParty = () => {
-    setPanel("user");
     navigate("/demo-party/dashboard");
     handleClose();
   };
 
-  // Función para obtener el label actual para mostrar al lado del AccountCircle
-  const getCurrentLabel = () => {
-    if (location.pathname.startsWith("/admin")) {
-      return t("Administrator");
-    } else if (location.pathname === "/demo-party/dashboard") {
-      return t("Demo Party");
-    } else {
-      return t("User");
+  // Función para obtener el nombre del usuario para mostrar al lado del AccountCircle
+  const getUserDisplayName = () => {
+    if (user) {
+      // Prioridad: nickname > first_name > email (parte antes del @)
+      if (user.nickname) return user.nickname;
+      if (user.first_name) return user.first_name;
+      if (user.email) return user.email.split('@')[0];
     }
+    return t("User");
   };
 
   // Función para verificar si una ruta está activa
@@ -155,7 +153,7 @@ const MainBar = () => {
         </Box>
         <Box display="flex" alignItems="center">
           <Typography variant="body1" color="inherit" sx={{ marginRight: 1 }}>
-            {getCurrentLabel()}
+            {getUserDisplayName()}
           </Typography>
           <IconButton
             color="inherit"
@@ -277,12 +275,6 @@ const MainBar = () => {
         {panel === "admin" && (
           <Box className="drawer-content">
             <List sx={{ width: "100%" }}>
-              <ListItemButton selected={isActive("/")} onClick={handleUserPanel} sx={{ justifyContent: open ? 'initial' : 'center' }}>
-                <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
-                  <HomeIcon />
-                </ListItemIcon>
-                {open && <ListItemText primary={t("User Panel")} />}
-              </ListItemButton>
               <ListItemButton selected={isActive("/admin/dashboard")} onClick={() => navigate("/admin/dashboard")} sx={{ justifyContent: open ? 'initial' : 'center' }}>
                 <ListItemIcon sx={{ minWidth: open ? 40 : 0, mr: open ? 3 : 'auto', justifyContent: 'center' }}>
                   <DashboardIcon />
