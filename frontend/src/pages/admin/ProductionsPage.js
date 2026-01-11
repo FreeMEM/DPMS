@@ -16,7 +16,6 @@ import {
   InputAdornment,
   Chip,
   Alert,
-  CircularProgress,
   MenuItem,
   Select,
   FormControl,
@@ -27,13 +26,11 @@ import {
   Delete as DeleteIcon,
   Search as SearchIcon,
   Visibility as ViewIcon,
-  CheckCircle as ApprovedIcon,
-  Cancel as RejectedIcon,
-  HourglassEmpty as PendingIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
-import ConfirmDialog from '../../components/admin/common/ConfirmDialog';
+import { ConfirmDialog, LoadingSpinner, StatusChip } from '../../components/admin/common';
+import { formatDate } from '../../utils/dateFormatting';
 import axiosWrapper from '../../utils/AxiosWrapper';
 
 const ProductionsPage = () => {
@@ -98,35 +95,6 @@ const ProductionsPage = () => {
     setPage(0);
   };
 
-  const getStatusChip = (status) => {
-    const statusConfig = {
-      pending: { label: 'Pendiente', color: 'warning', icon: <PendingIcon fontSize="small" /> },
-      approved: { label: 'Aprobada', color: 'success', icon: <ApprovedIcon fontSize="small" /> },
-      rejected: { label: 'Rechazada', color: 'error', icon: <RejectedIcon fontSize="small" /> },
-    };
-
-    const config = statusConfig[status] || statusConfig.pending;
-
-    return (
-      <Chip
-        label={config.label}
-        color={config.color}
-        size="small"
-        icon={config.icon}
-      />
-    );
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
   const filteredProductions = productions.filter((production) => {
     const matchesSearch = production.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesEdition = !filterEdition || production.edition === parseInt(filterEdition, 10);
@@ -143,9 +111,7 @@ const ProductionsPage = () => {
   if (loading) {
     return (
       <AdminLayout title="Gestión de Producciones">
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-          <CircularProgress />
-        </Box>
+        <LoadingSpinner />
       </AdminLayout>
     );
   }
@@ -282,7 +248,7 @@ const ProductionsPage = () => {
                         {compos.find((c) => c.id === production.compo)?.name || '-'}
                       </Typography>
                     </TableCell>
-                    <TableCell align="center">{getStatusChip(production.status)}</TableCell>
+                    <TableCell align="center"><StatusChip status={production.status} /></TableCell>
                     <TableCell align="center">
                       {production.ranking ? (
                         <Chip

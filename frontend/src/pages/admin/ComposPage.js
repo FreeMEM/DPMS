@@ -16,7 +16,6 @@ import {
   InputAdornment,
   Chip,
   Alert,
-  CircularProgress,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -27,7 +26,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
-import ConfirmDialog from '../../components/admin/common/ConfirmDialog';
+import { ConfirmDialog, LoadingSpinner } from '../../components/admin/common';
 import axiosWrapper from '../../utils/AxiosWrapper';
 
 const ComposPage = () => {
@@ -93,9 +92,7 @@ const ComposPage = () => {
   if (loading) {
     return (
       <AdminLayout title="Gestión de Competiciones">
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-          <CircularProgress />
-        </Box>
+        <LoadingSpinner />
       </AdminLayout>
     );
   }

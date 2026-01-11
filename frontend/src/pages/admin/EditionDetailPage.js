@@ -11,7 +11,6 @@ import {
   CardMedia,
   Divider,
   Alert,
-  CircularProgress,
   Table,
   TableBody,
   TableCell,
@@ -27,7 +26,27 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
+import { LoadingSpinner, InfoField, EmptyState } from '../../components/admin/common';
+import { formatDateTime } from '../../utils/dateFormatting';
 import axiosWrapper from '../../utils/AxiosWrapper';
+
+// Estilos reutilizables
+const ellipsisStyle = {
+  maxWidth: 300,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+};
+
+const imagePlaceholderStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  bgcolor: 'grey.900',
+  borderRadius: 1,
+  border: '1px dashed',
+  borderColor: 'grey.700',
+};
 
 const EditionDetailPage = () => {
   const navigate = useNavigate();
@@ -56,24 +75,10 @@ const EditionDetailPage = () => {
     }
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    return date.toLocaleString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
   if (loading) {
     return (
       <AdminLayout title="Detalle de Edición">
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-          <CircularProgress />
-        </Box>
+        <LoadingSpinner />
       </AdminLayout>
     );
   }
@@ -121,62 +126,34 @@ const EditionDetailPage = () => {
             </Typography>
             <Divider sx={{ mb: 2 }} />
 
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                Descripción
-              </Typography>
-              <Typography variant="body1">{edition.description || '-'}</Typography>
-            </Box>
+            <InfoField label="Descripción" value={edition.description} />
 
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                Estado
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                <Chip
-                  label={edition.public ? 'Pública' : 'Privada'}
-                  color={edition.public ? 'success' : 'default'}
-                  size="small"
-                />
-                <Chip
-                  label={edition.open_to_upload ? 'Envíos Abiertos' : 'Envíos Cerrados'}
-                  color={edition.open_to_upload ? 'success' : 'error'}
-                  size="small"
-                />
-                <Chip
-                  label={
-                    edition.open_to_update
-                      ? 'Actualizaciones Permitidas'
-                      : 'Actualizaciones Cerradas'
-                  }
-                  color={edition.open_to_update ? 'info' : 'default'}
-                  size="small"
-                />
-              </Box>
-            </Box>
+            <InfoField
+              label="Estado"
+              value={
+                <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                  <Chip
+                    label={edition.public ? 'Pública' : 'Privada'}
+                    color={edition.public ? 'success' : 'default'}
+                    size="small"
+                  />
+                  <Chip
+                    label={edition.open_to_upload ? 'Envíos Abiertos' : 'Envíos Cerrados'}
+                    color={edition.open_to_upload ? 'success' : 'error'}
+                    size="small"
+                  />
+                  <Chip
+                    label={edition.open_to_update ? 'Actualizaciones Permitidas' : 'Actualizaciones Cerradas'}
+                    color={edition.open_to_update ? 'info' : 'default'}
+                    size="small"
+                  />
+                </Box>
+              }
+            />
 
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                Creado por
-              </Typography>
-              <Typography variant="body1">
-                {edition.uploaded_by?.email || '-'}
-              </Typography>
-            </Box>
-
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                Fecha de creación
-              </Typography>
-              <Typography variant="body1">{formatDate(edition.created)}</Typography>
-            </Box>
-
-            <Box>
-              <Typography variant="body2" color="text.secondary">
-                Última modificación
-              </Typography>
-              <Typography variant="body1">{formatDate(edition.modified)}</Typography>
-            </Box>
+            <InfoField label="Creado por" value={edition.uploaded_by?.email} />
+            <InfoField label="Fecha de creación" value={formatDateTime(edition.created)} />
+            <InfoField label="Última modificación" value={formatDateTime(edition.modified)} sx={{ mb: 0 }} />
           </Paper>
         </Grid>
 
@@ -230,26 +207,11 @@ const EditionDetailPage = () => {
                       component="img"
                       image={edition.logo}
                       alt="Logo de la edición"
-                      sx={{
-                        height: 150,
-                        objectFit: 'contain',
-                        p: 1,
-                      }}
+                      sx={{ height: 150, objectFit: 'contain', p: 1 }}
                     />
                   </Card>
                 ) : (
-                  <Box
-                    sx={{
-                      height: 150,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      bgcolor: 'grey.900',
-                      borderRadius: 1,
-                      border: '1px dashed',
-                      borderColor: 'grey.700',
-                    }}
-                  >
+                  <Box sx={{ height: 150, ...imagePlaceholderStyle }}>
                     <Box sx={{ textAlign: 'center', color: 'text.secondary' }}>
                       <ImageIcon sx={{ fontSize: 40, opacity: 0.5 }} />
                       <Typography variant="body2">Sin logo</Typography>
@@ -269,26 +231,11 @@ const EditionDetailPage = () => {
                       component="img"
                       image={edition.poster}
                       alt="Cartel de la edición"
-                      sx={{
-                        height: 250,
-                        objectFit: 'contain',
-                        p: 1,
-                      }}
+                      sx={{ height: 250, objectFit: 'contain', p: 1 }}
                     />
                   </Card>
                 ) : (
-                  <Box
-                    sx={{
-                      height: 250,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      bgcolor: 'grey.900',
-                      borderRadius: 1,
-                      border: '1px dashed',
-                      borderColor: 'grey.700',
-                    }}
-                  >
+                  <Box sx={{ height: 250, ...imagePlaceholderStyle }}>
                     <Box sx={{ textAlign: 'center', color: 'text.secondary' }}>
                       <ImageIcon sx={{ fontSize: 48, opacity: 0.5 }} />
                       <Typography variant="body2">Sin cartel</Typography>
@@ -337,20 +284,11 @@ const EditionDetailPage = () => {
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{
-                              maxWidth: 300,
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                            }}
-                          >
+                          <Typography variant="body2" color="text.secondary" sx={ellipsisStyle}>
                             {hasCompo.compo_description}
                           </Typography>
                         </TableCell>
-                        <TableCell>{formatDate(hasCompo.start)}</TableCell>
+                        <TableCell>{formatDateTime(hasCompo.start)}</TableCell>
                         <TableCell align="center">
                           <Chip
                             label={hasCompo.open_to_upload ? 'Abierto' : 'Cerrado'}
@@ -371,9 +309,7 @@ const EditionDetailPage = () => {
                 </Table>
               </TableContainer>
             ) : (
-              <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 4 }}>
-                No hay competiciones asociadas a esta edición
-              </Typography>
+              <EmptyState message="No hay competiciones asociadas a esta edición" />
             )}
           </Paper>
         </Grid>
