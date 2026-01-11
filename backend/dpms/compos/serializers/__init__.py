@@ -2,6 +2,12 @@ from .editions import EditionSerializer, EditionDetailSerializer, EditionListSer
 from .compos import CompoSerializer, CompoDetailSerializer, HasCompoSerializer
 from .productions import ProductionSerializer, ProductionDetailSerializer, ProductionCreateSerializer
 from .files import FileSerializer, FileUploadSerializer, FileUpdateSerializer
+from .gallery import (
+    GalleryImageSerializer,
+    GalleryImageUploadSerializer,
+    GalleryImageUpdateSerializer,
+    GalleryImageDetailSerializer,
+)
 from .voting import (
     VotingConfigurationSerializer,
     AttendanceCodeSerializer,
@@ -31,6 +37,10 @@ __all__ = [
     'FileSerializer',
     'FileUploadSerializer',
     'FileUpdateSerializer',
+    'GalleryImageSerializer',
+    'GalleryImageUploadSerializer',
+    'GalleryImageUpdateSerializer',
+    'GalleryImageDetailSerializer',
     'VotingConfigurationSerializer',
     'AttendanceCodeSerializer',
     'AttendanceCodeGenerateSerializer',

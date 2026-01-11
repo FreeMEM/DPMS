@@ -5,4 +5,5 @@ app_name = 'website'
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('editions/', views.editions_list, name='editions'),
 ]

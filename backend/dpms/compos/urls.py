@@ -9,6 +9,7 @@ from dpms.compos.views import (
     HasCompoViewSet,
     ProductionViewSet,
     FileViewSet,
+    GalleryImageViewSet,
     VotingConfigurationViewSet,
     AttendanceCodeViewSet,
     AttendeeVerificationViewSet,
@@ -24,6 +25,7 @@ router.register(r'compos', CompoViewSet, basename='compos')
 router.register(r'hascompos', HasCompoViewSet, basename='hascompos')
 router.register(r'productions', ProductionViewSet, basename='productions')
 router.register(r'files', FileViewSet, basename='files')
+router.register(r'gallery', GalleryImageViewSet, basename='gallery')
 
 # Voting system routes
 router.register(r'voting-config', VotingConfigurationViewSet, basename='voting-config')

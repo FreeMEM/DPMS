@@ -25,6 +25,7 @@ import ProductionDetailPage from "./pages/admin/ProductionDetailPage";
 import VotingConfigPage from "./pages/admin/VotingConfigPage";
 import AttendanceCodesPage from "./pages/admin/AttendanceCodesPage";
 import JuryManagementPage from "./pages/admin/JuryManagementPage";
+import Gallery from "./components/gallery/Gallery";
 
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useContext(AuthContext);
@@ -169,6 +170,7 @@ const AppRoutes = () => {
           }
         />
         <Route path="/compos" element={<ComposList />} />
+        <Route path="/gallery" element={<Gallery />} />
         <Route
           path="/productions/new"
           element={

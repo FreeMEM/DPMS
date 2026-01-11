@@ -66,3 +66,22 @@ export const hasComposAPI = {
   update: (id, data) => getAxios().put(`/api/hascompos/${id}/`, data),
   delete: (id) => getAxios().delete(`/api/hascompos/${id}/`),
 };
+
+// Gallery API
+export const galleryAPI = {
+  list: (params) => getAxios().get('/api/gallery/', { params }),
+  get: (id) => getAxios().get(`/api/gallery/${id}/`),
+  upload: (formData) => {
+    const client = getAxios();
+    return client.post('/api/gallery/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+  update: (id, data) => getAxios().put(`/api/gallery/${id}/`, data),
+  delete: (id) => getAxios().delete(`/api/gallery/${id}/`),
+  myImages: (params) => getAxios().get('/api/gallery/my_images/', { params }),
+  byEdition: (editionId) => getAxios().get(`/api/gallery/by-edition/${editionId}/`),
+  editionsWithImages: () => getAxios().get('/api/gallery/editions_with_images/'),
+};

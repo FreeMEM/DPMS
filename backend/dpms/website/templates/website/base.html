@@ -28,11 +28,14 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+    <!-- Three.js Background Container -->
+    <div id="three-background"></div>
+
     <header>
         <nav class="navbar">
             <div class="container">
                 <div class="navbar-brand">
-                    <h1>DPMS</h1>
+                    <a href="/" style="text-decoration: none;"><h1>DPMS</h1></a>
                 </div>
                 <div class="navbar-menu">
                     <a href="/">Inicio</a>
@@ -53,7 +56,13 @@
         </div>
     </footer>
 
-    <!-- JavaScript -->
+    <!-- Three.js Library (CDN) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Three.js Background Effects -->
+    <script src="{% static 'website/js/three-background.js' %}"></script>
+
+    <!-- Main JavaScript -->
     <script src="{% static 'website/js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
