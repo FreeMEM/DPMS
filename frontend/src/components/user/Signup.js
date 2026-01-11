@@ -1,9 +1,10 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../../AuthContext";
 import { Box, Button, TextField, Typography, Paper, FormControl, FormLabel } from "@mui/material";
-import { useTheme } from "@mui/material/styles"; // Importar useTheme
+import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -14,10 +15,27 @@ const Signup = () => {
   const [lastName, setLastName] = useState("");
   const [group, setGroup] = useState("");
   const [errors, setErrors] = useState({});
+  const [edition, setEdition] = useState(null);
+  const [editionLoaded, setEditionLoaded] = useState(false);
   const { signup } = useContext(AuthContext);
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const theme = useTheme(); // Acceder al tema definido en App.js
+  const theme = useTheme();
+
+  // Cargar edición actual
+  useEffect(() => {
+    const fetchCurrentEdition = async () => {
+      try {
+        const response = await axios.get('/api/editions/current/');
+        setEdition(response.data);
+      } catch (error) {
+        setEdition(null);
+      } finally {
+        setEditionLoaded(true);
+      }
+    };
+    fetchCurrentEdition();
+  }, []);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -61,6 +79,30 @@ const Signup = () => {
           color: theme.palette.text.primary, // Color del texto
         }}
       >
+        <Box display="flex" justifyContent="center" alignItems="center" mb={2} sx={{ minHeight: 100 }}>
+          {editionLoaded && edition?.logo ? (
+            <img
+              src={edition.logo}
+              alt={edition.title || "Logo"}
+              style={{
+                maxHeight: 100,
+                maxWidth: '100%',
+                objectFit: 'contain',
+                filter: edition.logo_border_width > 0
+                  ? `drop-shadow(0 0 ${edition.logo_border_width}px ${edition.logo_border_color || '#00ff00'})`
+                  : 'none',
+              }}
+            />
+          ) : editionLoaded && edition?.title ? (
+            <Typography variant="h4" align="center" color="primary" fontWeight={700}>
+              {edition.title}
+            </Typography>
+          ) : editionLoaded ? (
+            <Typography variant="h4" align="center" color="primary" fontWeight={700}>
+              DPMS
+            </Typography>
+          ) : null}
+        </Box>
         <Typography variant="h5" align="center" gutterBottom>
           {t("Sign Up")}
         </Typography>

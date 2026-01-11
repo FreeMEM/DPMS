@@ -4,7 +4,8 @@ import { AuthContext } from "../../AuthContext";
 import ModalForgotPassword from "./ModalForgotPassword";
 import { Box, Button, TextField, Typography, Paper, FormControl, FormLabel, Divider } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { useTheme } from "@mui/material/styles"; // Importar useTheme
+import { useTheme } from "@mui/material/styles";
+import axios from "axios";
 
 const SceneIDIcon = () => (
   <img
@@ -23,10 +24,28 @@ const Login = () => {
   const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
   const [open, setOpen] = useState(false);
   const { login } = useContext(AuthContext);
-  const [loginError, setLoginError] = useState(""); // Estado para el mensaje de error de login
+  const [loginError, setLoginError] = useState("");
+  const [edition, setEdition] = useState(null);
+  const [editionLoaded, setEditionLoaded] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const theme = useTheme(); // Acceder al tema definido en App.js
+  const theme = useTheme();
+
+  // Cargar edición actual
+  useEffect(() => {
+    const fetchCurrentEdition = async () => {
+      try {
+        const response = await axios.get('/api/editions/current/');
+        setEdition(response.data);
+      } catch (error) {
+        // No hay edición actual o error
+        setEdition(null);
+      } finally {
+        setEditionLoaded(true);
+      }
+    };
+    fetchCurrentEdition();
+  }, []);
 
   // Effect to handle shrink behavior if the browser autocompletes the inputs
   useEffect(() => {
@@ -114,12 +133,29 @@ const Login = () => {
           color: theme.palette.text.primary, // Color del texto
         }}
       >
-        <Box display="flex" justifyContent="center" mb={2}>
-          <img
-            src={`${process.env.PUBLIC_URL}/assets/logo_pp_192.png`}
-            alt="Posadas Party Logo"
-            style={{ height: 192 }}
-          />
+        <Box display="flex" justifyContent="center" alignItems="center" mb={2} sx={{ minHeight: 120 }}>
+          {editionLoaded && edition?.logo ? (
+            <img
+              src={edition.logo}
+              alt={edition.title || "Logo"}
+              style={{
+                maxHeight: 120,
+                maxWidth: '100%',
+                objectFit: 'contain',
+                filter: edition.logo_border_width > 0
+                  ? `drop-shadow(0 0 ${edition.logo_border_width}px ${edition.logo_border_color || '#00ff00'})`
+                  : 'none',
+              }}
+            />
+          ) : editionLoaded && edition?.title ? (
+            <Typography variant="h3" align="center" color="primary" fontWeight={700}>
+              {edition.title}
+            </Typography>
+          ) : editionLoaded ? (
+            <Typography variant="h3" align="center" color="primary" fontWeight={700}>
+              DPMS
+            </Typography>
+          ) : null}
         </Box>
         <Typography variant="h5" align="center" gutterBottom>
           {t("Login")}
