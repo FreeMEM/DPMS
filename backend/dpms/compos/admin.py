@@ -11,6 +11,7 @@ from .models import (
     Production,
     File,
     GalleryImage,
+    Sponsor,
     VotingConfiguration,
     AttendanceCode,
     AttendeeVerification,
@@ -1728,3 +1729,110 @@ class GalleryImageAdmin(admin.ModelAdmin):
         updated = queryset.update(is_active=False)
         self.message_user(request, f"{updated} images are now inactive.")
     deactivate_images.short_description = "Deactivate images"
+
+
+# ============================================================================
+# SPONSORS ADMIN
+# ============================================================================
+
+
+@admin.register(Sponsor)
+class SponsorAdmin(admin.ModelAdmin):
+    """Sponsor model admin"""
+
+    list_display = (
+        "id",
+        "logo_preview",
+        "name",
+        "url_link",
+        "display_order",
+        "editions_count",
+        "created_display",
+    )
+
+    list_display_links = ("id", "name")
+
+    search_fields = (
+        "name",
+        "description",
+        "url",
+    )
+
+    list_filter = (
+        "editions",
+        "created",
+    )
+
+    readonly_fields = (
+        "logo_preview_large",
+        "created",
+        "modified",
+    )
+
+    fieldsets = (
+        ("Basic Information", {
+            "fields": ("name", "description", "url", "display_order")
+        }),
+        ("Logo", {
+            "fields": ("logo", "logo_preview_large")
+        }),
+        ("Editions", {
+            "fields": ("editions",),
+            "description": "Select editions this sponsor is associated with"
+        }),
+        ("Timestamps", {
+            "fields": ("created", "modified"),
+            "classes": ("collapse",)
+        }),
+    )
+
+    filter_horizontal = ("editions",)
+
+    list_per_page = 50
+
+    ordering = ["display_order", "name"]
+
+    def logo_preview(self, obj):
+        """Display logo thumbnail"""
+        if obj.logo:
+            return format_html(
+                '<img src="{}" style="max-height: 40px; max-width: 80px; object-fit: contain;"/>',
+                obj.logo.url
+            )
+        return "-"
+    logo_preview.short_description = "Logo"
+
+    def logo_preview_large(self, obj):
+        """Display full logo preview"""
+        if obj.logo:
+            return format_html(
+                '<img src="{}" style="max-height: 150px; max-width: 300px;"/>',
+                obj.logo.url
+            )
+        return "No logo"
+    logo_preview_large.short_description = "Logo Preview"
+
+    def url_link(self, obj):
+        """Display URL as link"""
+        if obj.url:
+            return format_html(
+                '<a href="{}" target="_blank">{}</a>',
+                obj.url,
+                obj.url[:40] + "..." if len(obj.url) > 40 else obj.url
+            )
+        return "-"
+    url_link.short_description = "Website"
+
+    def editions_count(self, obj):
+        """Count of editions"""
+        count = obj.editions.count()
+        if count > 0:
+            return format_html('<strong>{}</strong> editions', count)
+        return "0"
+    editions_count.short_description = "Editions"
+
+    def created_display(self, obj):
+        """Format created date"""
+        return obj.created.strftime("%Y-%m-%d %H:%M")
+    created_display.short_description = "Created"
+    created_display.admin_order_field = "created"

@@ -369,7 +369,7 @@ const JuryManagementPage = () => {
                           </Box>
                           <LinearProgress
                             variant="determinate"
-                            value={member.voting_progress.percentage}
+                            value={member.voting_progress.percentage || 0}
                             sx={{ height: 6, borderRadius: 1 }}
                           />
                         </Box>

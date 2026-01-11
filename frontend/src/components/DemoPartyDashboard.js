@@ -6,6 +6,7 @@ import BackgroundToggle from "./common/BackgroundToggle";
 import StatsCard from "./admin/common/StatsCard";
 import { AuthContext } from "../AuthContext";
 import axiosWrapper from "../utils/AxiosWrapper";
+import { sponsorsAPI } from "../services/api";
 import {
   Box,
   Container,
@@ -46,6 +47,7 @@ const DemoPartyDashboard = () => {
   const [openCompos, setOpenCompos] = useState([]);
   const [myProductions, setMyProductions] = useState([]);
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [sponsors, setSponsors] = useState([]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -106,6 +108,17 @@ const DemoPartyDashboard = () => {
 
       // My productions
       setMyProductions(productionsRes.data?.slice(0, 5) || []);
+
+      // Fetch sponsors for the active edition
+      if (upcoming?.id) {
+        try {
+          const sponsorsRes = await sponsorsAPI.byEdition(upcoming.id);
+          setSponsors(sponsorsRes.data || []);
+        } catch (sponsorErr) {
+          console.error('Error fetching sponsors:', sponsorErr);
+          setSponsors([]);
+        }
+      }
 
       setError(null);
     } catch (err) {
@@ -581,6 +594,90 @@ const DemoPartyDashboard = () => {
                   </Card>
                 </Grid>
               </Grid>
+
+              {/* Sponsors Section */}
+              {sponsors.length > 0 && (
+                <Box sx={{ mt: 6 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 3,
+                      textAlign: 'center',
+                      color: 'text.secondary',
+                      textTransform: 'uppercase',
+                      letterSpacing: 2,
+                    }}
+                  >
+                    Patrocinadores
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      gap: 4,
+                      p: 3,
+                      borderRadius: 2,
+                      bgcolor: 'rgba(255, 255, 255, 0.02)',
+                      border: '1px solid rgba(255, 255, 255, 0.05)',
+                    }}
+                  >
+                    {sponsors.map((sponsor) => (
+                      <Tooltip key={sponsor.id} title={sponsor.name}>
+                        <Box
+                          component={sponsor.url ? "a" : "div"}
+                          href={sponsor.url || undefined}
+                          target={sponsor.url ? "_blank" : undefined}
+                          rel={sponsor.url ? "noopener noreferrer" : undefined}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            p: 2,
+                            borderRadius: 1,
+                            bgcolor: 'rgba(255, 255, 255, 0.05)',
+                            transition: 'all 0.2s',
+                            cursor: sponsor.url ? 'pointer' : 'default',
+                            textDecoration: 'none',
+                            '&:hover': {
+                              bgcolor: 'rgba(255, 165, 0, 0.1)',
+                              transform: 'scale(1.05)',
+                            },
+                          }}
+                        >
+                          {sponsor.logo ? (
+                            <Box
+                              component="img"
+                              src={sponsor.logo}
+                              alt={sponsor.name}
+                              sx={{
+                                maxHeight: 60,
+                                maxWidth: 150,
+                                objectFit: 'contain',
+                                filter: 'brightness(0.9)',
+                                '&:hover': {
+                                  filter: 'brightness(1)',
+                                },
+                              }}
+                            />
+                          ) : (
+                            <Typography
+                              variant="body1"
+                              sx={{
+                                fontWeight: 600,
+                                color: 'primary.main',
+                              }}
+                            >
+                              {sponsor.name}
+                            </Typography>
+                          )}
+                        </Box>
+                      </Tooltip>
+                    ))}
+                  </Box>
+                </Box>
+              )}
             </>
           )}
         </Container>

@@ -3,6 +3,7 @@ from .compos import CompoViewSet, HasCompoViewSet
 from .productions import ProductionViewSet
 from .files import FileViewSet
 from .gallery import GalleryImageViewSet
+from .sponsors import SponsorViewSet
 from .voting import (
     VotingConfigurationViewSet,
     AttendanceCodeViewSet,
@@ -20,6 +21,7 @@ __all__ = [
     'ProductionViewSet',
     'FileViewSet',
     'GalleryImageViewSet',
+    'SponsorViewSet',
     'VotingConfigurationViewSet',
     'AttendanceCodeViewSet',
     'AttendeeVerificationViewSet',

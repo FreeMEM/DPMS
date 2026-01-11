@@ -31,6 +31,7 @@ import CelebrationIcon from "@mui/icons-material/Celebration";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import FolderIcon from "@mui/icons-material/Folder";
 import CategoryIcon from "@mui/icons-material/Category";
+import HandshakeIcon from "@mui/icons-material/Handshake";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../AuthContext";
 import axiosWrapper from "../utils/AxiosWrapper";
@@ -391,6 +392,16 @@ const MainBar = () => {
                   <PeopleIcon />
                 </ListItemIcon>
                 {open && <ListItemText primary={t("Jury")} />}
+              </ListItemButton>
+              <ListItemButton
+                selected={location.pathname.startsWith("/admin/sponsors")}
+                onClick={() => navigate("/admin/sponsors")}
+                sx={listItemButtonSx}
+              >
+                <ListItemIcon sx={listItemIconSx}>
+                  <HandshakeIcon />
+                </ListItemIcon>
+                {open && <ListItemText primary={t("Sponsors")} />}
               </ListItemButton>
             </List>
           </Box>

@@ -3,6 +3,7 @@ from .edition import Edition
 from .files import File
 from .gallery import GalleryImage
 from .productions import Production
+from .sponsors import Sponsor
 from .voting import (
     VotingConfiguration,
     AttendanceCode,

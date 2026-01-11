@@ -25,6 +25,8 @@ import ProductionDetailPage from "./pages/admin/ProductionDetailPage";
 import VotingConfigPage from "./pages/admin/VotingConfigPage";
 import AttendanceCodesPage from "./pages/admin/AttendanceCodesPage";
 import JuryManagementPage from "./pages/admin/JuryManagementPage";
+import SponsorsPage from "./pages/admin/SponsorsPage";
+import SponsorFormPage from "./pages/admin/SponsorFormPage";
 import Gallery from "./components/gallery/Gallery";
 
 const PrivateRoute = ({ children }) => {
@@ -166,6 +168,30 @@ const AppRoutes = () => {
           element={
             <AdminRoute>
               <JuryManagementPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/sponsors"
+          element={
+            <AdminRoute>
+              <SponsorsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/sponsors/new"
+          element={
+            <AdminRoute>
+              <SponsorFormPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/sponsors/:id/edit"
+          element={
+            <AdminRoute>
+              <SponsorFormPage />
             </AdminRoute>
           }
         />

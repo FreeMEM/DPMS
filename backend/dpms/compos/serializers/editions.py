@@ -1,8 +1,17 @@
 """Edition serializers"""
 
 from rest_framework import serializers
-from dpms.compos.models import Edition, HasCompo
+from dpms.compos.models import Edition, HasCompo, Sponsor
 from dpms.users.serializers import ResumedUserModelSerializer
+
+
+class SponsorInlineSerializer(serializers.ModelSerializer):
+    """Inline serializer for sponsors in Edition detail"""
+
+    class Meta:
+        model = Sponsor
+        fields = ['id', 'name', 'logo', 'url', 'display_order']
+        read_only_fields = ['id']
 
 
 class EditionListSerializer(serializers.ModelSerializer):
@@ -98,10 +107,11 @@ class HasCompoInlineSerializer(serializers.ModelSerializer):
 
 
 class EditionDetailSerializer(serializers.ModelSerializer):
-    """Detailed serializer for Edition with nested compos"""
+    """Detailed serializer for Edition with nested compos and sponsors"""
 
     uploaded_by = ResumedUserModelSerializer(read_only=True)
     hascompo_set = HasCompoInlineSerializer(many=True, read_only=True)
+    sponsors = SponsorInlineSerializer(many=True, read_only=True)
     compos_count = serializers.SerializerMethodField()
     productions_count = serializers.SerializerMethodField()
 
@@ -121,6 +131,7 @@ class EditionDetailSerializer(serializers.ModelSerializer):
             'open_to_update',
             'productions_public',
             'hascompo_set',
+            'sponsors',
             'compos_count',
             'productions_count',
             'created',

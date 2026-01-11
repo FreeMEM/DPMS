@@ -8,6 +8,7 @@ from .gallery import (
     GalleryImageUpdateSerializer,
     GalleryImageDetailSerializer,
 )
+from .sponsors import SponsorSerializer, SponsorListSerializer, SponsorDetailSerializer
 from .voting import (
     VotingConfigurationSerializer,
     AttendanceCodeSerializer,
@@ -41,6 +42,9 @@ __all__ = [
     'GalleryImageUploadSerializer',
     'GalleryImageUpdateSerializer',
     'GalleryImageDetailSerializer',
+    'SponsorSerializer',
+    'SponsorListSerializer',
+    'SponsorDetailSerializer',
     'VotingConfigurationSerializer',
     'AttendanceCodeSerializer',
     'AttendanceCodeGenerateSerializer',
