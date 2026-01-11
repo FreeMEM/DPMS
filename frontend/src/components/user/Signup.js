@@ -22,12 +22,16 @@ const Signup = () => {
   const { t } = useTranslation();
   const theme = useTheme();
 
-  // Cargar edición actual
+  // Cargar edición actual (la primera edición pública)
   useEffect(() => {
     const fetchCurrentEdition = async () => {
       try {
-        const response = await axios.get('/api/editions/current/');
-        setEdition(response.data);
+        const response = await axios.get('/api/editions/?public=true');
+        if (response.data && response.data.length > 0) {
+          setEdition(response.data[0]);
+        } else {
+          setEdition(null);
+        }
       } catch (error) {
         setEdition(null);
       } finally {
