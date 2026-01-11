@@ -10,10 +10,10 @@
 export const hyperspaceEffect = {
   name: 'hyperspace',
 
-  particleCount: (variant) => variant === "admin" ? 500 : 350,
+  particleCount: (variant) => variant === "admin" ? 350 : 250,
 
   // Line connection settings
-  maxConnections: (variant) => variant === "admin" ? 100 : 50,
+  maxConnections: (variant) => variant === "admin" ? 60 : 40,
   lineOpacity: 0.15,
   maxConnectionDistance: 2.5,
   animateLines: false,  // Sin animación de energía
@@ -128,10 +128,10 @@ export const hyperspaceEffect = {
 export const waveEffect = {
   name: 'wave',
 
-  particleCount: (variant) => variant === "admin" ? 1000 : 500,
+  particleCount: (variant) => variant === "admin" ? 500 : 350,
 
   // Line connection settings - más brillantes y abundantes
-  maxConnections: (variant) => variant === "admin" ? 250 : 150,
+  maxConnections: (variant) => variant === "admin" ? 150 : 100,
   lineOpacity: 0.8,  // Aumentado para ver mejor la energía
   maxConnectionDistance: 3.5,  // Distancia mayor para más conexiones
   animateLines: true,  // ¡CON animación de energía!
@@ -243,10 +243,10 @@ export const waveEffect = {
 export const energyGridEffect = {
   name: 'energy-grid',
 
-  particleCount: (variant) => variant === "admin" ? 400 : 250,
+  particleCount: (variant) => variant === "admin" ? 300 : 200,
 
   // Line connection settings - energía visible fluyendo
-  maxConnections: (variant) => variant === "admin" ? 250 : 180,
+  maxConnections: (variant) => variant === "admin" ? 180 : 120,
   lineOpacity: 0.6,  // Muy brillante para ver la energía
   maxConnectionDistance: 3.0,  // Distancia corta para conexiones solo entre partículas cercanas
   animateLines: true,  // ¡CON animación de energía!
