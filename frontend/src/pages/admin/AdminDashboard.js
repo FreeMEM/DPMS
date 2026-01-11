@@ -18,11 +18,13 @@ import {
   Category as CategoryIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import AdminLayout from '../../components/admin/AdminLayout';
 import StatsCard from '../../components/admin/common/StatsCard';
 import axiosWrapper from '../../utils/AxiosWrapper';
 
 const AdminDashboard = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -66,7 +68,7 @@ const AdminDashboard = () => {
   };
 
   return (
-    <AdminLayout title="Panel de Administración">
+    <AdminLayout title={t("Administration Panel")}>
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {error}
@@ -77,7 +79,7 @@ const AdminDashboard = () => {
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
           <StatsCard
-            title="Usuarios Registrados"
+            title={t("Registered Users")}
             value={loading ? '...' : stats.totalUsers}
             icon={<PeopleIcon />}
             color="primary"
@@ -85,7 +87,7 @@ const AdminDashboard = () => {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatsCard
-            title="Ediciones"
+            title={t("Editions")}
             value={loading ? '...' : stats.totalEditions}
             icon={<TrophyIcon />}
             color="success"
@@ -93,7 +95,7 @@ const AdminDashboard = () => {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatsCard
-            title="Producciones"
+            title={t("Productions")}
             value={loading ? '...' : stats.totalProductions}
             icon={<UploadIcon />}
             color="info"
@@ -101,7 +103,7 @@ const AdminDashboard = () => {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatsCard
-            title="Votos Emitidos"
+            title={t("Votes Cast")}
             value={loading ? '...' : stats.totalVotes}
             icon={<VoteIcon />}
             color="warning"
@@ -116,17 +118,17 @@ const AdminDashboard = () => {
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                 <TrophyIcon color="primary" sx={{ fontSize: 40 }} />
-                <Typography variant="h6">Ediciones</Typography>
+                <Typography variant="h6">{t("Editions")}</Typography>
               </Box>
               <Typography variant="body2" color="text.secondary" paragraph>
-                Crear y gestionar ediciones de parties
+                {t("Create and manage party editions")}
               </Typography>
               <Button
                 variant="contained"
                 fullWidth
                 onClick={() => navigate('/admin/editions')}
               >
-                Gestionar Ediciones
+                {t("Manage Editions")}
               </Button>
             </CardContent>
           </Card>
@@ -137,17 +139,17 @@ const AdminDashboard = () => {
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                 <CategoryIcon color="primary" sx={{ fontSize: 40 }} />
-                <Typography variant="h6">Competiciones</Typography>
+                <Typography variant="h6">{t("Competitions")}</Typography>
               </Box>
               <Typography variant="body2" color="text.secondary" paragraph>
-                Configurar tipos de competiciones (compos)
+                {t("Configure competition types (compos)")}
               </Typography>
               <Button
                 variant="contained"
                 fullWidth
                 onClick={() => navigate('/admin/compos')}
               >
-                Gestionar Compos
+                {t("Manage Compos")}
               </Button>
             </CardContent>
           </Card>
@@ -158,17 +160,17 @@ const AdminDashboard = () => {
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                 <SettingsIcon color="primary" sx={{ fontSize: 40 }} />
-                <Typography variant="h6">Votaciones</Typography>
+                <Typography variant="h6">{t("Voting")}</Typography>
               </Box>
               <Typography variant="body2" color="text.secondary" paragraph>
-                Configurar sistema de votación y jurados
+                {t("Configure voting system and juries")}
               </Typography>
               <Button
                 variant="contained"
                 fullWidth
                 onClick={() => navigate('/admin/voting')}
               >
-                Configurar Votación
+                {t("Configure Voting")}
               </Button>
             </CardContent>
           </Card>
@@ -177,10 +179,10 @@ const AdminDashboard = () => {
 
       {/* Welcome Card */}
       <Card>
-        <CardHeader title="Bienvenido al Panel de Administración" />
+        <CardHeader title={t("Welcome to Administration Panel")} />
         <CardContent>
           <Typography variant="body1">
-            Gestiona todos los aspectos del sistema DPMS desde este panel centralizado.
+            {t("Manage all aspects of DPMS system from this centralized panel.")}
           </Typography>
         </CardContent>
       </Card>

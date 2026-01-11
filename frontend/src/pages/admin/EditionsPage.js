@@ -22,12 +22,14 @@ import {
   Visibility as ViewIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { ConfirmDialog, LoadingSpinner } from '../../components/admin/common';
 import { formatDate } from '../../utils/dateFormatting';
 import axiosWrapper from '../../utils/AxiosWrapper';
 
 const EditionsPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [editions, setEditions] = useState([]);
   const [filteredEditions, setFilteredEditions] = useState([]);
@@ -83,7 +85,7 @@ const EditionsPage = () => {
 
   if (loading) {
     return (
-      <AdminLayout title="Gestión de Ediciones">
+      <AdminLayout title={t("Editions Management")}>
         <LoadingSpinner />
       </AdminLayout>
     );
@@ -91,8 +93,8 @@ const EditionsPage = () => {
 
   return (
     <AdminLayout
-      title="Gestión de Ediciones"
-      breadcrumbs={[{ label: 'Ediciones', href: '/admin/editions' }]}
+      title={t("Editions Management")}
+      breadcrumbs={[{ label: t('Editions'), href: '/admin/editions' }]}
     >
       {error && (
         <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
@@ -103,7 +105,7 @@ const EditionsPage = () => {
       {/* Toolbar */}
       <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
         <TextField
-          placeholder="Buscar ediciones..."
+          placeholder={t("Search editions...")}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           size="small"
@@ -114,7 +116,7 @@ const EditionsPage = () => {
           startIcon={<AddIcon />}
           onClick={() => navigate('/admin/editions/new')}
         >
-          Nueva Edición
+          {t("New Edition")}
         </Button>
       </Box>
 
@@ -123,14 +125,14 @@ const EditionsPage = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Título</TableCell>
-              <TableCell>Descripción</TableCell>
-              <TableCell align="center">Pública</TableCell>
-              <TableCell align="center">Abierta Envíos</TableCell>
-              <TableCell align="center">Compos</TableCell>
-              <TableCell align="center">Producciones</TableCell>
-              <TableCell>Creada</TableCell>
-              <TableCell align="right">Acciones</TableCell>
+              <TableCell>{t("Title")}</TableCell>
+              <TableCell>{t("Description")}</TableCell>
+              <TableCell align="center">{t("Public")}</TableCell>
+              <TableCell align="center">{t("Open Submissions")}</TableCell>
+              <TableCell align="center">{t("Compos")}</TableCell>
+              <TableCell align="center">{t("Productions")}</TableCell>
+              <TableCell>{t("Created")}</TableCell>
+              <TableCell align="right">{t("Actions")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -139,8 +141,8 @@ const EditionsPage = () => {
                 <TableCell colSpan={8} align="center">
                   <Typography variant="body2" color="text.secondary" sx={{ py: 4 }}>
                     {searchTerm
-                      ? 'No se encontraron ediciones'
-                      : 'No hay ediciones. Crea una nueva para empezar.'}
+                      ? t('No editions found')
+                      : t('No editions. Create a new one to get started.')}
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -168,14 +170,14 @@ const EditionsPage = () => {
                   </TableCell>
                   <TableCell align="center">
                     <Chip
-                      label={edition.public ? 'Sí' : 'No'}
+                      label={edition.public ? t('Yes') : t('No')}
                       color={edition.public ? 'success' : 'default'}
                       size="small"
                     />
                   </TableCell>
                   <TableCell align="center">
                     <Chip
-                      label={edition.open_to_upload ? 'Abierta' : 'Cerrada'}
+                      label={edition.open_to_upload ? t('Open') : t('Closed')}
                       color={edition.open_to_upload ? 'success' : 'error'}
                       size="small"
                     />
@@ -191,14 +193,14 @@ const EditionsPage = () => {
                     <IconButton
                       size="small"
                       onClick={() => navigate(`/admin/editions/${edition.id}`)}
-                      title="Ver detalle"
+                      title={t("View detail")}
                     >
                       <ViewIcon fontSize="small" />
                     </IconButton>
                     <IconButton
                       size="small"
                       onClick={() => navigate(`/admin/editions/${edition.id}/edit`)}
-                      title="Editar"
+                      title={t("Edit")}
                     >
                       <EditIcon fontSize="small" />
                     </IconButton>
@@ -206,7 +208,7 @@ const EditionsPage = () => {
                       size="small"
                       color="error"
                       onClick={() => setDeleteDialog({ open: true, edition })}
-                      title="Eliminar"
+                      title={t("Delete")}
                     >
                       <DeleteIcon fontSize="small" />
                     </IconButton>
@@ -221,12 +223,12 @@ const EditionsPage = () => {
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         open={deleteDialog.open}
-        title="Eliminar Edición"
-        message={`¿Estás seguro de que quieres eliminar la edición "${deleteDialog.edition?.title}"? Esta acción no se puede deshacer.`}
+        title={t("Delete Edition")}
+        message={t('Are you sure you want to delete the edition "{{title}}"? This action cannot be undone.', { title: deleteDialog.edition?.title })}
         onConfirm={handleDelete}
         onCancel={() => setDeleteDialog({ open: false, edition: null })}
-        confirmText="Eliminar"
-        cancelText="Cancelar"
+        confirmText={t("Delete")}
+        cancelText={t("Cancel")}
       />
     </AdminLayout>
   );

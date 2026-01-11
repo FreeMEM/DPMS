@@ -28,12 +28,14 @@ import {
   Visibility as ViewIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { ConfirmDialog, LoadingSpinner, StatusChip } from '../../components/admin/common';
 import { formatDate } from '../../utils/dateFormatting';
 import axiosWrapper from '../../utils/AxiosWrapper';
 
 const ProductionsPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [productions, setProductions] = useState([]);
@@ -110,7 +112,7 @@ const ProductionsPage = () => {
 
   if (loading) {
     return (
-      <AdminLayout title="Gestión de Producciones">
+      <AdminLayout title={t("Productions Management")}>
         <LoadingSpinner />
       </AdminLayout>
     );
@@ -118,8 +120,8 @@ const ProductionsPage = () => {
 
   return (
     <AdminLayout
-      title="Gestión de Producciones"
-      breadcrumbs={[{ label: 'Producciones', href: '#' }]}
+      title={t("Productions Management")}
+      breadcrumbs={[{ label: t('Productions'), href: '#' }]}
     >
       {error && (
         <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
@@ -133,7 +135,7 @@ const ProductionsPage = () => {
           <Grid item xs={12} md={3}>
             <TextField
               fullWidth
-              placeholder="Buscar producciones..."
+              placeholder={t("Search productions...")}
               variant="outlined"
               size="small"
               value={searchTerm}
@@ -149,13 +151,13 @@ const ProductionsPage = () => {
           </Grid>
           <Grid item xs={12} md={3}>
             <FormControl fullWidth size="small">
-              <InputLabel>Edición</InputLabel>
+              <InputLabel>{t("Edition")}</InputLabel>
               <Select
                 value={filterEdition}
                 onChange={(e) => setFilterEdition(e.target.value)}
-                label="Edición"
+                label={t("Edition")}
               >
-                <MenuItem value="">Todas</MenuItem>
+                <MenuItem value="">{t("All")}</MenuItem>
                 {editions.map((edition) => (
                   <MenuItem key={edition.id} value={edition.id}>
                     {edition.title}
@@ -166,13 +168,13 @@ const ProductionsPage = () => {
           </Grid>
           <Grid item xs={12} md={3}>
             <FormControl fullWidth size="small">
-              <InputLabel>Competición</InputLabel>
+              <InputLabel>{t("Competition")}</InputLabel>
               <Select
                 value={filterCompo}
                 onChange={(e) => setFilterCompo(e.target.value)}
-                label="Competición"
+                label={t("Competition")}
               >
-                <MenuItem value="">Todas</MenuItem>
+                <MenuItem value="">{t("All")}</MenuItem>
                 {compos.map((compo) => (
                   <MenuItem key={compo.id} value={compo.id}>
                     {compo.name}
@@ -183,16 +185,16 @@ const ProductionsPage = () => {
           </Grid>
           <Grid item xs={12} md={3}>
             <FormControl fullWidth size="small">
-              <InputLabel>Estado</InputLabel>
+              <InputLabel>{t("Status")}</InputLabel>
               <Select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                label="Estado"
+                label={t("Status")}
               >
-                <MenuItem value="">Todos</MenuItem>
-                <MenuItem value="pending">Pendiente</MenuItem>
-                <MenuItem value="approved">Aprobada</MenuItem>
-                <MenuItem value="rejected">Rechazada</MenuItem>
+                <MenuItem value="">{t("All")}</MenuItem>
+                <MenuItem value="pending">{t("Pending")}</MenuItem>
+                <MenuItem value="approved">{t("Approved")}</MenuItem>
+                <MenuItem value="rejected">{t("Rejected")}</MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -204,14 +206,14 @@ const ProductionsPage = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Título</TableCell>
-                <TableCell>Autores</TableCell>
-                <TableCell>Edición</TableCell>
-                <TableCell>Competición</TableCell>
-                <TableCell align="center">Estado</TableCell>
-                <TableCell align="center">Ranking</TableCell>
-                <TableCell>Enviado</TableCell>
-                <TableCell align="right">Acciones</TableCell>
+                <TableCell>{t("Title")}</TableCell>
+                <TableCell>{t("Authors")}</TableCell>
+                <TableCell>{t("Edition")}</TableCell>
+                <TableCell>{t("Competition")}</TableCell>
+                <TableCell align="center">{t("Status")}</TableCell>
+                <TableCell align="center">{t("Ranking")}</TableCell>
+                <TableCell>{t("Submitted")}</TableCell>
+                <TableCell align="right">{t("Actions")}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -220,8 +222,8 @@ const ProductionsPage = () => {
                   <TableCell colSpan={8} align="center">
                     <Typography variant="body2" color="text.secondary" sx={{ py: 4 }}>
                       {searchTerm || filterEdition || filterCompo || filterStatus
-                        ? 'No se encontraron producciones'
-                        : 'No hay producciones enviadas'}
+                        ? t('No productions found')
+                        : t('No productions yet.')}
                     </Typography>
                   </TableCell>
                 </TableRow>
@@ -272,14 +274,14 @@ const ProductionsPage = () => {
                       <IconButton
                         size="small"
                         onClick={() => navigate(`/app/admin/productions/${production.id}`)}
-                        title="Ver detalle"
+                        title={t("View detail")}
                       >
                         <ViewIcon fontSize="small" />
                       </IconButton>
                       <IconButton
                         size="small"
                         onClick={() => setDeleteDialog({ open: true, production })}
-                        title="Eliminar"
+                        title={t("Delete")}
                         color="error"
                       >
                         <DeleteIcon fontSize="small" />
@@ -299,8 +301,8 @@ const ProductionsPage = () => {
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={handleChangeRowsPerPage}
           rowsPerPageOptions={[5, 10, 25, 50]}
-          labelRowsPerPage="Filas por página:"
-          labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+          labelRowsPerPage={t("Rows per page:")}
+          labelDisplayedRows={({ from, to, count }) => `${from}-${to} ${t("of")} ${count}`}
         />
       </Paper>
 
@@ -308,8 +310,8 @@ const ProductionsPage = () => {
         open={deleteDialog.open}
         onClose={() => setDeleteDialog({ open: false, production: null })}
         onConfirm={handleDelete}
-        title="Eliminar Producción"
-        message={`¿Estás seguro de que deseas eliminar la producción "${deleteDialog.production?.title}"? Esta acción no se puede deshacer.`}
+        title={t("Delete Production")}
+        message={t('Are you sure you want to delete the production "{{title}}"? This action cannot be undone.', { title: deleteDialog.production?.title })}
       />
     </AdminLayout>
   );
