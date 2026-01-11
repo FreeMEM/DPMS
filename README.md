@@ -58,13 +58,6 @@ Create the environment files in `.envs/` directory:
 # Django
 DJANGO_SECRET_KEY=your-secret-key-here-change-in-production
 
-# Redis (for Celery)
-REDIS_URL=redis://redis:6379/0
-
-# Celery Flower (task monitoring)
-CELERY_FLOWER_USER=your-flower-user
-CELERY_FLOWER_PASSWORD=your-flower-password
-
 # SceneID OAuth (optional, for SceneID login)
 SCENE_CLIENT_ID=your-sceneid-client-id
 SCENEID_CLIENT_SECRET=your-sceneid-client-secret
