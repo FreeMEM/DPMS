@@ -41,7 +41,7 @@ const JuryManagementPage = () => {
   const [juryMembers, setJuryMembers] = useState([]);
   const [editions, setEditions] = useState([]);
   const [compos, setCompos] = useState([]);
-  const [users, setUsers] = useState([]);
+  const [, setUsers] = useState([]); // users will be used when search endpoint is implemented
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -84,9 +84,8 @@ const JuryManagementPage = () => {
     }
   };
 
-  const fetchUsers = async (search = '') => {
+  const fetchUsers = async () => {
     try {
-      const client = axiosWrapper();
       // TODO: Implement user search endpoint
       // For now, we'll use a placeholder
       setUsers([]);
