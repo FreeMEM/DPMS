@@ -48,6 +48,7 @@ const SponsorFormPage = () => {
     } else {
       setLoadingData(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchEditions = async () => {

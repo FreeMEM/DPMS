@@ -13,7 +13,6 @@ import {
   Card,
   CardMedia,
   Slider,
-  InputAdornment,
 } from '@mui/material';
 import {
   Save as SaveIcon,
@@ -60,6 +59,7 @@ const EditionFormPage = () => {
     if (isEdit) {
       fetchEdition();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchEdition = async () => {

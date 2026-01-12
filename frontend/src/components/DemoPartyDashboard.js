@@ -39,7 +39,7 @@ import {
 
 const DemoPartyDashboard = () => {
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
+  useContext(AuthContext); // Keep context for future use
   const [value, setValue] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
