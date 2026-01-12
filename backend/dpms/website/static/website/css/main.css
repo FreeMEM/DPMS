@@ -120,16 +120,14 @@ main {
 
 /* Hero Section */
 .hero-section {
-    height: 100vh;
     min-height: 100vh;
-    max-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 80px 20px 40px;
+    padding: 100px 20px 60px;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .hero-wrapper {
@@ -153,7 +151,7 @@ main {
 .poster-image {
     width: 100%;
     height: auto;
-    max-height: 70vh;
+    max-height: 65vh;
     object-fit: contain;
     border-radius: 12px;
     border: 2px solid var(--border-color);
@@ -762,6 +760,10 @@ footer {
 
 /* Responsive Design */
 @media (max-width: 1024px) {
+    .hero-section {
+        padding: 100px 20px 40px;
+    }
+
     .hero-wrapper {
         flex-direction: column;
         gap: 2rem;
@@ -769,6 +771,10 @@ footer {
 
     .hero-poster {
         max-width: 280px;
+    }
+
+    .poster-image {
+        max-height: 45vh;
     }
 
     .hero-content.with-poster {
@@ -786,16 +792,20 @@ footer {
         gap: 1rem;
     }
 
+    .hero-section {
+        padding: 90px 15px 30px;
+    }
+
     .hero-poster {
-        max-width: 220px;
+        max-width: 200px;
     }
 
     .poster-image {
-        max-height: 40vh;
+        max-height: 35vh;
     }
 
     .hero-title {
-        font-size: 2.5rem;
+        font-size: 2rem;
     }
 
     .hero-date {
