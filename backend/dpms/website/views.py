@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.utils import timezone
-from dpms.compos.models import Edition, HasCompo
+from dpms.compos.models import Edition, HasCompo, Sponsor
 
 
 def index(request):
@@ -51,12 +51,20 @@ def index(request):
                 'target_date': earliest_start.isoformat(),
             }
 
+    # Get sponsors for current edition
+    sponsors = []
+    if current_edition:
+        sponsors = Sponsor.objects.filter(
+            editions=current_edition
+        ).order_by('display_order', 'name')
+
     context = {
         'site_title': 'DPMS - Demo Party Management System',
         'current_edition': current_edition,
         'open_compos': open_compos,
         'open_compos_count': open_compos_count,
         'countdown_data': countdown_data,
+        'sponsors': sponsors,
         'is_authenticated': request.user.is_authenticated,
     }
     return render(request, 'website/index.html', context)
