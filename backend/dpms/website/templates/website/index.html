@@ -6,62 +6,76 @@
 {% block content %}
 <!-- Hero Section - Full Screen Landing -->
 <div class="hero-section">
-    <div class="hero-content">
-        {% if current_edition %}
-            <div class="edition-badge">Demo Party</div>
-            <h1 class="hero-title">{{ current_edition.title }}</h1>
-            {% if current_edition.description %}
-                <p class="hero-subtitle">{{ current_edition.description|truncatewords:15 }}</p>
-            {% endif %}
-
-            <!-- Countdown Timer -->
-            {% if countdown_data %}
-                <div class="countdown-container">
-                    <div class="countdown-label">Comienza en</div>
-                    <div class="countdown-timer" id="countdown"
-                         data-target="{{ countdown_data.target_date }}">
-                        <div class="countdown-item">
-                            <span class="countdown-value" id="days">{{ countdown_data.days }}</span>
-                            <span class="countdown-unit">Dias</span>
-                        </div>
-                        <div class="countdown-separator">:</div>
-                        <div class="countdown-item">
-                            <span class="countdown-value" id="hours">{{ countdown_data.hours|stringformat:"02d" }}</span>
-                            <span class="countdown-unit">Horas</span>
-                        </div>
-                        <div class="countdown-separator">:</div>
-                        <div class="countdown-item">
-                            <span class="countdown-value" id="minutes">{{ countdown_data.minutes|stringformat:"02d" }}</span>
-                            <span class="countdown-unit">Min</span>
-                        </div>
-                        <div class="countdown-separator">:</div>
-                        <div class="countdown-item">
-                            <span class="countdown-value" id="seconds">{{ countdown_data.seconds|stringformat:"02d" }}</span>
-                            <span class="countdown-unit">Seg</span>
-                        </div>
-                    </div>
-                </div>
-            {% endif %}
-
-            <!-- Open Compos -->
-            {% if open_compos_count > 0 %}
-                <div class="open-compos-badge">
-                    <span class="compos-count">{{ open_compos_count }}</span>
-                    competicion{{ open_compos_count|pluralize:"es" }} abierta{{ open_compos_count|pluralize:"s" }}
-                </div>
-            {% endif %}
-
-        {% else %}
-            <h1 class="hero-title">DPMS</h1>
-            <p class="hero-subtitle">Demo Party Management System</p>
+    <div class="hero-wrapper">
+        {% if current_edition and current_edition.poster %}
+        <!-- Poster destacado -->
+        <div class="hero-poster">
+            <img src="{{ current_edition.poster.url }}" alt="{{ current_edition.title }} - Cartel"
+                 class="poster-image"
+                 {% if current_edition.logo_border_width > 0 %}
+                 style="box-shadow: 0 0 {{ current_edition.logo_border_width|add:20 }}px {{ current_edition.logo_border_color }};"
+                 {% endif %}
+            >
+        </div>
         {% endif %}
 
-        <!-- CTA Buttons -->
-        <div class="cta-buttons">
-            <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">Registrarse</a>
-            <a href="{{ FRONTEND_URL }}/login" class="btn btn-secondary">Acceder</a>
-        </div>
+        <div class="hero-content {% if current_edition and current_edition.poster %}with-poster{% endif %}">
+            {% if current_edition %}
+                <div class="edition-badge">Demo Party</div>
+                <h1 class="hero-title">{{ current_edition.title }}</h1>
+                {% if current_edition.description %}
+                    <p class="hero-subtitle">{{ current_edition.description|truncatewords:15 }}</p>
+                {% endif %}
 
+                <!-- Countdown Timer -->
+                {% if countdown_data %}
+                    <div class="countdown-container">
+                        <div class="countdown-label">Comienza en</div>
+                        <div class="countdown-timer" id="countdown"
+                             data-target="{{ countdown_data.target_date }}">
+                            <div class="countdown-item">
+                                <span class="countdown-value" id="days">{{ countdown_data.days }}</span>
+                                <span class="countdown-unit">Dias</span>
+                            </div>
+                            <div class="countdown-separator">:</div>
+                            <div class="countdown-item">
+                                <span class="countdown-value" id="hours">{{ countdown_data.hours|stringformat:"02d" }}</span>
+                                <span class="countdown-unit">Horas</span>
+                            </div>
+                            <div class="countdown-separator">:</div>
+                            <div class="countdown-item">
+                                <span class="countdown-value" id="minutes">{{ countdown_data.minutes|stringformat:"02d" }}</span>
+                                <span class="countdown-unit">Min</span>
+                            </div>
+                            <div class="countdown-separator">:</div>
+                            <div class="countdown-item">
+                                <span class="countdown-value" id="seconds">{{ countdown_data.seconds|stringformat:"02d" }}</span>
+                                <span class="countdown-unit">Seg</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Open Compos -->
+                {% if open_compos_count > 0 %}
+                    <div class="open-compos-badge">
+                        <span class="compos-count">{{ open_compos_count }}</span>
+                        competicion{{ open_compos_count|pluralize:"es" }} abierta{{ open_compos_count|pluralize:"s" }}
+                    </div>
+                {% endif %}
+
+            {% else %}
+                <h1 class="hero-title">DPMS</h1>
+                <p class="hero-subtitle">Demo Party Management System</p>
+            {% endif %}
+
+            <!-- CTA Buttons -->
+            <div class="cta-buttons">
+                <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">Registrarse</a>
+                <a href="{{ FRONTEND_URL }}/login" class="btn btn-secondary">Acceder</a>
+            </div>
+
+        </div>
     </div>
 
     <!-- Scroll indicator - outside hero-content for proper positioning -->
@@ -121,6 +135,35 @@
         </div>
     </div>
 </div>
+
+<!-- Sponsors Section -->
+{% if sponsors %}
+<div class="sponsors-section">
+    <div class="container">
+        <h2>Patrocinadores</h2>
+        <p class="section-description">
+            Gracias a nuestros patrocinadores por hacer posible este evento.
+        </p>
+        <div class="sponsors-grid">
+            {% for sponsor in sponsors %}
+            <div class="sponsor-item">
+                {% if sponsor.url %}
+                <a href="{{ sponsor.url }}" target="_blank" rel="noopener noreferrer" class="sponsor-link">
+                {% endif %}
+                    {% if sponsor.logo %}
+                    <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }}" class="sponsor-logo">
+                    {% else %}
+                    <span class="sponsor-name">{{ sponsor.name }}</span>
+                    {% endif %}
+                {% if sponsor.url %}
+                </a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
 
 {% endblock %}
 
