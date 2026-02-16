@@ -96,7 +96,7 @@ EMAIL_USE_TLS = env("EMAIL_USE_TLS")
 EMAIL_SSL_CONTEXT = ssl_context
 
 
-FRONTEND_URL = "https://dpms.freemem.space"
+FRONTEND_URL = "https://dpms.freemem.space/app"
 BACKEND_URL = "https://api.dpms.freemem.space"
 
 # Admin
