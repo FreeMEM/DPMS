@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { getEffect, getEffectCount } from "./backgroundEffects";
+import WebGL2Background from "./WebGL2Background";
 
 // Constantes de rendimiento
 const TARGET_FPS = 30;
 const FRAME_INTERVAL = 1000 / TARGET_FPS;
 
-const ThreeBackground = ({ variant = "admin" }) => {
+const ThreeBackground = ({ variant = "admin", effectIndex: externalEffectIndex }) => {
   const containerRef = useRef(null);
   const rendererRef = useRef(null);
   const animationFrameRef = useRef(null);
@@ -16,19 +17,23 @@ const ThreeBackground = ({ variant = "admin" }) => {
   const lastFrameTimeRef = useRef(0);
   const isTabVisibleRef = useRef(true);
   const [isVisible, setIsVisible] = useState(() => {
-    // Leer preferencia de localStorage, por defecto true
+    // Para stagerunner siempre visible, para otros leer de localStorage
+    if (variant === "stagerunner") return true;
     const saved = localStorage.getItem('backgroundEnabled');
     return saved !== null ? JSON.parse(saved) : true;
   });
 
   // Estado para alternar entre efectos
-  const [effectIndex, setEffectIndex] = useState(() => {
+  const [internalEffectIndex, setEffectIndex] = useState(() => {
     const saved = localStorage.getItem('selectedEffect');
     if (saved && saved !== 'auto') {
       return parseInt(saved, 10);
     }
     return 0;
   });
+
+  // Usar effectIndex externo si se proporciona, sino usar el interno
+  const effectIndex = externalEffectIndex !== undefined ? externalEffectIndex : internalEffectIndex;
   const [isFading, setIsFading] = useState(false);
   const [autoRotate, setAutoRotate] = useState(() => {
     const saved = localStorage.getItem('selectedEffect');
@@ -783,16 +788,41 @@ const ThreeBackground = ({ variant = "admin" }) => {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [isVisible]);
 
+  // Get current effect to check if it's WebGL2
+  const currentEffect = getEffect(effectIndex);
+  const isWebGL2Effect = currentEffect?.isWebGL2Effect || false;
+
+  // If it's a WebGL2 effect, render WebGL2Background instead
+  if (isWebGL2Effect && isVisible) {
+    return (
+      <div
+        style={{
+          position: variant === "stagerunner" ? "absolute" : "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          zIndex: variant === "stagerunner" ? 0 : -1,
+          pointerEvents: "none",
+          opacity: isFading ? 0 : 1,
+          transition: "opacity 1s ease-in-out",
+        }}
+      >
+        <WebGL2Background shaderName={currentEffect.name} />
+      </div>
+    );
+  }
+
   return (
     <div
       ref={containerRef}
       style={{
-        position: "fixed",
+        position: variant === "stagerunner" ? "absolute" : "fixed",
         top: 0,
         left: 0,
         width: "100%",
         height: "100%",
-        zIndex: -1,
+        zIndex: variant === "stagerunner" ? 0 : -1,
         pointerEvents: "none",
         display: isVisible ? "block" : "none",
         opacity: isFading ? 0 : 1,

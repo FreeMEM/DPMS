@@ -18,6 +18,12 @@ from .models import (
     JuryMember,
     Vote,
     VotingPeriod,
+    StageRunnerConfig,
+    StageSlide,
+    SlideElement,
+    StageControl,
+    StagePresentation,
+    PresentationSlide,
 )
 
 
@@ -1830,6 +1836,519 @@ class SponsorAdmin(admin.ModelAdmin):
             return format_html('<strong>{}</strong> editions', count)
         return "0"
     editions_count.short_description = "Editions"
+
+    def created_display(self, obj):
+        """Format created date"""
+        return obj.created.strftime("%Y-%m-%d %H:%M")
+    created_display.short_description = "Created"
+    created_display.admin_order_field = "created"
+
+
+# ============================================================================
+# STAGERUNNER ADMIN
+# ============================================================================
+
+
+class StageSlideInline(admin.TabularInline):
+    """StageSlide inline for StageRunnerConfig admin"""
+    model = StageSlide
+    extra = 0
+    fields = ("name", "slide_type", "background_effect", "display_order", "is_active")
+    readonly_fields = ("created",)
+    show_change_link = True
+    ordering = ["display_order"]
+
+
+class SlideElementInline(admin.TabularInline):
+    """SlideElement inline for StageSlide admin"""
+    model = SlideElement
+    extra = 0
+    fields = ("name", "element_type", "x", "y", "width", "height", "z_index", "is_visible")
+    readonly_fields = ("created",)
+    ordering = ["z_index"]
+
+
+@admin.register(StageRunnerConfig)
+class StageRunnerConfigAdmin(admin.ModelAdmin):
+    """StageRunnerConfig model admin"""
+
+    list_display = (
+        "id",
+        "edition_link",
+        "default_background_effect",
+        "canvas_dimensions",
+        "slides_count",
+        "created_display",
+    )
+
+    list_display_links = ("id", "edition_link")
+
+    search_fields = ("edition__title",)
+
+    list_filter = ("default_background_effect", "created")
+
+    readonly_fields = ("created", "modified")
+
+    inlines = [StageSlideInline]
+
+    fieldsets = (
+        ("Edition", {"fields": ("edition",)}),
+        ("Canvas", {"fields": ("canvas_width", "canvas_height")}),
+        ("Background", {"fields": ("default_background_effect",)}),
+        ("Auto Advance", {"fields": ("auto_advance_interval",)}),
+        ("Timestamps", {"fields": ("created", "modified"), "classes": ("collapse",)}),
+    )
+
+    autocomplete_fields = ["edition"]
+
+    def edition_link(self, obj):
+        """Link to edition admin page"""
+        url = reverse("admin:compos_edition_change", args=[obj.edition.pk])
+        return format_html('<a href="{}">{}</a>', url, obj.edition.title)
+    edition_link.short_description = "Edition"
+    edition_link.admin_order_field = "edition__title"
+
+    def canvas_dimensions(self, obj):
+        """Display canvas dimensions"""
+        return f"{obj.canvas_width} x {obj.canvas_height}"
+    canvas_dimensions.short_description = "Canvas"
+
+    def slides_count(self, obj):
+        """Count of slides"""
+        count = obj.slides.count()
+        active = obj.slides.filter(is_active=True).count()
+        return format_html('<strong>{}</strong> slides ({} active)', count, active)
+    slides_count.short_description = "Slides"
+
+    def created_display(self, obj):
+        """Format created date"""
+        return obj.created.strftime("%Y-%m-%d %H:%M")
+    created_display.short_description = "Created"
+    created_display.admin_order_field = "created"
+
+
+@admin.register(StageSlide)
+class StageSlideAdmin(admin.ModelAdmin):
+    """StageSlide model admin"""
+
+    list_display = (
+        "id",
+        "name",
+        "config_link",
+        "slide_type_badge",
+        "background_effect_badge",
+        "display_order",
+        "active_badge",
+        "elements_count",
+        "created_display",
+    )
+
+    list_display_links = ("id", "name")
+
+    search_fields = ("name", "config__edition__title")
+
+    list_filter = ("slide_type", "background_effect", "is_active", "config__edition")
+
+    readonly_fields = ("created", "modified")
+
+    inlines = [SlideElementInline]
+
+    fieldsets = (
+        ("Basic", {"fields": ("config", "name", "slide_type")}),
+        ("Background", {"fields": ("background_effect", "background_image", "background_color")}),
+        ("Display", {"fields": ("display_order", "duration", "is_active")}),
+        ("Compo Association", {"fields": ("has_compo",), "classes": ("collapse",)}),
+        ("Timestamps", {"fields": ("created", "modified"), "classes": ("collapse",)}),
+    )
+
+    autocomplete_fields = ["config", "has_compo"]
+
+    ordering = ["config", "display_order"]
+
+    def config_link(self, obj):
+        """Link to config admin page"""
+        url = reverse("admin:compos_stagerunnerconfig_change", args=[obj.config.pk])
+        return format_html('<a href="{}">{}</a>', url, obj.config.edition.title)
+    config_link.short_description = "Config"
+    config_link.admin_order_field = "config__edition__title"
+
+    def slide_type_badge(self, obj):
+        """Display slide type"""
+        colors = {
+            "custom": "#17a2b8",
+            "idle": "#6c757d",
+            "countdown": "#ffc107",
+            "production_list": "#28a745",
+            "production_show": "#fd7e14",
+            "results": "#6f42c1",
+        }
+        color = colors.get(obj.slide_type, "#6c757d")
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 3px 10px; border-radius: 3px;">{}</span>',
+            color, obj.get_slide_type_display()
+        )
+    slide_type_badge.short_description = "Type"
+    slide_type_badge.admin_order_field = "slide_type"
+
+    def background_effect_badge(self, obj):
+        """Display background effect"""
+        colors = {
+            "inherit": "#6c757d",
+            "none": "#343a40",
+            "hyperspace": "#007bff",
+            "wave": "#17a2b8",
+            "energy-grid": "#28a745",
+            "tron-grid": "#fd7e14",
+        }
+        color = colors.get(obj.background_effect, "#6c757d")
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 3px 10px; border-radius: 3px;">{}</span>',
+            color, obj.background_effect
+        )
+    background_effect_badge.short_description = "Effect"
+    background_effect_badge.admin_order_field = "background_effect"
+
+    def active_badge(self, obj):
+        """Display active status"""
+        if obj.is_active:
+            return format_html(
+                '<span style="background-color: #28a745; color: white; padding: 3px 10px; border-radius: 3px;">Active</span>'
+            )
+        return format_html(
+            '<span style="background-color: #6c757d; color: white; padding: 3px 10px; border-radius: 3px;">Inactive</span>'
+        )
+    active_badge.short_description = "Active"
+    active_badge.admin_order_field = "is_active"
+
+    def elements_count(self, obj):
+        """Count of elements"""
+        count = obj.elements.count()
+        return format_html('<strong>{}</strong> elements', count)
+    elements_count.short_description = "Elements"
+
+    def created_display(self, obj):
+        """Format created date"""
+        return obj.created.strftime("%Y-%m-%d %H:%M")
+    created_display.short_description = "Created"
+    created_display.admin_order_field = "created"
+
+
+@admin.register(SlideElement)
+class SlideElementAdmin(admin.ModelAdmin):
+    """SlideElement model admin"""
+
+    list_display = (
+        "id",
+        "name",
+        "slide_link",
+        "element_type_badge",
+        "position_display",
+        "size_display",
+        "z_index",
+        "visible_badge",
+        "transition_display",
+    )
+
+    list_display_links = ("id", "name")
+
+    search_fields = ("name", "content", "slide__name", "slide__config__edition__title")
+
+    list_filter = ("element_type", "is_visible", "enter_transition", "slide__config__edition")
+
+    readonly_fields = ("created", "modified", "image_preview")
+
+    fieldsets = (
+        ("Basic", {"fields": ("slide", "element_type", "name")}),
+        ("Position & Size", {"fields": ("x", "y", "width", "height", "rotation", "z_index")}),
+        ("Content", {"fields": ("content", "image", "image_preview", "video")}),
+        ("Styles", {"fields": ("styles",)}),
+        ("Transitions", {"fields": ("enter_transition", "exit_transition", "enter_duration", "exit_duration", "enter_delay")}),
+        ("Visibility", {"fields": ("is_visible",)}),
+        ("Timestamps", {"fields": ("created", "modified"), "classes": ("collapse",)}),
+    )
+
+    autocomplete_fields = ["slide"]
+
+    ordering = ["slide", "z_index"]
+
+    def slide_link(self, obj):
+        """Link to slide admin page"""
+        url = reverse("admin:compos_stageslide_change", args=[obj.slide.pk])
+        return format_html('<a href="{}">{}</a>', url, obj.slide.name)
+    slide_link.short_description = "Slide"
+    slide_link.admin_order_field = "slide__name"
+
+    def element_type_badge(self, obj):
+        """Display element type"""
+        colors = {
+            "text": "#007bff",
+            "image": "#28a745",
+            "video": "#dc3545",
+            "scrolling_text": "#17a2b8",
+            "clock": "#ffc107",
+            "countdown": "#fd7e14",
+            "production_info": "#6f42c1",
+            "sponsor_bar": "#e83e8c",
+        }
+        color = colors.get(obj.element_type, "#6c757d")
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 3px 10px; border-radius: 3px;">{}</span>',
+            color, obj.get_element_type_display()
+        )
+    element_type_badge.short_description = "Type"
+    element_type_badge.admin_order_field = "element_type"
+
+    def position_display(self, obj):
+        """Display position"""
+        return f"({obj.x:.1f}%, {obj.y:.1f}%)"
+    position_display.short_description = "Position"
+
+    def size_display(self, obj):
+        """Display size"""
+        return f"{obj.width:.1f}% x {obj.height:.1f}%"
+    size_display.short_description = "Size"
+
+    def visible_badge(self, obj):
+        """Display visibility status"""
+        if obj.is_visible:
+            return format_html(
+                '<span style="background-color: #28a745; color: white; padding: 3px 10px; border-radius: 3px;">Visible</span>'
+            )
+        return format_html(
+            '<span style="background-color: #6c757d; color: white; padding: 3px 10px; border-radius: 3px;">Hidden</span>'
+        )
+    visible_badge.short_description = "Visible"
+    visible_badge.admin_order_field = "is_visible"
+
+    def transition_display(self, obj):
+        """Display transitions"""
+        return f"In: {obj.enter_transition} / Out: {obj.exit_transition}"
+    transition_display.short_description = "Transitions"
+
+    def image_preview(self, obj):
+        """Display image preview"""
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="max-height: 100px; max-width: 200px;"/>',
+                obj.image.url
+            )
+        return "No image"
+    image_preview.short_description = "Image Preview"
+
+
+@admin.register(StageControl)
+class StageControlAdmin(admin.ModelAdmin):
+    """StageControl model admin"""
+
+    list_display = (
+        "id",
+        "config_link",
+        "current_slide_link",
+        "playing_badge",
+        "modified_display",
+    )
+
+    list_display_links = ("id", "config_link")
+
+    search_fields = ("config__edition__title",)
+
+    list_filter = ("is_playing", "config__edition")
+
+    readonly_fields = ("created", "modified")
+
+    fieldsets = (
+        ("Config", {"fields": ("config",)}),
+        ("State", {"fields": ("current_slide", "current_production", "current_production_index", "is_playing")}),
+        ("Countdown", {"fields": ("countdown_target",)}),
+        ("Timestamps", {"fields": ("created", "modified"), "classes": ("collapse",)}),
+    )
+
+    autocomplete_fields = ["config", "current_slide", "current_production"]
+
+    def config_link(self, obj):
+        """Link to config admin page"""
+        url = reverse("admin:compos_stagerunnerconfig_change", args=[obj.config.pk])
+        return format_html('<a href="{}">{}</a>', url, obj.config.edition.title)
+    config_link.short_description = "Config"
+    config_link.admin_order_field = "config__edition__title"
+
+    def current_slide_link(self, obj):
+        """Link to current slide"""
+        if obj.current_slide:
+            url = reverse("admin:compos_stageslide_change", args=[obj.current_slide.pk])
+            return format_html('<a href="{}">{}</a>', url, obj.current_slide.name)
+        return "-"
+    current_slide_link.short_description = "Current Slide"
+
+    def playing_badge(self, obj):
+        """Display playing status"""
+        if obj.is_playing:
+            return format_html(
+                '<span style="background-color: #28a745; color: white; padding: 3px 10px; border-radius: 3px;">Playing</span>'
+            )
+        return format_html(
+            '<span style="background-color: #6c757d; color: white; padding: 3px 10px; border-radius: 3px;">Paused</span>'
+        )
+    playing_badge.short_description = "Status"
+    playing_badge.admin_order_field = "is_playing"
+
+    def modified_display(self, obj):
+        """Format modified date"""
+        return obj.modified.strftime("%Y-%m-%d %H:%M")
+    modified_display.short_description = "Modified"
+    modified_display.admin_order_field = "modified"
+
+
+# ============================================================================
+# STAGE PRESENTATIONS ADMIN
+# ============================================================================
+
+
+class PresentationSlideInline(admin.TabularInline):
+    """PresentationSlide inline for StagePresentation admin"""
+    model = PresentationSlide
+    extra = 0
+    fields = ("slide", "display_order")
+    autocomplete_fields = ["slide"]
+    ordering = ["display_order"]
+
+
+@admin.register(StagePresentation)
+class StagePresentationAdmin(admin.ModelAdmin):
+    """StagePresentation model admin"""
+
+    list_display = (
+        "id",
+        "name",
+        "config_link",
+        "presentation_type_badge",
+        "has_compo_link",
+        "active_badge",
+        "slides_count",
+        "created_display",
+    )
+
+    list_display_links = ("id", "name")
+
+    search_fields = ("name", "config__edition__title", "has_compo__compo__name")
+
+    list_filter = ("presentation_type", "is_active", "config__edition")
+
+    readonly_fields = ("created", "modified")
+
+    inlines = [PresentationSlideInline]
+
+    fieldsets = (
+        ("Basic", {"fields": ("config", "name", "presentation_type")}),
+        ("Compo Association", {"fields": ("has_compo",), "description": "Required for compo and awards presentations"}),
+        ("Status", {"fields": ("is_active",)}),
+        ("Timestamps", {"fields": ("created", "modified"), "classes": ("collapse",)}),
+    )
+
+    autocomplete_fields = ["config", "has_compo"]
+
+    ordering = ["config", "name"]
+
+    def config_link(self, obj):
+        """Link to config admin page"""
+        url = reverse("admin:compos_stagerunnerconfig_change", args=[obj.config.pk])
+        return format_html('<a href="{}">{}</a>', url, obj.config.edition.title)
+    config_link.short_description = "Config"
+    config_link.admin_order_field = "config__edition__title"
+
+    def presentation_type_badge(self, obj):
+        """Display presentation type"""
+        colors = {
+            "idle": "#6c757d",
+            "compo": "#28a745",
+            "awards": "#ffc107",
+            "custom": "#17a2b8",
+        }
+        color = colors.get(obj.presentation_type, "#6c757d")
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 3px 10px; border-radius: 3px;">{}</span>',
+            color, obj.get_presentation_type_display()
+        )
+    presentation_type_badge.short_description = "Type"
+    presentation_type_badge.admin_order_field = "presentation_type"
+
+    def has_compo_link(self, obj):
+        """Link to has_compo admin page"""
+        if obj.has_compo:
+            url = reverse("admin:compos_hascompo_change", args=[obj.has_compo.pk])
+            return format_html('<a href="{}">{}</a>', url, obj.has_compo.compo.name)
+        return "-"
+    has_compo_link.short_description = "Compo"
+    has_compo_link.admin_order_field = "has_compo__compo__name"
+
+    def active_badge(self, obj):
+        """Display active status"""
+        if obj.is_active:
+            return format_html(
+                '<span style="background-color: #28a745; color: white; padding: 3px 10px; border-radius: 3px;">Active</span>'
+            )
+        return format_html(
+            '<span style="background-color: #6c757d; color: white; padding: 3px 10px; border-radius: 3px;">Inactive</span>'
+        )
+    active_badge.short_description = "Active"
+    active_badge.admin_order_field = "is_active"
+
+    def slides_count(self, obj):
+        """Count of slides"""
+        count = obj.slides.count()
+        return format_html('<strong>{}</strong> slides', count)
+    slides_count.short_description = "Slides"
+
+    def created_display(self, obj):
+        """Format created date"""
+        return obj.created.strftime("%Y-%m-%d %H:%M")
+    created_display.short_description = "Created"
+    created_display.admin_order_field = "created"
+
+
+@admin.register(PresentationSlide)
+class PresentationSlideAdmin(admin.ModelAdmin):
+    """PresentationSlide model admin"""
+
+    list_display = (
+        "id",
+        "presentation_link",
+        "slide_link",
+        "display_order",
+        "created_display",
+    )
+
+    list_display_links = ("id",)
+
+    search_fields = ("presentation__name", "slide__name")
+
+    list_filter = ("presentation__config__edition", "presentation")
+
+    readonly_fields = ("created", "modified")
+
+    fieldsets = (
+        ("Association", {"fields": ("presentation", "slide")}),
+        ("Display", {"fields": ("display_order",)}),
+        ("Timestamps", {"fields": ("created", "modified"), "classes": ("collapse",)}),
+    )
+
+    autocomplete_fields = ["presentation", "slide"]
+
+    ordering = ["presentation", "display_order"]
+
+    def presentation_link(self, obj):
+        """Link to presentation admin page"""
+        url = reverse("admin:compos_stagepresentation_change", args=[obj.presentation.pk])
+        return format_html('<a href="{}">{}</a>', url, obj.presentation.name)
+    presentation_link.short_description = "Presentation"
+    presentation_link.admin_order_field = "presentation__name"
+
+    def slide_link(self, obj):
+        """Link to slide admin page"""
+        url = reverse("admin:compos_stageslide_change", args=[obj.slide.pk])
+        return format_html('<a href="{}">{}</a>', url, obj.slide.name)
+    slide_link.short_description = "Slide"
+    slide_link.admin_order_field = "slide__name"
 
     def created_display(self, obj):
         """Format created date"""

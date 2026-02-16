@@ -543,7 +543,7 @@ export const tronGridEffect = {
       // Cada letra es una matriz 5x5 codificada como bits
       // Letras A-Z: 65-90
       // Números 0-9: 48-57
-      // Especiales: 32(espacio), 33(!), 36($), 40((), 41()), 45(-), 47(/), 58(:), 59(;), 61(=), 63(?), 92(\), 161(¿), 164(€), 209(Ñ)
+      // Especiales: 32(espacio), 33(!), 36($), 40((), 41()), 45(-), 47(/), 58(:), 59(;), 61(=), 63(?), 92(backslash), 161(?), 164(EUR), 209(N)
 
       if (ch == 65) { // A
         if (y==0 && x>=1 && x<=3) return 1.0;
@@ -909,6 +909,784 @@ export const tronGridEffect = {
 };
 
 /**
+ * WUHU BOXES EFFECT
+ * Raymarching with animated 3D SDF boxes creating volumetric glow
+ * Ported from Wuhu slideviewer WebGL2 shader
+ */
+export const wuhuBoxesEffect = {
+  name: 'wuhu-boxes',
+
+  // This effect is purely shader-based, no particles needed
+  particleCount: () => 0,
+
+  // No line connections for this effect
+  maxConnections: () => 0,
+  lineOpacity: 0,
+  maxConnectionDistance: 0,
+  animateLines: false,
+
+  // Flag to indicate this is a fullscreen shader effect
+  isFullscreenShader: true,
+
+  initializeParticles: () => {
+    return { positions: new Float32Array(0), colors: new Float32Array(0), sizes: new Float32Array(0), particleData: null };
+  },
+
+  animateParticles: () => {
+    return null;
+  },
+
+  plasmaShader: `
+    uniform float time;
+    uniform vec3 color1;
+    uniform vec3 color2;
+    varying vec2 vUv;
+
+    // Raymarching repeat period
+    float REPEAT = 5.0;
+
+    mat2 rot(float a) {
+      float c = cos(a), s = sin(a);
+      return mat2(c, s, -s, c);
+    }
+
+    float sdBox(vec3 p, vec3 b) {
+      vec3 q = abs(p) - b;
+      return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0);
+    }
+
+    float box(vec3 pos, float scale, float gTime) {
+      pos *= scale;
+      float base = sdBox(pos, vec3(0.4, 0.4, 0.1)) / 1.5;
+      pos.xy *= 5.0;
+      pos.y -= 3.5;
+      pos.xy = rot(0.75) * pos.xy;
+      float result = -base;
+      return result;
+    }
+
+    float box_set(vec3 pos, float gTime) {
+      vec3 pos_origin = pos;
+      pos = pos_origin;
+      pos.y += sin(gTime * 0.4) * 2.5;
+      pos.xy = rot(0.8) * pos.xy;
+      float box1 = box(pos, 2.0 - abs(sin(gTime * 0.4)) * 1.5, gTime);
+
+      pos = pos_origin;
+      pos.y -= sin(gTime * 0.4) * 2.5;
+      pos.xy = rot(0.8) * pos.xy;
+      float box2 = box(pos, 2.0 - abs(sin(gTime * 0.4)) * 1.5, gTime);
+
+      pos = pos_origin;
+      pos.x += sin(gTime * 0.4) * 2.5;
+      pos.xy = rot(0.8) * pos.xy;
+      float box3 = box(pos, 2.0 - abs(sin(gTime * 0.4)) * 1.5, gTime);
+
+      pos = pos_origin;
+      pos.x -= sin(gTime * 0.4) * 2.5;
+      pos.xy = rot(0.8) * pos.xy;
+      float box4 = box(pos, 2.0 - abs(sin(gTime * 0.4)) * 1.5, gTime);
+
+      pos = pos_origin;
+      pos.xy = rot(0.8) * pos.xy;
+      float box5 = box(pos, 0.5, gTime) * 6.0;
+
+      pos = pos_origin;
+      float box6 = box(pos, 0.5, gTime) * 6.0;
+
+      float result = max(max(max(max(max(box1, box2), box3), box4), box5), box6);
+      return result;
+    }
+
+    float map(vec3 pos, float gTime) {
+      float box_set1 = box_set(pos, gTime);
+      return box_set1;
+    }
+
+    void main() {
+      // Convert vUv to centered coordinates with aspect ratio correction
+      vec2 uv = vUv * 2.0 - 1.0;
+      uv.x *= 1.777; // 16:9 aspect ratio
+
+      vec3 ro = vec3(0.0, -0.2, time * 4.0);
+      vec3 ray = normalize(vec3(uv, 1.5));
+      ray.xy = rot(sin(time * 0.03) * 5.0) * ray.xy;
+      ray.yz = rot(sin(time * 0.05) * 0.2) * ray.yz;
+
+      float t = 0.1;
+      vec3 col = vec3(0.0);
+      float ac = 0.0;
+      float gTime;
+
+      // Raymarching loop
+      for (int i = 0; i < 99; i++) {
+        vec3 pos = ro + ray * t;
+        pos = mod(pos - 2.0, 4.0) - 2.0;
+        gTime = time - float(i) * 0.01;
+
+        float d = map(pos, gTime);
+        d = max(abs(d), 0.01);
+        ac += exp(-d * 23.0);
+        t += d * 0.55;
+      }
+
+      col = vec3(ac * 0.02);
+
+      // Dynamic color based on time - blend with color1 and color2
+      vec3 baseColor = vec3(0.0, 0.2 * abs(sin(time)), 0.5 + sin(time) * 0.2);
+      col += mix(baseColor, color2, 0.3);
+
+      float alpha = 1.0 - t * (0.02 + 0.02 * sin(time));
+      alpha = clamp(alpha, 0.0, 1.0);
+
+      gl_FragColor = vec4(col, alpha);
+    }
+  `
+};
+
+/**
+ * WebGL2 Effect placeholder - these effects are rendered by WebGL2Background component
+ * Used for wuhu-boxes variants which need full raymarching
+ */
+const createWebGL2Effect = (name) => ({
+  name,
+  isWebGL2Effect: true,
+  particleCount: () => 0,
+  maxConnections: () => 0,
+  lineOpacity: 0,
+  maxConnectionDistance: 0,
+  animateLines: false,
+  initializeParticles: () => ({
+    positions: new Float32Array(0),
+    colors: new Float32Array(0),
+    sizes: new Float32Array(0),
+    particleData: null
+  }),
+  animateParticles: () => null,
+  plasmaShader: `
+    uniform float time;
+    varying vec2 vUv;
+    void main() {
+      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
+    }
+  `
+});
+
+export const wuhuBoxesFireEffect = createWebGL2Effect('wuhu-boxes-fire');
+export const wuhuBoxesPurpleEffect = createWebGL2Effect('wuhu-boxes-purple');
+
+/**
+ * FLOATING SPHERES EFFECT (Three.js version)
+ * Particles distributed to form sphere shapes with organic movement
+ */
+export const floatingSpheresEffect = {
+  name: 'floating-spheres',
+
+  particleCount: (variant) => variant === "admin" ? 600 : 450,
+  maxConnections: (variant) => variant === "admin" ? 80 : 50,
+  lineOpacity: 0.4,
+  maxConnectionDistance: 2.0,
+  animateLines: true,
+
+  initializeParticles: (particlesCount, variant) => {
+    const positions = new Float32Array(particlesCount * 3);
+    const colors = new Float32Array(particlesCount * 3);
+    const sizes = new Float32Array(particlesCount);
+    const particleData = [];
+
+    // Create 4 main spheres + debris
+    const mainSpheres = [
+      { x: 0, y: 0, z: 0, radius: 2.5, particles: Math.floor(particlesCount * 0.3) },
+      { x: 4, y: 1, z: -2, radius: 1.5, particles: Math.floor(particlesCount * 0.15) },
+      { x: -3.5, y: -1.5, z: -1, radius: 1.3, particles: Math.floor(particlesCount * 0.12) },
+      { x: 2, y: -2, z: 1, radius: 1.0, particles: Math.floor(particlesCount * 0.1) },
+    ];
+
+    let idx = 0;
+
+    // Generate particles for each sphere
+    mainSpheres.forEach((sphere, sphereIdx) => {
+      for (let i = 0; i < sphere.particles && idx < particlesCount; i++) {
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos(2 * Math.random() - 1);
+        const r = sphere.radius * (0.8 + Math.random() * 0.4);
+
+        const x = sphere.x + r * Math.sin(phi) * Math.cos(theta);
+        const y = sphere.y + r * Math.sin(phi) * Math.sin(theta);
+        const z = sphere.z + r * Math.cos(phi);
+
+        positions[idx * 3] = x;
+        positions[idx * 3 + 1] = y;
+        positions[idx * 3 + 2] = z;
+
+        // Aqua/teal colors
+        colors[idx * 3] = 0.1 + Math.random() * 0.2;
+        colors[idx * 3 + 1] = 0.6 + Math.random() * 0.3;
+        colors[idx * 3 + 2] = 0.7 + Math.random() * 0.3;
+
+        sizes[idx] = 2 + Math.random() * 3;
+
+        particleData.push({
+          sphereIdx,
+          originalX: x, originalY: y, originalZ: z,
+          phase: Math.random() * Math.PI * 2,
+          speed: 0.3 + Math.random() * 0.3
+        });
+        idx++;
+      }
+    });
+
+    // Remaining particles as debris
+    while (idx < particlesCount) {
+      positions[idx * 3] = (Math.random() - 0.5) * 15;
+      positions[idx * 3 + 1] = (Math.random() - 0.5) * 10;
+      positions[idx * 3 + 2] = (Math.random() - 0.5) * 12;
+
+      colors[idx * 3] = 0.15 + Math.random() * 0.15;
+      colors[idx * 3 + 1] = 0.5 + Math.random() * 0.3;
+      colors[idx * 3 + 2] = 0.6 + Math.random() * 0.3;
+
+      sizes[idx] = 1 + Math.random() * 2;
+
+      particleData.push({
+        sphereIdx: -1,
+        originalX: positions[idx * 3],
+        originalY: positions[idx * 3 + 1],
+        originalZ: positions[idx * 3 + 2],
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.1 + Math.random() * 0.2
+      });
+      idx++;
+    }
+
+    return { positions, colors, sizes, particleData };
+  },
+
+  animateParticles: (particlesCount, positions, particleData, mouseRef, elapsedTime) => {
+    for (let i = 0; i < particlesCount; i++) {
+      const data = particleData[i];
+      const i3 = i * 3;
+
+      // Organic breathing motion
+      const breathe = Math.sin(elapsedTime * data.speed + data.phase) * 0.3;
+      const sway = Math.cos(elapsedTime * data.speed * 0.7 + data.phase) * 0.2;
+
+      positions[i3] = data.originalX + breathe + sway * 0.5;
+      positions[i3 + 1] = data.originalY + breathe * 0.8;
+      positions[i3 + 2] = data.originalZ + sway;
+    }
+
+    return {
+      rotationY: Math.sin(elapsedTime * 0.1) * 0.3,
+      rotationX: Math.cos(elapsedTime * 0.08) * 0.15
+    };
+  },
+
+  plasmaShader: `
+    uniform float time;
+    uniform vec3 color1;
+    uniform vec3 color2;
+    varying vec2 vUv;
+
+    void main() {
+      vec2 uv = vUv * 2.0 - 1.0;
+      float dist = length(uv);
+
+      float glow1 = sin(dist * 3.0 - time * 0.5) * 0.5 + 0.5;
+      float glow2 = cos(uv.x * 2.0 + uv.y * 2.0 + time * 0.3) * 0.5 + 0.5;
+
+      vec3 col = mix(color1, color2, glow1 * glow2);
+      float alpha = 0.3 * (1.0 - dist * 0.5);
+
+      gl_FragColor = vec4(col, alpha);
+    }
+  `
+};
+
+/**
+ * SPINNING TOROIDS EFFECT (Three.js version)
+ * Particles distributed to form torus shapes with rotation
+ */
+export const spinningToroidsEffect = {
+  name: 'spinning-toroids',
+
+  particleCount: (variant) => variant === "admin" ? 700 : 500,
+  maxConnections: (variant) => variant === "admin" ? 100 : 70,
+  lineOpacity: 0.5,
+  maxConnectionDistance: 1.8,
+  animateLines: true,
+
+  initializeParticles: (particlesCount, variant) => {
+    const positions = new Float32Array(particlesCount * 3);
+    const colors = new Float32Array(particlesCount * 3);
+    const sizes = new Float32Array(particlesCount);
+    const particleData = [];
+
+    // Create 3 interlocking toroids
+    const toroids = [
+      { R: 3.0, r: 0.8, rotX: 0, rotY: 0, particles: Math.floor(particlesCount * 0.35) },
+      { R: 3.0, r: 0.6, rotX: Math.PI / 2, rotY: 0, particles: Math.floor(particlesCount * 0.30) },
+      { R: 2.2, r: 0.5, rotX: Math.PI / 4, rotY: Math.PI / 4, particles: Math.floor(particlesCount * 0.20) },
+    ];
+
+    let idx = 0;
+
+    toroids.forEach((torus, toroidIdx) => {
+      for (let i = 0; i < torus.particles && idx < particlesCount; i++) {
+        const u = Math.random() * Math.PI * 2;
+        const v = Math.random() * Math.PI * 2;
+
+        // Torus parametric equation
+        let x = (torus.R + torus.r * Math.cos(v)) * Math.cos(u);
+        let y = (torus.R + torus.r * Math.cos(v)) * Math.sin(u);
+        let z = torus.r * Math.sin(v);
+
+        // Add some noise
+        x += (Math.random() - 0.5) * 0.2;
+        y += (Math.random() - 0.5) * 0.2;
+        z += (Math.random() - 0.5) * 0.2;
+
+        // Apply rotation
+        const cosX = Math.cos(torus.rotX), sinX = Math.sin(torus.rotX);
+        const cosY = Math.cos(torus.rotY), sinY = Math.sin(torus.rotY);
+
+        const y1 = y * cosX - z * sinX;
+        const z1 = y * sinX + z * cosX;
+        const x1 = x * cosY + z1 * sinY;
+        const z2 = -x * sinY + z1 * cosY;
+
+        positions[idx * 3] = x1;
+        positions[idx * 3 + 1] = y1;
+        positions[idx * 3 + 2] = z2;
+
+        // Gold/bronze colors
+        colors[idx * 3] = 0.8 + Math.random() * 0.2;
+        colors[idx * 3 + 1] = 0.5 + Math.random() * 0.3;
+        colors[idx * 3 + 2] = 0.1 + Math.random() * 0.2;
+
+        sizes[idx] = 2 + Math.random() * 2.5;
+
+        particleData.push({
+          toroidIdx,
+          u, v,
+          originalX: x1, originalY: y1, originalZ: z2,
+          phase: Math.random() * Math.PI * 2
+        });
+        idx++;
+      }
+    });
+
+    // Small orbiting particles
+    while (idx < particlesCount) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 4 + Math.random() * 2;
+
+      positions[idx * 3] = Math.cos(angle) * radius;
+      positions[idx * 3 + 1] = (Math.random() - 0.5) * 3;
+      positions[idx * 3 + 2] = Math.sin(angle) * radius;
+
+      colors[idx * 3] = 1.0;
+      colors[idx * 3 + 1] = 0.8 + Math.random() * 0.2;
+      colors[idx * 3 + 2] = 0.3 + Math.random() * 0.2;
+
+      sizes[idx] = 1 + Math.random() * 1.5;
+
+      particleData.push({
+        toroidIdx: -1,
+        u: angle, v: 0,
+        originalX: positions[idx * 3],
+        originalY: positions[idx * 3 + 1],
+        originalZ: positions[idx * 3 + 2],
+        phase: Math.random() * Math.PI * 2
+      });
+      idx++;
+    }
+
+    return { positions, colors, sizes, particleData };
+  },
+
+  animateParticles: (particlesCount, positions, particleData, mouseRef, elapsedTime) => {
+    for (let i = 0; i < particlesCount; i++) {
+      const data = particleData[i];
+      const i3 = i * 3;
+
+      if (data.toroidIdx >= 0) {
+        // Particles on toroids rotate with them
+        const rotSpeed = (data.toroidIdx + 1) * 0.15;
+        const rotAngle = elapsedTime * rotSpeed;
+
+        const x = data.originalX;
+        const z = data.originalZ;
+
+        positions[i3] = x * Math.cos(rotAngle) - z * Math.sin(rotAngle);
+        positions[i3 + 1] = data.originalY + Math.sin(elapsedTime * 0.5 + data.phase) * 0.1;
+        positions[i3 + 2] = x * Math.sin(rotAngle) + z * Math.cos(rotAngle);
+      } else {
+        // Orbiting particles
+        const orbitAngle = data.u + elapsedTime * 0.3;
+        const radius = Math.sqrt(data.originalX * data.originalX + data.originalZ * data.originalZ);
+
+        positions[i3] = Math.cos(orbitAngle) * radius;
+        positions[i3 + 1] = data.originalY + Math.sin(elapsedTime + data.phase) * 0.5;
+        positions[i3 + 2] = Math.sin(orbitAngle) * radius;
+      }
+    }
+
+    return {
+      rotationY: elapsedTime * 0.05,
+      rotationX: Math.sin(elapsedTime * 0.1) * 0.1
+    };
+  },
+
+  plasmaShader: `
+    uniform float time;
+    uniform vec3 color1;
+    uniform vec3 color2;
+    varying vec2 vUv;
+
+    void main() {
+      vec2 uv = vUv * 2.0 - 1.0;
+      float dist = length(uv);
+
+      float ring = sin(dist * 5.0 - time * 0.8) * 0.5 + 0.5;
+      float shimmer = sin(uv.x * 3.0 + uv.y * 3.0 + time * 0.5) * 0.5 + 0.5;
+
+      vec3 col = mix(color1, color2, ring * shimmer);
+      float alpha = 0.25 * (1.0 - dist * 0.4);
+
+      gl_FragColor = vec4(col, alpha);
+    }
+  `
+};
+
+/**
+ * CRYSTAL PYRAMIDS EFFECT (Three.js version)
+ * Particles distributed to form crystal/octahedron shapes
+ */
+export const crystalPyramidsEffect = {
+  name: 'crystal-pyramids',
+
+  particleCount: (variant) => variant === "admin" ? 550 : 400,
+  maxConnections: (variant) => variant === "admin" ? 120 : 80,
+  lineOpacity: 0.6,
+  maxConnectionDistance: 2.5,
+  animateLines: true,
+
+  initializeParticles: (particlesCount, variant) => {
+    const positions = new Float32Array(particlesCount * 3);
+    const colors = new Float32Array(particlesCount * 3);
+    const sizes = new Float32Array(particlesCount);
+    const particleData = [];
+
+    // Central octahedron
+    const centerParticles = Math.floor(particlesCount * 0.4);
+    // Orbiting crystals
+    const orbitParticles = Math.floor(particlesCount * 0.4);
+
+    let idx = 0;
+
+    // Create central octahedron (particles along edges)
+    const octaSize = 2.5;
+    const vertices = [
+      [0, octaSize, 0], [0, -octaSize, 0],
+      [octaSize, 0, 0], [-octaSize, 0, 0],
+      [0, 0, octaSize], [0, 0, -octaSize]
+    ];
+    const edges = [
+      [0, 2], [0, 3], [0, 4], [0, 5],
+      [1, 2], [1, 3], [1, 4], [1, 5],
+      [2, 4], [4, 3], [3, 5], [5, 2]
+    ];
+
+    const particlesPerEdge = Math.floor(centerParticles / edges.length);
+
+    edges.forEach((edge, edgeIdx) => {
+      const v1 = vertices[edge[0]];
+      const v2 = vertices[edge[1]];
+
+      for (let i = 0; i < particlesPerEdge && idx < particlesCount; i++) {
+        const t = i / particlesPerEdge;
+        const noise = 0.15;
+
+        positions[idx * 3] = v1[0] + (v2[0] - v1[0]) * t + (Math.random() - 0.5) * noise;
+        positions[idx * 3 + 1] = v1[1] + (v2[1] - v1[1]) * t + (Math.random() - 0.5) * noise;
+        positions[idx * 3 + 2] = v1[2] + (v2[2] - v1[2]) * t + (Math.random() - 0.5) * noise;
+
+        // Cyan/white crystalline colors
+        colors[idx * 3] = 0.3 + Math.random() * 0.4;
+        colors[idx * 3 + 1] = 0.7 + Math.random() * 0.3;
+        colors[idx * 3 + 2] = 0.9 + Math.random() * 0.1;
+
+        sizes[idx] = 2.5 + Math.random() * 2;
+
+        particleData.push({
+          type: 'center',
+          originalX: positions[idx * 3],
+          originalY: positions[idx * 3 + 1],
+          originalZ: positions[idx * 3 + 2],
+          phase: Math.random() * Math.PI * 2
+        });
+        idx++;
+      }
+    });
+
+    // Orbiting smaller crystals (6 positions)
+    const orbitRadius = 4.5;
+    const crystalsCount = 6;
+    const particlesPerCrystal = Math.floor(orbitParticles / crystalsCount);
+
+    for (let c = 0; c < crystalsCount && idx < particlesCount; c++) {
+      const crystalAngle = (c / crystalsCount) * Math.PI * 2;
+      const cx = Math.cos(crystalAngle) * orbitRadius;
+      const cz = Math.sin(crystalAngle) * orbitRadius;
+      const cy = Math.sin(crystalAngle * 2) * 1.5;
+
+      // Small octahedron at this position
+      const smallSize = 0.8;
+      const smallVerts = [
+        [0, smallSize, 0], [0, -smallSize, 0],
+        [smallSize, 0, 0], [-smallSize, 0, 0],
+        [0, 0, smallSize], [0, 0, -smallSize]
+      ];
+
+      for (let i = 0; i < particlesPerCrystal && idx < particlesCount; i++) {
+        const vi = Math.floor(Math.random() * 6);
+        const t = Math.random();
+        const v = smallVerts[vi];
+
+        positions[idx * 3] = cx + v[0] * t + (Math.random() - 0.5) * 0.1;
+        positions[idx * 3 + 1] = cy + v[1] * t + (Math.random() - 0.5) * 0.1;
+        positions[idx * 3 + 2] = cz + v[2] * t + (Math.random() - 0.5) * 0.1;
+
+        colors[idx * 3] = 0.4 + Math.random() * 0.3;
+        colors[idx * 3 + 1] = 0.8 + Math.random() * 0.2;
+        colors[idx * 3 + 2] = 1.0;
+
+        sizes[idx] = 1.5 + Math.random() * 1.5;
+
+        particleData.push({
+          type: 'orbit',
+          crystalIdx: c,
+          orbitAngle: crystalAngle,
+          orbitRadius,
+          localX: positions[idx * 3] - cx,
+          localY: positions[idx * 3 + 1] - cy,
+          localZ: positions[idx * 3 + 2] - cz,
+          phase: Math.random() * Math.PI * 2
+        });
+        idx++;
+      }
+    }
+
+    // Remaining as sparkles
+    while (idx < particlesCount) {
+      positions[idx * 3] = (Math.random() - 0.5) * 12;
+      positions[idx * 3 + 1] = (Math.random() - 0.5) * 8;
+      positions[idx * 3 + 2] = (Math.random() - 0.5) * 10;
+
+      colors[idx * 3] = 0.8 + Math.random() * 0.2;
+      colors[idx * 3 + 1] = 0.9 + Math.random() * 0.1;
+      colors[idx * 3 + 2] = 1.0;
+
+      sizes[idx] = 0.8 + Math.random() * 1;
+
+      particleData.push({
+        type: 'sparkle',
+        originalX: positions[idx * 3],
+        originalY: positions[idx * 3 + 1],
+        originalZ: positions[idx * 3 + 2],
+        phase: Math.random() * Math.PI * 2
+      });
+      idx++;
+    }
+
+    return { positions, colors, sizes, particleData };
+  },
+
+  animateParticles: (particlesCount, positions, particleData, mouseRef, elapsedTime) => {
+    for (let i = 0; i < particlesCount; i++) {
+      const data = particleData[i];
+      const i3 = i * 3;
+
+      if (data.type === 'center') {
+        // Slow rotation of central crystal
+        const rotAngle = elapsedTime * 0.2;
+        const x = data.originalX;
+        const z = data.originalZ;
+
+        positions[i3] = x * Math.cos(rotAngle) - z * Math.sin(rotAngle);
+        positions[i3 + 1] = data.originalY + Math.sin(elapsedTime * 0.5 + data.phase) * 0.1;
+        positions[i3 + 2] = x * Math.sin(rotAngle) + z * Math.cos(rotAngle);
+      } else if (data.type === 'orbit') {
+        // Orbiting crystals
+        const orbitAngle = data.orbitAngle + elapsedTime * 0.15;
+        const cx = Math.cos(orbitAngle) * data.orbitRadius;
+        const cz = Math.sin(orbitAngle) * data.orbitRadius;
+        const cy = Math.sin(orbitAngle * 2 + elapsedTime * 0.3) * 1.5;
+
+        // Local rotation
+        const localRot = elapsedTime * 0.5 + data.crystalIdx;
+        const lx = data.localX * Math.cos(localRot) - data.localZ * Math.sin(localRot);
+        const lz = data.localX * Math.sin(localRot) + data.localZ * Math.cos(localRot);
+
+        positions[i3] = cx + lx;
+        positions[i3 + 1] = cy + data.localY;
+        positions[i3 + 2] = cz + lz;
+      } else {
+        // Sparkles - gentle floating
+        positions[i3] = data.originalX + Math.sin(elapsedTime * 0.3 + data.phase) * 0.5;
+        positions[i3 + 1] = data.originalY + Math.cos(elapsedTime * 0.4 + data.phase) * 0.3;
+        positions[i3 + 2] = data.originalZ + Math.sin(elapsedTime * 0.35 + data.phase) * 0.4;
+      }
+    }
+
+    return {
+      rotationY: Math.sin(elapsedTime * 0.08) * 0.2,
+      rotationX: Math.cos(elapsedTime * 0.06) * 0.1
+    };
+  },
+
+  plasmaShader: `
+    uniform float time;
+    uniform vec3 color1;
+    uniform vec3 color2;
+    varying vec2 vUv;
+
+    void main() {
+      vec2 uv = vUv * 2.0 - 1.0;
+      float dist = length(uv);
+
+      float crystal = abs(sin(uv.x * 4.0 + time * 0.3)) * abs(sin(uv.y * 4.0 - time * 0.2));
+      float glow = sin(dist * 4.0 - time * 0.6) * 0.5 + 0.5;
+
+      vec3 col = mix(color1, color2, crystal * glow);
+      float alpha = 0.25 * (1.0 - dist * 0.4);
+
+      gl_FragColor = vec4(col, alpha);
+    }
+  `
+};
+
+/**
+ * INFINITE TUNNEL EFFECT (Three.js version)
+ * Particles forming tunnel structure with forward movement
+ */
+export const infiniteTunnelEffect = {
+  name: 'infinite-tunnel',
+
+  particleCount: (variant) => variant === "admin" ? 800 : 600,
+  maxConnections: (variant) => variant === "admin" ? 150 : 100,
+  lineOpacity: 0.5,
+  maxConnectionDistance: 2.0,
+  animateLines: true,
+
+  initializeParticles: (particlesCount, variant) => {
+    const positions = new Float32Array(particlesCount * 3);
+    const colors = new Float32Array(particlesCount * 3);
+    const sizes = new Float32Array(particlesCount);
+    const particleData = [];
+
+    const tunnelLength = 50;
+    const tunnelRadius = 3;
+
+    for (let i = 0; i < particlesCount; i++) {
+      const i3 = i * 3;
+
+      // Distribute along tunnel
+      const z = (Math.random() * tunnelLength) - tunnelLength / 2;
+      const angle = Math.random() * Math.PI * 2;
+
+      // Some particles on the walls, some inside
+      const isWall = Math.random() < 0.7;
+      const r = isWall
+        ? tunnelRadius * (0.9 + Math.random() * 0.2)
+        : Math.random() * tunnelRadius * 0.5;
+
+      positions[i3] = Math.cos(angle) * r;
+      positions[i3 + 1] = Math.sin(angle) * r;
+      positions[i3 + 2] = z;
+
+      // Neon rainbow colors
+      const hue = (z / tunnelLength + 0.5) * 0.8 + Math.random() * 0.2;
+      colors[i3] = 0.5 + 0.5 * Math.sin(hue * Math.PI * 2);
+      colors[i3 + 1] = 0.5 + 0.5 * Math.sin(hue * Math.PI * 2 + 2.094);
+      colors[i3 + 2] = 0.5 + 0.5 * Math.sin(hue * Math.PI * 2 + 4.188);
+
+      sizes[i] = isWall ? (1.5 + Math.random() * 2) : (2.5 + Math.random() * 2);
+
+      particleData.push({
+        angle,
+        radius: r,
+        isWall,
+        speed: 0.2 + Math.random() * 0.3,
+        originalZ: z,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+
+    return { positions, colors, sizes, particleData };
+  },
+
+  animateParticles: (particlesCount, positions, particleData, mouseRef, elapsedTime) => {
+    const tunnelLength = 50;
+    const moveSpeed = elapsedTime * 8;
+
+    for (let i = 0; i < particlesCount; i++) {
+      const data = particleData[i];
+      const i3 = i * 3;
+
+      // Move through tunnel
+      let z = data.originalZ + moveSpeed * data.speed;
+      z = ((z + tunnelLength / 2) % tunnelLength) - tunnelLength / 2;
+
+      // Wall particles spiral slightly
+      const spiralAngle = data.angle + (data.isWall ? elapsedTime * 0.1 : 0);
+
+      // Breathing effect for inner particles
+      const breathe = data.isWall ? 0 : Math.sin(elapsedTime * 2 + data.phase) * 0.3;
+
+      positions[i3] = Math.cos(spiralAngle) * (data.radius + breathe);
+      positions[i3 + 1] = Math.sin(spiralAngle) * (data.radius + breathe);
+      positions[i3 + 2] = z;
+    }
+
+    return {
+      rotationY: 0,
+      rotationX: 0
+    };
+  },
+
+  plasmaShader: `
+    uniform float time;
+    uniform vec3 color1;
+    uniform vec3 color2;
+    varying vec2 vUv;
+
+    void main() {
+      vec2 uv = vUv * 2.0 - 1.0;
+      float dist = length(uv);
+
+      // Tunnel effect
+      float tunnel = sin(dist * 8.0 - time * 2.0) * 0.5 + 0.5;
+      float rings = sin(atan(uv.y, uv.x) * 8.0 + time) * 0.5 + 0.5;
+
+      // Rainbow shift
+      float hue = time * 0.1 + dist;
+      vec3 rainbow = vec3(
+        0.5 + 0.5 * sin(hue * 6.28),
+        0.5 + 0.5 * sin(hue * 6.28 + 2.094),
+        0.5 + 0.5 * sin(hue * 6.28 + 4.188)
+      );
+
+      vec3 col = mix(color1, rainbow, tunnel * rings);
+      float alpha = 0.3 * (1.0 - dist * 0.3);
+
+      gl_FragColor = vec4(col, alpha);
+    }
+  `
+};
+
+/**
  * Array of all available effects
  * Add new effects here to make them selectable
  */
@@ -917,6 +1695,13 @@ export const availableEffects = [
   waveEffect,
   energyGridEffect,
   tronGridEffect,
+  wuhuBoxesEffect,
+  wuhuBoxesFireEffect,
+  wuhuBoxesPurpleEffect,
+  floatingSpheresEffect,
+  spinningToroidsEffect,
+  crystalPyramidsEffect,
+  infiniteTunnelEffect,
 ];
 
 /**

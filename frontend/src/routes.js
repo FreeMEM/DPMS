@@ -27,6 +27,13 @@ import AttendanceCodesPage from "./pages/admin/AttendanceCodesPage";
 import JuryManagementPage from "./pages/admin/JuryManagementPage";
 import SponsorsPage from "./pages/admin/SponsorsPage";
 import SponsorFormPage from "./pages/admin/SponsorFormPage";
+import {
+  StageRunnerPage,
+  SlidesListPage,
+  SlideEditorPage,
+  LiveControlPage,
+} from "./pages/admin/stagerunner";
+import StageRunnerViewer from "./pages/stagerunner/StageRunnerViewer";
 import Gallery from "./components/gallery/Gallery";
 
 const PrivateRoute = ({ children }) => {
@@ -195,6 +202,49 @@ const AppRoutes = () => {
             </AdminRoute>
           }
         />
+        {/* StageRunner Admin Routes */}
+        <Route
+          path="/admin/stagerunner"
+          element={
+            <AdminRoute>
+              <StageRunnerPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/stagerunner/slides"
+          element={
+            <AdminRoute>
+              <SlidesListPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/stagerunner/slides/new"
+          element={
+            <AdminRoute>
+              <SlideEditorPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/stagerunner/slides/:id"
+          element={
+            <AdminRoute>
+              <SlideEditorPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/stagerunner/control"
+          element={
+            <AdminRoute>
+              <LiveControlPage />
+            </AdminRoute>
+          }
+        />
+        {/* StageRunner Visualizer (public for projector laptop) */}
+        <Route path="/stagerunner/:editionId" element={<StageRunnerViewer />} />
         <Route path="/compos" element={<ComposList />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route
