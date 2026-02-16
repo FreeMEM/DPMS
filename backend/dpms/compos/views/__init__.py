@@ -4,6 +4,14 @@ from .productions import ProductionViewSet
 from .files import FileViewSet
 from .gallery import GalleryImageViewSet
 from .sponsors import SponsorViewSet
+from .stagerunner import (
+    StageRunnerConfigViewSet,
+    StageSlideViewSet,
+    SlideElementViewSet,
+    StagePresentationViewSet,
+    StageControlViewSet,
+    StageRunnerDataViewSet,
+)
 from .voting import (
     VotingConfigurationViewSet,
     AttendanceCodeViewSet,
@@ -22,6 +30,12 @@ __all__ = [
     'FileViewSet',
     'GalleryImageViewSet',
     'SponsorViewSet',
+    'StageRunnerConfigViewSet',
+    'StageSlideViewSet',
+    'SlideElementViewSet',
+    'StagePresentationViewSet',
+    'StageControlViewSet',
+    'StageRunnerDataViewSet',
     'VotingConfigurationViewSet',
     'AttendanceCodeViewSet',
     'AttendeeVerificationViewSet',

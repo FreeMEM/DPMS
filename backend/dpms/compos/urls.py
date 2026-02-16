@@ -11,6 +11,12 @@ from dpms.compos.views import (
     FileViewSet,
     GalleryImageViewSet,
     SponsorViewSet,
+    StageRunnerConfigViewSet,
+    StageSlideViewSet,
+    SlideElementViewSet,
+    StagePresentationViewSet,
+    StageControlViewSet,
+    StageRunnerDataViewSet,
     VotingConfigurationViewSet,
     AttendanceCodeViewSet,
     AttendeeVerificationViewSet,
@@ -28,6 +34,14 @@ router.register(r'productions', ProductionViewSet, basename='productions')
 router.register(r'files', FileViewSet, basename='files')
 router.register(r'gallery', GalleryImageViewSet, basename='gallery')
 router.register(r'sponsors', SponsorViewSet, basename='sponsors')
+
+# StageRunner routes
+router.register(r'stagerunner-config', StageRunnerConfigViewSet, basename='stagerunner-config')
+router.register(r'stage-slides', StageSlideViewSet, basename='stage-slides')
+router.register(r'slide-elements', SlideElementViewSet, basename='slide-elements')
+router.register(r'stage-presentations', StagePresentationViewSet, basename='stage-presentations')
+router.register(r'stage-control', StageControlViewSet, basename='stage-control')
+router.register(r'stagerunner-data', StageRunnerDataViewSet, basename='stagerunner-data')
 
 # Voting system routes
 router.register(r'voting-config', VotingConfigurationViewSet, basename='voting-config')

@@ -32,6 +32,7 @@ import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import FolderIcon from "@mui/icons-material/Folder";
 import CategoryIcon from "@mui/icons-material/Category";
 import HandshakeIcon from "@mui/icons-material/Handshake";
+import SlideshowIcon from "@mui/icons-material/Slideshow";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../AuthContext";
 import axiosWrapper from "../utils/AxiosWrapper";
@@ -402,6 +403,16 @@ const MainBar = () => {
                   <HandshakeIcon />
                 </ListItemIcon>
                 {open && <ListItemText primary={t("Sponsors")} />}
+              </ListItemButton>
+              <ListItemButton
+                selected={location.pathname.startsWith("/admin/stagerunner")}
+                onClick={() => navigate("/admin/stagerunner")}
+                sx={listItemButtonSx}
+              >
+                <ListItemIcon sx={listItemIconSx}>
+                  <SlideshowIcon />
+                </ListItemIcon>
+                {open && <ListItemText primary={t("StageRunner")} />}
               </ListItemButton>
             </List>
           </Box>
