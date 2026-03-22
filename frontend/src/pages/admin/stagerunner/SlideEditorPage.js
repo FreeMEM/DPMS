@@ -22,6 +22,7 @@ import {
   ListItemText,
   ListItemSecondaryAction,
   Slider,
+  LinearProgress,
 } from '@mui/material';
 import {
   Save as SaveIcon,
@@ -38,11 +39,14 @@ import {
   ViewCarousel as ProductionIcon,
   Handshake as SponsorIcon,
   TextRotationNone as ScrollTextIcon,
+  CloudUpload as UploadIcon,
+  Clear as ClearIcon,
 } from '@mui/icons-material';
 import { Rnd } from 'react-rnd';
 import { HexColorPicker } from 'react-colorful';
 
 import axiosWrapper from '../../../utils/AxiosWrapper';
+import { getVideoEmbedUrl, isVideoUrl } from '../../../utils/videoUtils';
 
 const CANVAS_WIDTH = 1920;
 const CANVAS_HEIGHT = 1080;
@@ -108,8 +112,10 @@ const SlideEditorPage = () => {
   const [selectedElementId, setSelectedElementId] = useState(null);
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(null);
   const [error, setError] = useState(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showTextColorPicker, setShowTextColorPicker] = useState(false);
   const [canvasScale, setCanvasScale] = useState(0.5);
 
   // Get config ID from URL or from loaded slide
@@ -179,23 +185,71 @@ const SlideEditorPage = () => {
 
       // Save elements
       for (const element of elements) {
-        if (element.id && !element._isNew) {
-          await client.put(`/api/slide-elements/${element.id}/`, {
-            ...element,
-            slide: slideId,
+        const hasFiles = element._imageFile || element._videoFile;
+        const { _isNew, _imageFile, _videoFile, _imagePreview, _videoPreview, ...cleanElement } = element;
+
+        if (hasFiles) {
+          const formData = new FormData();
+          const elementData = { ...cleanElement, slide: slideId };
+          // Remove fields that shouldn't go in FormData
+          delete elementData.image;
+          delete elementData.video;
+          delete elementData.created;
+          delete elementData.modified;
+
+          Object.entries(elementData).forEach(([key, value]) => {
+            if (value === null || value === undefined) return;
+            if (key === 'styles' && typeof value === 'object') {
+              formData.append(key, JSON.stringify(value));
+            } else if (typeof value === 'boolean') {
+              formData.append(key, value ? 'true' : 'false');
+            } else {
+              formData.append(key, value);
+            }
           });
+          if (_imageFile) formData.append('image', _imageFile);
+          if (_videoFile) formData.append('video', _videoFile);
+
+          const uploadConfig = {
+            timeout: 600000,
+            onUploadProgress: (progressEvent) => {
+              const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              setUploadProgress({ element: element.name, percent });
+            },
+          };
+          if (element.id && !_isNew) {
+            await client.put(`/api/slide-elements/${element.id}/`, formData, uploadConfig);
+          } else {
+            formData.delete('id');
+            await client.post('/api/slide-elements/', formData, uploadConfig);
+          }
+          setUploadProgress(null);
         } else {
-          const { id: _, _isNew, ...elementData } = element;
-          await client.post('/api/slide-elements/', {
-            ...elementData,
-            slide: slideId,
-          });
+          // Remove file URL strings - backend expects files, not URLs
+          const { image, video, created, modified, ...jsonElement } = cleanElement;
+          if (element.id && !_isNew) {
+            await client.put(`/api/slide-elements/${element.id}/`, {
+              ...jsonElement,
+              slide: slideId,
+            });
+          } else {
+            const { id: _, ...elementData } = jsonElement;
+            await client.post('/api/slide-elements/', {
+              ...elementData,
+              slide: slideId,
+            });
+          }
         }
       }
 
       navigate(`/admin/stagerunner/slides?config=${configId}`);
     } catch (err) {
-      setError('Error saving slide');
+      console.error('Error saving slide:', err.response?.data || err.message || err);
+      const detail = err.response?.data
+        ? (typeof err.response.data === 'object' ? JSON.stringify(err.response.data) : err.response.data)
+        : err.message;
+      setError(`Error: ${detail}`);
+      setUploadProgress(null);
       setSaving(false);
     }
   };
@@ -263,8 +317,8 @@ const SlideEditorPage = () => {
       <Rnd
         key={element.id}
         size={{
-          width: `${element.width}%`,
-          height: `${element.height}%`,
+          width: (element.width / 100) * CANVAS_WIDTH * canvasScale,
+          height: (element.height / 100) * CANVAS_HEIGHT * canvasScale,
         }}
         position={{
           x: (element.x / 100) * CANVAS_WIDTH * canvasScale,
@@ -276,8 +330,8 @@ const SlideEditorPage = () => {
           updateElement(element.id, { x: newX, y: newY });
         }}
         onResizeStop={(e, direction, ref, delta, position) => {
-          const newWidth = parseFloat(ref.style.width) / (CANVAS_WIDTH * canvasScale) * 100;
-          const newHeight = parseFloat(ref.style.height) / (CANVAS_HEIGHT * canvasScale) * 100;
+          const newWidth = (parseFloat(ref.style.width) / (CANVAS_WIDTH * canvasScale)) * 100;
+          const newHeight = (parseFloat(ref.style.height) / (CANVAS_HEIGHT * canvasScale)) * 100;
           const newX = (position.x / (CANVAS_WIDTH * canvasScale)) * 100;
           const newY = (position.y / (CANVAS_HEIGHT * canvasScale)) * 100;
           updateElement(element.id, {
@@ -299,7 +353,7 @@ const SlideEditorPage = () => {
           opacity: element.is_visible ? 1 : 0.4,
         }}
       >
-        <Box sx={{ textAlign: 'center', color: '#fff', p: 1, overflow: 'hidden', width: '100%' }}>
+        <Box sx={{ textAlign: 'center', color: '#fff', overflow: 'hidden', width: '100%', height: '100%' }}>
           {element.element_type === 'text' ? (
             <Typography
               sx={{
@@ -307,12 +361,42 @@ const SlideEditorPage = () => {
                 fontFamily: element.styles?.fontFamily || 'Arial',
                 color: element.styles?.color || '#fff',
                 textAlign: element.styles?.textAlign || 'center',
+                p: 1,
               }}
             >
               {element.content || 'Text'}
             </Typography>
+          ) : element.element_type === 'image' && (element._imagePreview || element.image) ? (
+            <Box
+              component="img"
+              src={element._imagePreview || element.image}
+              alt={element.name}
+              sx={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            />
+          ) : element.element_type === 'video' && (element._videoPreview || element.video) ? (
+            <Box
+              component="video"
+              src={element._videoPreview || element.video}
+              muted
+              sx={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              onError={(e) => console.warn('Video format not supported:', e.target.src)}
+            />
+          ) : element.element_type === 'video' && element.content && getVideoEmbedUrl(element.content) ? (
+            <Box
+              component="iframe"
+              src={getVideoEmbedUrl(element.content)}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              sx={{ width: '100%', height: '100%', border: 'none', pointerEvents: 'none' }}
+            />
+          ) : element.element_type === 'video' && element.content && /\.(mp4|webm|ogg|mov)(\?|$)/i.test(element.content) ? (
+            <Box
+              component="video"
+              src={element.content}
+              muted
+              sx={{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none' }}
+            />
           ) : (
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
               <ElementIcon sx={{ fontSize: 32 * canvasScale, opacity: 0.7 }} />
               <Typography variant="caption" sx={{ opacity: 0.7, fontSize: 12 * canvasScale }}>
                 {element.name}
@@ -455,6 +539,14 @@ const SlideEditorPage = () => {
           >
             {t('Preview')}
           </Button>
+          {uploadProgress && (
+            <Box sx={{ minWidth: 150, mr: 1 }}>
+              <Typography variant="caption" color="text.secondary">
+                {uploadProgress.element}: {uploadProgress.percent}%
+              </Typography>
+              <LinearProgress variant="determinate" value={uploadProgress.percent} sx={{ height: 6, borderRadius: 3 }} />
+            </Box>
+          )}
           <Button
             variant="contained"
             startIcon={<SaveIcon />}
@@ -582,6 +674,177 @@ const SlideEditorPage = () => {
               />
             )}
 
+            {selectedElement.element_type === 'image' && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="caption" color="text.secondary" gutterBottom>
+                  {t('Image')}
+                </Typography>
+                {(selectedElement._imagePreview || selectedElement.image) ? (
+                  <Box sx={{ position: 'relative', mt: 1 }}>
+                    <Box
+                      component="img"
+                      src={selectedElement._imagePreview || selectedElement.image}
+                      alt={selectedElement.name}
+                      sx={{ width: '100%', borderRadius: 1, maxHeight: 150, objectFit: 'contain', bgcolor: 'rgba(0,0,0,0.3)' }}
+                    />
+                    <IconButton
+                      size="small"
+                      onClick={() => updateElement(selectedElement.id, {
+                        _imageFile: null, _imagePreview: null, image: null,
+                      })}
+                      sx={{ position: 'absolute', top: 4, right: 4, bgcolor: 'rgba(0,0,0,0.6)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}
+                    >
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                ) : (
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    component="label"
+                    startIcon={<UploadIcon />}
+                    size="small"
+                    sx={{ mt: 1 }}
+                  >
+                    {t('Upload Image')}
+                    <input
+                      type="file"
+                      hidden
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          updateElement(selectedElement.id, {
+                            _imageFile: file,
+                            _imagePreview: URL.createObjectURL(file),
+                          });
+                        }
+                      }}
+                    />
+                  </Button>
+                )}
+              </Box>
+            )}
+
+            {selectedElement.element_type === 'video' && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="caption" color="text.secondary" gutterBottom>
+                  {t('Video')}
+                </Typography>
+                {(selectedElement._videoPreview || selectedElement.video) ? (
+                  <Box sx={{ position: 'relative', mt: 1 }}>
+                    <Box
+                      component="video"
+                      src={selectedElement._videoPreview || selectedElement.video}
+                      muted
+                      controls
+                      sx={{ width: '100%', borderRadius: 1, maxHeight: 150 }}
+                      onError={(e) => {
+                        console.error('VIDEO PANEL ERROR:', e.target.error, 'src:', e.target.src);
+                        // If loading from server fails, video may still be converting
+                        if (selectedElement.video && !selectedElement._videoPreview) {
+                          const el = e.target.parentElement;
+                          if (el && !el.querySelector('.converting-msg')) {
+                            const msg = document.createElement('div');
+                            msg.className = 'converting-msg';
+                            msg.style.cssText = 'padding:8px;text-align:center;color:#ff9800;font-size:12px;';
+                            msg.textContent = t('Video is being converted, please reload in a moment...');
+                            el.appendChild(msg);
+                          }
+                        }
+                      }}
+                      onLoadedData={(e) => {
+                        const msg = e.target.parentElement?.querySelector('.converting-msg');
+                        if (msg) msg.remove();
+                      }}
+                    />
+                    <IconButton
+                      size="small"
+                      onClick={() => updateElement(selectedElement.id, {
+                        _videoFile: null, _videoPreview: null, video: null,
+                      })}
+                      sx={{ position: 'absolute', top: 4, right: 4, bgcolor: 'rgba(0,0,0,0.6)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}
+                    >
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                ) : (
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    component="label"
+                    startIcon={<UploadIcon />}
+                    size="small"
+                    sx={{ mt: 1 }}
+                  >
+                    {t('Upload Video')}
+                    <input
+                      type="file"
+                      hidden
+                      accept="video/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          updateElement(selectedElement.id, {
+                            _videoFile: file,
+                            _videoPreview: URL.createObjectURL(file),
+                          });
+                        }
+                      }}
+                    />
+                  </Button>
+                )}
+                <Divider sx={{ my: 1.5 }}>
+                  <Typography variant="caption" color="text.secondary">{t('or')}</Typography>
+                </Divider>
+                <TextField
+                  fullWidth
+                  label={t('Video URL')}
+                  placeholder="YouTube, Vimeo, Dailymotion..."
+                  value={selectedElement.content || ''}
+                  onChange={(e) => updateElement(selectedElement.id, { content: e.target.value })}
+                  size="small"
+                  helperText={
+                    selectedElement.content && getVideoEmbedUrl(selectedElement.content)
+                      ? t('Embed URL detected')
+                      : selectedElement.content && /\.(mp4|webm|ogg|mov)(\?|$)/i.test(selectedElement.content)
+                      ? t('Direct video URL')
+                      : selectedElement.content
+                      ? t('Unrecognized URL format')
+                      : null
+                  }
+                  FormHelperTextProps={{
+                    sx: {
+                      color: selectedElement.content && !isVideoUrl(selectedElement.content)
+                        ? 'warning.main' : 'success.main',
+                    },
+                  }}
+                />
+                {selectedElement.content && getVideoEmbedUrl(selectedElement.content) && (
+                  <Box sx={{ mt: 1, borderRadius: 1, overflow: 'hidden' }}>
+                    <Box
+                      component="iframe"
+                      src={getVideoEmbedUrl(selectedElement.content)}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      sx={{ width: '100%', height: 140, border: 'none' }}
+                    />
+                  </Box>
+                )}
+                {selectedElement.content && !getVideoEmbedUrl(selectedElement.content) && /\.(mp4|webm|ogg|mov)(\?|$)/i.test(selectedElement.content) && (
+                  <Box sx={{ mt: 1 }}>
+                    <Box
+                      component="video"
+                      src={selectedElement.content}
+                      muted
+                      controls
+                      sx={{ width: '100%', borderRadius: 1, maxHeight: 140 }}
+                    />
+                  </Box>
+                )}
+              </Box>
+            )}
+
             <Typography variant="caption" color="text.secondary" gutterBottom>
               {t('Position')} (%)
             </Typography>
@@ -643,16 +906,56 @@ const SlideEditorPage = () => {
                   size="small"
                   sx={{ mb: 2 }}
                 />
-                <TextField
-                  fullWidth
-                  label={t('Color')}
-                  value={selectedElement.styles?.color || '#ffffff'}
-                  onChange={(e) => updateElement(selectedElement.id, {
-                    styles: { ...selectedElement.styles, color: e.target.value }
-                  })}
-                  size="small"
-                  sx={{ mb: 2 }}
-                />
+                <Box sx={{ position: 'relative', mb: 2 }}>
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                    onClick={() => setShowTextColorPicker(!showTextColorPicker)}
+                    sx={{
+                      justifyContent: 'flex-start',
+                      textTransform: 'none',
+                      color: 'text.primary',
+                      borderColor: 'rgba(255,255,255,0.23)',
+                      '&:hover': { borderColor: 'rgba(255,255,255,0.5)' },
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: 0.5,
+                        bgcolor: selectedElement.styles?.color || '#ffffff',
+                        border: '1px solid rgba(255,255,255,0.3)',
+                        mr: 1,
+                        flexShrink: 0,
+                      }}
+                    />
+                    {selectedElement.styles?.color || '#ffffff'}
+                  </Button>
+                  {showTextColorPicker && (
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        mt: 1,
+                        zIndex: 10,
+                        p: 1,
+                        bgcolor: 'background.paper',
+                        borderRadius: 1,
+                        boxShadow: 3,
+                      }}
+                    >
+                      <HexColorPicker
+                        color={selectedElement.styles?.color || '#ffffff'}
+                        onChange={(color) => updateElement(selectedElement.id, {
+                          styles: { ...selectedElement.styles, color }
+                        })}
+                      />
+                    </Box>
+                  )}
+                </Box>
               </>
             )}
 

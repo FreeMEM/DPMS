@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ThreeBackground from '../../components/common/ThreeBackground';
 import WebGL2Background from '../../components/common/WebGL2Background';
 import axiosWrapper from '../../utils/AxiosWrapper';
+import { getVideoEmbedUrl } from '../../utils/videoUtils';
 import {
   useStageRunnerData,
   useStageControl,
@@ -28,6 +29,14 @@ import {
   ClockRenderer,
   CountdownRenderer,
 } from '../../components/stagerunner/renderers';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_ADDRESS || 'http://localhost:8000';
+
+const resolveMediaUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `${BACKEND_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+};
 
 const transitionVariants = {
   none: {
@@ -390,7 +399,7 @@ const StageRunnerViewer = () => {
         if (!element.image) return null;
         return (
           <img
-            src={element.image}
+            src={resolveMediaUrl(element.image)}
             alt={element.name}
             style={{
               maxWidth: '100%',
@@ -400,21 +409,55 @@ const StageRunnerViewer = () => {
           />
         );
 
-      case 'video':
-        if (!element.video) return null;
-        return (
-          <video
-            src={element.video}
-            autoPlay
-            loop={styles?.loop}
-            muted={styles?.muted !== false}
-            style={{
-              maxWidth: '100%',
-              maxHeight: '100%',
-              objectFit: styles?.objectFit || 'contain',
-            }}
-          />
-        );
+      case 'video': {
+        // Uploaded video file
+        if (element.video) {
+          return (
+            <video
+              src={resolveMediaUrl(element.video)}
+              autoPlay
+              loop
+              muted={styles?.muted !== false}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '100%',
+                objectFit: styles?.objectFit || 'contain',
+              }}
+            />
+          );
+        }
+        // Video URL (YouTube, Vimeo, Dailymotion, or direct)
+        if (element.content) {
+          const embedUrl = getVideoEmbedUrl(element.content);
+          if (embedUrl) {
+            return (
+              <iframe
+                src={`${embedUrl}?autoplay=1&mute=1&loop=1`}
+                title={element.name}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                style={{ width: '100%', height: '100%', border: 'none' }}
+              />
+            );
+          }
+          if (/\.(mp4|webm|ogg|mov)(\?|$)/i.test(element.content)) {
+            return (
+              <video
+                src={element.content}
+                autoPlay
+                loop
+                muted={styles?.muted !== false}
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  objectFit: styles?.objectFit || 'contain',
+                }}
+              />
+            );
+          }
+        }
+        return null;
+      }
 
       default:
         return null;
@@ -563,7 +606,7 @@ const StageRunnerViewer = () => {
         />
       )}
 
-      {/* Slide Content */}
+      {/* Slide Content - 16:9 container to match editor canvas proportions */}
       <AnimatePresence mode="wait">
         <motion.div
           key={`${currentSlide.id}-${productionIndex}`}
@@ -575,9 +618,21 @@ const StageRunnerViewer = () => {
             position: 'absolute',
             inset: 0,
             zIndex: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          {currentSlide.elements?.map(renderElement)}
+          <div style={{
+            position: 'relative',
+            width: '100%',
+            maxHeight: '100%',
+            aspectRatio: '16 / 9',
+            maxWidth: '100%',
+            overflow: 'hidden',
+          }}>
+            {currentSlide.elements?.map(renderElement)}
+          </div>
         </motion.div>
       </AnimatePresence>
 

@@ -19,6 +19,25 @@ services:
             - ./.envs/.django
             - ./.envs/.postgres
 
+    frontend:
+        restart: unless-stopped
+        build:
+            context: .
+            dockerfile: ./docker/frontend/development.Dockerfile
+        image: react_frontend_party
+        depends_on:
+            - backend_party
+        volumes:
+            - ./frontend/src:/app/frontend/src
+            - ./frontend/public:/app/frontend/public
+        ports:
+            - "3000:3000"
+        environment:
+            - WATCHPACK_POLLING=true
+            - WDS_SOCKET_PORT=3000
+            - REACT_APP_BACKEND_ADDRESS=http://localhost:8000
+            - PUBLIC_URL=/app
+
     postgres:
         build:
             context: .

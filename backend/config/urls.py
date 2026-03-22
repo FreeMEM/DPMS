@@ -1,10 +1,12 @@
 """ Main URLs module """
 
+import os
+import mimetypes
 from django.conf import settings
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls.conf import include
+from django.http import FileResponse, HttpResponse, Http404
 
 
 # Yet another Swagger generator
@@ -43,4 +45,43 @@ urlpatterns = [
     ),
     # Landing Page (debe ir al final como fallback)
     path("", include(("dpms.website.urls", "website"), namespace="website")),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
+
+
+def serve_media(request, path):
+    """Serve media files with HTTP Range request support for video streaming."""
+    file_path = os.path.join(settings.MEDIA_ROOT, path)
+    if not os.path.isfile(file_path):
+        raise Http404
+
+    file_size = os.path.getsize(file_path)
+    content_type, _ = mimetypes.guess_type(file_path)
+    content_type = content_type or 'application/octet-stream'
+
+    range_header = request.META.get('HTTP_RANGE')
+    if range_header:
+        range_match = range_header.strip().split('=')[-1]
+        range_start, range_end = range_match.split('-')
+        range_start = int(range_start)
+        range_end = int(range_end) if range_end else file_size - 1
+        content_length = range_end - range_start + 1
+
+        f = open(file_path, 'rb')
+        f.seek(range_start)
+        data = f.read(content_length)
+        f.close()
+
+        response = HttpResponse(data, status=206, content_type=content_type)
+        response['Content-Length'] = content_length
+        response['Content-Range'] = f'bytes {range_start}-{range_end}/{file_size}'
+    else:
+        response = FileResponse(open(file_path, 'rb'), content_type=content_type)
+
+    response['Accept-Ranges'] = 'bytes'
+    return response
+
+
+if settings.DEBUG:
+    urlpatterns += [
+        re_path(r'^media/(?P<path>.*)$', serve_media),
+    ]

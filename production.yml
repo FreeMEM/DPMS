@@ -3,65 +3,89 @@ version: '3'
 volumes:
   production_postgres_data: {}
   production_postgres_data_backups: {}
-  production_caddy: {}
+  modsec_logs: {}
 
 services:
-  django: &django
+  backend_party:
+    restart: unless-stopped
     build:
       context: .
-      dockerfile: ./compose/production/django/Dockerfile
+      dockerfile: ./docker/backend/production.Dockerfile
     image: dpms_production_django
     working_dir: /app/backend
+    entrypoint: /app/docker/backend/wsgi-entrypoint-prod.sh
     depends_on:
       - postgres
-      - redis
     env_file:
       - ./.envs/.production/.django
       - ./.envs/.production/.postgres
-    command: /start
+    networks:
+      - backend
+
+  frontend:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: ./docker/frontend/production.Dockerfile
+      args:
+        REACT_APP_BACKEND_ADDRESS: https://dpms.freemem.space
+        PUBLIC_URL: /app
+    image: dpms_production_frontend
+    depends_on:
+      - backend_party
+    networks:
+      - backend
+
+  nginx:
+    image: owasp/modsecurity-crs:nginx-alpine
+    restart: unless-stopped
+    depends_on:
+      - backend_party
+      - frontend
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # ModSecurity
+      - MODSEC_RULE_ENGINE=On
+      - MODSEC_AUDIT_LOG=/var/log/modsecurity/audit.log
+      - BLOCKING_PARANOIA=1
+      # Ajustes para API REST
+      - ALLOWED_METHODS=GET HEAD POST OPTIONS PUT PATCH DELETE
+      - MAX_FILE_SIZE=67108864
+      - MAX_NUM_ARGS=512
+      - ARG_LENGTH=8000
+      - TOTAL_ARG_LENGTH=64000
+    volumes:
+      - ./nginx/site.conf:/etc/nginx/conf.d/site.conf:ro
+      - ./nginx/modsecurity/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf:ro
+      - ./nginx/modsecurity/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf:/etc/modsecurity.d/owasp-crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf:ro
+      - ./certbot/www:/var/www/certbot:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - modsec_logs:/var/log/modsecurity
+    networks:
+      - backend
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
   postgres:
     build:
       context: .
-      dockerfile: ./compose/production/postgres/Dockerfile
+      dockerfile: ./docker/postgres/Dockerfile
     image: dpms_production_postgres
+    restart: unless-stopped
     volumes:
       - production_postgres_data:/var/lib/postgresql/data
       - production_postgres_data_backups:/backups
     env_file:
       - ./.envs/.production/.postgres
+    networks:
+      - backend
 
-  caddy:
-    build:
-      context: .
-      dockerfile: ./compose/production/caddy/Dockerfile
-    image: dpms_production_caddy
-    depends_on:
-      - django
-    volumes:
-      - production_caddy:/root/.caddy
-    env_file:
-      - ./.envs/.production/.caddy
-    ports:
-      - "0.0.0.0:80:80"
-      - "0.0.0.0:443:443"
-
-  redis:
-    image: redis:3.2
-
-  celeryworker:
-    <<: *django
-    image: dpms_production_celeryworker
-    command: /start-celeryworker
-
-  celerybeat:
-    <<: *django
-    image: dpms_production_celerybeat
-    command: /start-celerybeat
-
-  flower:
-    <<: *django
-    image: dpms_production_flower
-    ports:
-      - "5555:5555"
-    command: /start-flower
+networks:
+  backend:

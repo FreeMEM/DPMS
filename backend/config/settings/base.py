@@ -178,6 +178,10 @@ MEDIA_ROOT = BASE_DIR / "../staticfiles/media"
 
 MEDIA_URL = "/media/"
 
+# File uploads - allow large video files (up to 500MB)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760   # 10MB (files larger than this use temp disk)
+
 # Templates
 TEMPLATES = [
     {

@@ -20,6 +20,14 @@ const axiosWrapper = () => {
     headers: headers,
   });
 
+  // Remove Content-Type for FormData so axios sets multipart/form-data with boundary
+  client.interceptors.request.use((config) => {
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+    return config;
+  });
+
   // Interceptor to handle 401 errors (invalid/expired token)
   client.interceptors.response.use(
     (response) => response,
@@ -29,8 +37,8 @@ const axiosWrapper = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         localStorage.removeItem("groups");
-        // Redirect to backend home
-        window.location.href = baseURL + "/";
+        // Redirect to frontend home
+        window.location.href = (process.env.PUBLIC_URL || "") + "/";
       }
       return Promise.reject(error);
     }

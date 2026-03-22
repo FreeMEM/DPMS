@@ -396,6 +396,106 @@ class SlideElement(BaseModel):
         display_name = self.name or self.get_element_type_display()
         return f"{display_name} @ ({self.x:.0f}%, {self.y:.0f}%)"
 
+    def delete(self, *args, **kwargs):
+        if self.video and self.video.storage.exists(self.video.name):
+            self.video.delete(save=False)
+        if self.image and self.image.storage.exists(self.image.name):
+            self.image.delete(save=False)
+        super().delete(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        is_new_video = False
+        if self.pk:
+            try:
+                old = SlideElement.objects.get(pk=self.pk)
+                if self.video and str(self.video) != str(old.video):
+                    is_new_video = True
+                    # Delete old video file
+                    if old.video and old.video.storage.exists(old.video.name):
+                        old.video.delete(save=False)
+                # Delete old image file when replaced
+                if self.image and old.image and str(self.image) != str(old.image):
+                    if old.image.storage.exists(old.image.name):
+                        old.image.delete(save=False)
+            except SlideElement.DoesNotExist:
+                is_new_video = bool(self.video)
+        else:
+            is_new_video = bool(self.video)
+
+        super().save(*args, **kwargs)
+
+        if is_new_video and self.video:
+            import threading
+            logger = __import__('logging').getLogger('dpms')
+            logger.info(f"SlideElement {self.pk}: starting video conversion check")
+            thread = threading.Thread(
+                target=self._convert_video_if_needed,
+                daemon=True,
+            )
+            thread.start()
+
+    @staticmethod
+    def _do_convert(pk, video_field):
+        """Convert uploaded video to MP4 H.264 if not browser-compatible."""
+        import subprocess
+        import shutil
+        from django.conf import settings
+        logger = __import__('logging').getLogger('dpms')
+
+        video_path = os.path.join(str(settings.MEDIA_ROOT), str(video_field))
+        if not os.path.isfile(video_path):
+            logger.warning(f"SlideElement {pk}: video file not found: {video_path}")
+            return
+
+        # Check if already a browser-compatible format
+        try:
+            result = subprocess.run(
+                ['ffprobe', '-v', 'error', '-select_streams', 'v:0',
+                 '-show_entries', 'format=format_name:stream=codec_name',
+                 '-of', 'csv=p=0', video_path],
+                capture_output=True, text=True, timeout=30,
+            )
+            output = result.stdout.strip()
+            logger.info(f"SlideElement {pk}: ffprobe output: {output}")
+            if any(codec in output for codec in ['h264', 'vp8', 'vp9', 'av1']):
+                logger.info(f"SlideElement {pk}: video already compatible")
+                return
+        except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+            logger.error(f"SlideElement {pk}: ffprobe failed: {e}")
+            return
+
+        # Convert to MP4 H.264
+        logger.info(f"SlideElement {pk}: converting to H.264...")
+        converted_path = video_path + '.converting.mp4'
+        try:
+            subprocess.run(
+                ['ffmpeg', '-y', '-i', video_path,
+                 '-c:v', 'libx264', '-preset', 'fast', '-crf', '23',
+                 '-c:a', 'aac', '-b:a', '128k',
+                 '-movflags', '+faststart',
+                 converted_path],
+                capture_output=True, timeout=3600,
+                check=True,
+            )
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+            logger.error(f"SlideElement {pk}: ffmpeg conversion failed: {e}")
+            if os.path.exists(converted_path):
+                os.remove(converted_path)
+            return
+
+        # Replace the original file
+        os.remove(video_path)
+        new_path = os.path.splitext(video_path)[0] + '.mp4'
+        shutil.move(converted_path, new_path)
+
+        # Update the model field without triggering save() again
+        new_relative = os.path.relpath(new_path, str(settings.MEDIA_ROOT))
+        SlideElement.objects.filter(pk=pk).update(video=new_relative)
+        logger.info(f"SlideElement {pk}: conversion complete -> {new_relative}")
+
+    def _convert_video_if_needed(self):
+        SlideElement._do_convert(self.pk, self.video)
+
 
 class StagePresentation(BaseModel):
     """
