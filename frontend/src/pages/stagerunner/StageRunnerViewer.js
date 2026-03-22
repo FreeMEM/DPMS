@@ -38,6 +38,30 @@ const resolveMediaUrl = (url) => {
   return `${BACKEND_URL}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
+const VideoPlayer = ({ src, muted, autoPlay, loop, controls, style }) => {
+  const ref = React.useRef(null);
+  React.useEffect(() => {
+    if (ref.current) {
+      ref.current.muted = muted;
+      if (autoPlay && ref.current.paused) {
+        ref.current.play().catch(() => {});
+      }
+    }
+  }, [muted, autoPlay]);
+  return (
+    <video
+      ref={ref}
+      src={src}
+      autoPlay={autoPlay}
+      loop={loop}
+      controls={controls}
+      muted={muted}
+      playsInline
+      style={style}
+    />
+  );
+};
+
 const transitionVariants = {
   none: {
     initial: {},
@@ -127,6 +151,22 @@ const StageRunnerViewer = () => {
   const [backgroundEnabled, setBackgroundEnabled] = useState(true);
   const [currentEffect, setCurrentEffect] = useState(0);
   const [currentEffectName, setCurrentEffectName] = useState('hyperspace');
+  const [showCursor, setShowCursor] = useState(false);
+
+  // Auto-hide cursor after 2 seconds of inactivity
+  useEffect(() => {
+    let timer;
+    const handleMouseMove = () => {
+      setShowCursor(true);
+      clearTimeout(timer);
+      timer = setTimeout(() => setShowCursor(false), 2000);
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      clearTimeout(timer);
+    };
+  }, []);
 
   // Get current slide
   const slides = config?.slides?.filter(s => s.is_active) || [];
@@ -420,16 +460,19 @@ const StageRunnerViewer = () => {
           video::-webkit-media-controls { opacity: 0; transition: opacity 0.3s; }
           video:hover::-webkit-media-controls { opacity: 1; }
         `;
+        const shouldAutoPlay = styles?.autoPlay !== false;
+        const shouldLoop = styles?.loop !== false;
+        const shouldMute = styles?.muted !== false;
         if (element.video) {
           return (
             <>
               <style>{videoHoverCss}</style>
-              <video
+              <VideoPlayer
                 src={resolveMediaUrl(element.video)}
-                autoPlay
-                loop
+                autoPlay={shouldAutoPlay}
+                loop={shouldLoop}
                 controls
-                muted={styles?.muted !== false}
+                muted={shouldMute}
                 style={videoStyle}
               />
             </>
@@ -439,9 +482,14 @@ const StageRunnerViewer = () => {
         if (element.content) {
           const embedUrl = getVideoEmbedUrl(element.content);
           if (embedUrl) {
+            const params = [
+              shouldAutoPlay ? 'autoplay=1' : '',
+              shouldMute ? 'mute=1' : '',
+              shouldLoop ? 'loop=1' : '',
+            ].filter(Boolean).join('&');
             return (
               <iframe
-                src={`${embedUrl}?autoplay=1&mute=1&loop=1`}
+                src={`${embedUrl}?${params}`}
                 title={element.name}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
@@ -453,12 +501,12 @@ const StageRunnerViewer = () => {
             return (
               <>
                 <style>{videoHoverCss}</style>
-                <video
+                <VideoPlayer
                   src={element.content}
-                  autoPlay
-                  loop
+                  autoPlay={shouldAutoPlay}
+                  loop={shouldLoop}
                   controls
-                  muted={styles?.muted !== false}
+                  muted={shouldMute}
                   style={videoStyle}
                 />
               </>
@@ -580,7 +628,7 @@ const StageRunnerViewer = () => {
         overflow: 'hidden',
         bgcolor: backgroundEnabled ? 'transparent' : (currentSlide.background_color || '#000'),
         position: 'relative',
-        cursor: 'none',
+        cursor: showCursor ? 'auto' : 'none',
       }}
     >
       {/* Background Color Layer (behind effect) */}

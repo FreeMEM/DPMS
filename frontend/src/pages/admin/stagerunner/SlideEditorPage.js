@@ -43,11 +43,15 @@ import {
   TextRotationNone as ScrollTextIcon,
   CloudUpload as UploadIcon,
   Clear as ClearIcon,
+  VolumeUp as VolumeUpIcon,
+  VolumeOff as VolumeOffIcon,
 } from '@mui/icons-material';
 import { Rnd } from 'react-rnd';
 import { HexColorPicker } from 'react-colorful';
 
 import axiosWrapper from '../../../utils/AxiosWrapper';
+import ThreeBackground from '../../../components/common/ThreeBackground';
+import WebGL2Background from '../../../components/common/WebGL2Background';
 import { getVideoEmbedUrl, isVideoUrl } from '../../../utils/videoUtils';
 
 const CANVAS_WIDTH = 1920;
@@ -68,8 +72,19 @@ const backgroundEffectOptions = [
   { value: 'wave', label: 'Wave' },
   { value: 'energy-grid', label: 'Energy Grid' },
   { value: 'tron-grid', label: 'Tron Grid' },
+  { value: 'floating-spheres', label: 'Floating Spheres' },
+  { value: 'spinning-toroids', label: 'Spinning Toroids' },
+  { value: 'crystal-pyramids', label: 'Crystal Pyramids' },
+  { value: 'infinite-tunnel', label: 'Infinite Tunnel' },
+  { value: 'wuhu-boxes', label: 'Wuhu Boxes' },
+  { value: 'wuhu-boxes-fire', label: 'Wuhu Boxes Fire' },
+  { value: 'wuhu-boxes-purple', label: 'Wuhu Boxes Purple' },
   { value: 'none', label: 'None' },
 ];
+
+const webgl2Effects = ['wuhu-boxes', 'wuhu-boxes-fire', 'wuhu-boxes-purple'];
+const threeEffects = ['hyperspace', 'wave', 'energy-grid', 'tron-grid', 'floating-spheres', 'spinning-toroids', 'crystal-pyramids', 'infinite-tunnel'];
+const effectIndexMap = { hyperspace: 0, wave: 1, 'energy-grid': 2, 'tron-grid': 3, 'floating-spheres': 4, 'spinning-toroids': 5, 'crystal-pyramids': 6, 'infinite-tunnel': 7 };
 
 const elementTypes = [
   { type: 'text', label: 'Text', icon: TextIcon },
@@ -703,6 +718,17 @@ const SlideEditorPage = () => {
               overflow: 'hidden',
             }}
           >
+            {/* Background effect preview */}
+            {slide.background_effect && slide.background_effect !== 'none' && slide.background_effect !== 'inherit' && (
+              <Box sx={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
+                {webgl2Effects.includes(slide.background_effect) && (
+                  <WebGL2Background shaderName={slide.background_effect} />
+                )}
+                {threeEffects.includes(slide.background_effect) && (
+                  <ThreeBackground variant="stagerunner" effectIndex={effectIndexMap[slide.background_effect] || 0} />
+                )}
+              </Box>
+            )}
             {elements.map(renderElement)}
           </Box>
         </Box>
@@ -1103,6 +1129,61 @@ const SlideEditorPage = () => {
                       />
                     </Box>
                   )}
+                </Box>
+              </>
+            )}
+
+            {selectedElement.element_type === 'video' && (
+              <>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="caption" color="text.secondary" gutterBottom>
+                  {t('Playback')}
+                </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        size="small"
+                        checked={selectedElement.styles?.muted === false}
+                        onChange={(e) => updateElement(selectedElement.id, {
+                          styles: { ...selectedElement.styles, muted: !e.target.checked }
+                        })}
+                      />
+                    }
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        {selectedElement.styles?.muted === false
+                          ? <VolumeUpIcon sx={{ fontSize: 18 }} />
+                          : <VolumeOffIcon sx={{ fontSize: 18 }} />
+                        }
+                        <Typography variant="body2">{t('Audio')}</Typography>
+                      </Box>
+                    }
+                  />
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        size="small"
+                        checked={selectedElement.styles?.autoPlay !== false}
+                        onChange={(e) => updateElement(selectedElement.id, {
+                          styles: { ...selectedElement.styles, autoPlay: e.target.checked }
+                        })}
+                      />
+                    }
+                    label={<Typography variant="body2">{t('Autoplay')}</Typography>}
+                  />
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        size="small"
+                        checked={selectedElement.styles?.loop !== false}
+                        onChange={(e) => updateElement(selectedElement.id, {
+                          styles: { ...selectedElement.styles, loop: e.target.checked }
+                        })}
+                      />
+                    }
+                    label={<Typography variant="body2">{t('Loop')}</Typography>}
+                  />
                 </Box>
               </>
             )}
