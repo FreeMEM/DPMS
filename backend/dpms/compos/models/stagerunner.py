@@ -237,6 +237,7 @@ class SlideElement(BaseModel):
         ('scrolling_text', 'Scrolling Text'),
         ('clock', 'Clock'),
         ('countdown', 'Countdown Timer'),
+        ('shape', 'Shape'),
 
         # Dynamic elements (data from DB)
         ('compo_name', 'Compo Name'),

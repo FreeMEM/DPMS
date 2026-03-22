@@ -28,6 +28,7 @@ import {
   EditionPosterRenderer,
   ClockRenderer,
   CountdownRenderer,
+  ScrollingTextRenderer,
 } from '../../components/stagerunner/renderers';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_ADDRESS || 'http://localhost:8000';
@@ -492,6 +493,38 @@ const StageRunnerViewer = () => {
             styles={styles}
           />
         );
+
+      case 'scrolling_text':
+        return <ScrollingTextRenderer text={element.content} styles={styles} />;
+
+      case 'shape': {
+        const shapeType = styles?.shapeType || 'rectangle';
+        const fillColor = styles?.fillColor || '#ffffff';
+        const fillAlpha = styles?.fillAlpha !== undefined ? styles.fillAlpha : 0.3;
+        const borderColor = styles?.borderColor || '#ffffff';
+        const borderAlpha = styles?.borderAlpha !== undefined ? styles.borderAlpha : 1;
+        const borderWidth = styles?.borderWidth || 2;
+        const bg = fillAlpha > 0 ? fillColor + Math.round(fillAlpha * 255).toString(16).padStart(2, '0') : 'transparent';
+        const border = borderWidth > 0 && borderAlpha > 0
+          ? `${borderWidth}px solid ${borderColor}${Math.round(borderAlpha * 255).toString(16).padStart(2, '0')}`
+          : 'none';
+        const baseStyle = { width: '100%', height: '100%', background: bg, border, boxSizing: 'border-box' };
+        if (shapeType === 'circle') return <div style={{ ...baseStyle, borderRadius: '50%' }} />;
+        if (shapeType === 'triangle') {
+          return (
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
+              <polygon points="50,5 95,95 5,95"
+                fill={fillAlpha > 0 ? fillColor : 'none'}
+                fillOpacity={fillAlpha}
+                stroke={borderAlpha > 0 ? borderColor : 'none'}
+                strokeOpacity={borderAlpha}
+                strokeWidth={borderWidth}
+              />
+            </svg>
+          );
+        }
+        return <div style={baseStyle} />;
+      }
 
       case 'text':
         return (

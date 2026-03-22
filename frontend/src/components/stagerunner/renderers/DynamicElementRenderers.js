@@ -666,6 +666,119 @@ export const CountdownRenderer = ({ targetDate, label, styles, onComplete }) => 
   );
 };
 
+/**
+ * Renders horizontally scrolling text (marquee)
+ */
+export const ScrollingTextRenderer = ({ text, styles }) => {
+  const speed = styles?.scrollSpeed || 20;
+  const mode = styles?.scrollMode || 'left';
+  const content = text || 'Scrolling Text';
+  const textStyles = getTextStyles({ ...styles, fontSize: styles?.fontSize || 48 });
+  const container = { width: '100%', height: '100%', overflow: 'hidden', position: 'relative' };
+
+  if (mode === 'left') {
+    return (
+      <Box sx={{ ...container, display: 'flex', alignItems: 'center' }}>
+        <style>{`
+          @keyframes sL { from { left: 100%; } to { left: 0%; transform: translateX(-100%); } }
+        `}</style>
+        <Typography sx={{ ...textStyles, position: 'absolute', whiteSpace: 'nowrap', animation: `sL ${speed}s linear infinite` }}>
+          {content}
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (mode === 'right') {
+    return (
+      <Box sx={{ ...container, display: 'flex', alignItems: 'center' }}>
+        <style>{`
+          @keyframes sR { from { right: 100%; } to { right: 0%; transform: translateX(100%); } }
+        `}</style>
+        <Typography sx={{ ...textStyles, position: 'absolute', whiteSpace: 'nowrap', animation: `sR ${speed}s linear infinite` }}>
+          {content}
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (mode === 'up') {
+    return (
+      <Box sx={container}>
+        <style>{`
+          @keyframes sU { from { top: 100%; } to { top: 0%; transform: translateY(-100%); } }
+        `}</style>
+        <Box sx={{ position: 'absolute', width: '100%', animation: `sU ${speed}s linear infinite` }}>
+          <Typography sx={{ ...textStyles, whiteSpace: 'pre-wrap', textAlign: 'left' }}>{content}</Typography>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Star Wars crawl
+  if (mode === 'starwars') {
+    return (
+      <Box sx={{
+        width: '100%', height: '100%', overflow: 'hidden', position: 'relative',
+        background: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, transparent 30%, transparent 100%)',
+        zIndex: 1,
+      }}>
+        {/* Perspective container */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          overflow: 'hidden',
+          perspective: '350px',
+          perspectiveOrigin: '50% 40%',
+        }}>
+          <style>{`
+            @keyframes sSW {
+              0% { transform: rotateX(55deg) translateY(80%); }
+              100% { transform: rotateX(55deg) translateY(-300%); }
+            }
+          `}</style>
+          <div style={{
+            position: 'absolute',
+            width: '90%',
+            left: '5%',
+            bottom: 0,
+            transformOrigin: '50% 100%',
+            animation: `sSW ${speed}s linear infinite`,
+          }}>
+            <Typography sx={{
+              ...textStyles,
+              whiteSpace: 'pre-wrap',
+              textAlign: 'justify',
+              lineHeight: 1.8,
+              letterSpacing: '0.05em',
+            }}>
+              {content}
+            </Typography>
+          </div>
+        </div>
+        {/* Top fade to simulate vanishing point */}
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: '40%',
+          background: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 50%, transparent 100%)',
+          pointerEvents: 'none', zIndex: 2,
+        }} />
+      </Box>
+    );
+  }
+
+  // Bounce
+  return (
+    <Box sx={{ ...container, display: 'flex', alignItems: 'center' }}>
+      <style>{`
+        @keyframes sB { 0%, 100% { left: 0; } 50% { left: 100%; transform: translateX(-100%); } }
+      `}</style>
+      <Typography sx={{ ...textStyles, position: 'absolute', whiteSpace: 'nowrap', animation: `sB ${speed}s ease-in-out infinite` }}>
+        {content}
+      </Typography>
+    </Box>
+  );
+};
+
 const DynamicElementRenderers = {
   CompoNameRenderer,
   CompoDescriptionRenderer,

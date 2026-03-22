@@ -45,6 +45,7 @@ import {
   Clear as ClearIcon,
   VolumeUp as VolumeUpIcon,
   VolumeOff as VolumeOffIcon,
+  Category as ShapeIcon,
 } from '@mui/icons-material';
 import { Rnd } from 'react-rnd';
 import { HexColorPicker } from 'react-colorful';
@@ -52,7 +53,7 @@ import { HexColorPicker } from 'react-colorful';
 import axiosWrapper from '../../../utils/AxiosWrapper';
 import ThreeBackground from '../../../components/common/ThreeBackground';
 import WebGL2Background from '../../../components/common/WebGL2Background';
-import { ClockRenderer, CountdownRenderer, SponsorBarRenderer } from '../../../components/stagerunner/renderers';
+import { ClockRenderer, CountdownRenderer, SponsorBarRenderer, ScrollingTextRenderer } from '../../../components/stagerunner/renderers';
 import { getVideoEmbedUrl, isVideoUrl } from '../../../utils/videoUtils';
 
 const CANVAS_WIDTH = 1920;
@@ -94,6 +95,7 @@ const elementTypes = [
   { type: 'scrolling_text', label: 'Scrolling Text', icon: ScrollTextIcon },
   { type: 'clock', label: 'Clock', icon: ClockIcon },
   { type: 'countdown', label: 'Countdown Timer', icon: TimerIcon },
+  { type: 'shape', label: 'Shape', icon: ShapeIcon },
   { type: 'production_info', label: 'Info Production', icon: ProductionIcon },
   { type: 'sponsor_bar', label: 'Sponsor Bar', icon: SponsorIcon },
 ];
@@ -598,6 +600,42 @@ const SlideEditorPage = () => {
               muted
               sx={{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none' }}
             />
+          ) : element.element_type === 'shape' ? (
+            (() => {
+              const s = element.styles || {};
+              const shapeType = s.shapeType || 'rectangle';
+              const fillColor = s.fillColor || '#ffffff';
+              const fillAlpha = s.fillAlpha !== undefined ? s.fillAlpha : 0.3;
+              const borderColor = s.borderColor || '#ffffff';
+              const borderAlpha = s.borderAlpha !== undefined ? s.borderAlpha : 1;
+              const borderWidth = s.borderWidth || 2;
+              const bg = fillAlpha > 0 ? fillColor + Math.round(fillAlpha * 255).toString(16).padStart(2, '0') : 'transparent';
+              const border = borderWidth > 0 && borderAlpha > 0
+                ? `${borderWidth}px solid ${borderColor}${Math.round(borderAlpha * 255).toString(16).padStart(2, '0')}`
+                : 'none';
+              const baseStyle = { width: '100%', height: '100%', background: bg, border, boxSizing: 'border-box' };
+              if (shapeType === 'circle') return <div style={{ ...baseStyle, borderRadius: '50%' }} />;
+              if (shapeType === 'triangle') {
+                const size = Math.min(100, 100);
+                return (
+                  <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%' }}>
+                    <polygon points="50,5 95,95 5,95"
+                      fill={fillAlpha > 0 ? fillColor : 'none'}
+                      fillOpacity={fillAlpha}
+                      stroke={borderAlpha > 0 ? borderColor : 'none'}
+                      strokeOpacity={borderAlpha}
+                      strokeWidth={borderWidth}
+                    />
+                  </svg>
+                );
+              }
+              return <div style={baseStyle} />;
+            })()
+          ) : element.element_type === 'scrolling_text' ? (
+            <ScrollingTextRenderer
+              text={element.content}
+              styles={{ ...element.styles, fontSize: (element.styles?.fontSize || 48) * canvasScale }}
+            />
           ) : element.element_type === 'compo_name' ? (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', transform: `scale(${canvasScale})`, transformOrigin: 'center center' }}>
               <Typography sx={{ fontSize: element.styles?.fontSize || 32, fontFamily: element.styles?.fontFamily || 'Arial', color: element.styles?.color || '#fff', textShadow: '2px 2px 4px rgba(0,0,0,0.5)', textAlign: element.styles?.textAlign || 'left', width: '100%', opacity: selectedProduction ? 1 : 0.4 }}>
@@ -934,7 +972,7 @@ const SlideEditorPage = () => {
               sx={{ mb: 2 }}
             />
 
-            {selectedElement.element_type === 'text' && (
+            {(selectedElement.element_type === 'text' || selectedElement.element_type === 'scrolling_text') && (
               <TextField
                 fullWidth
                 label={t('Content')}
@@ -945,6 +983,42 @@ const SlideEditorPage = () => {
                 rows={2}
                 sx={{ mb: 2 }}
               />
+            )}
+
+            {selectedElement.element_type === 'scrolling_text' && (
+              <>
+                <TextField
+                  fullWidth
+                  select
+                  label={t('Scroll Mode')}
+                  value={selectedElement.styles?.scrollMode || 'left'}
+                  onChange={(e) => updateElement(selectedElement.id, {
+                    styles: { ...selectedElement.styles, scrollMode: e.target.value }
+                  })}
+                  size="small"
+                  sx={{ mb: 2 }}
+                >
+                  <MenuItem value="left">{t('Scroll Left')}</MenuItem>
+                  <MenuItem value="right">{t('Scroll Right')}</MenuItem>
+                  <MenuItem value="up">{t('Scroll Up (Credits)')}</MenuItem>
+                  <MenuItem value="starwars">{t('Star Wars Crawl')}</MenuItem>
+                  <MenuItem value="bounce">{t('Bounce')}</MenuItem>
+                </TextField>
+                <Typography variant="caption" color="text.secondary">
+                  {t('Speed')}: {selectedElement.styles?.scrollSpeed || 20}s
+                </Typography>
+                <Slider
+                  value={selectedElement.styles?.scrollSpeed || 20}
+                  onChange={(e, val) => updateElement(selectedElement.id, {
+                    styles: { ...selectedElement.styles, scrollSpeed: val }
+                  })}
+                  min={5}
+                  max={120}
+                  step={5}
+                  size="small"
+                  sx={{ mb: 2 }}
+                />
+              </>
             )}
 
             {selectedElement.element_type === 'countdown' && (
@@ -1267,6 +1341,114 @@ const SlideEditorPage = () => {
               />
             </Box>
 
+            {selectedElement.element_type === 'shape' && (
+              <>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="caption" color="text.secondary" gutterBottom>
+                  {t('Shape')}
+                </Typography>
+                <TextField
+                  fullWidth
+                  select
+                  value={selectedElement.styles?.shapeType || 'rectangle'}
+                  onChange={(e) => updateElement(selectedElement.id, {
+                    styles: { ...selectedElement.styles, shapeType: e.target.value }
+                  })}
+                  size="small"
+                  sx={{ mb: 2 }}
+                >
+                  <MenuItem value="rectangle">{t('Rectangle')}</MenuItem>
+                  <MenuItem value="circle">{t('Circle')}</MenuItem>
+                  <MenuItem value="triangle">{t('Triangle')}</MenuItem>
+                </TextField>
+
+                <Typography variant="caption" color="text.secondary" gutterBottom>
+                  {t('Fill')}
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'center' }}>
+                  <Box
+                    onClick={() => updateElement(selectedElement.id, {
+                      styles: { ...selectedElement.styles, _showFillPicker: !selectedElement.styles?._showFillPicker }
+                    })}
+                    sx={{
+                      width: 32, height: 32, borderRadius: 0.5, cursor: 'pointer', flexShrink: 0,
+                      bgcolor: selectedElement.styles?.fillColor || '#ffffff',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                    }}
+                  />
+                  <TextField
+                    label={t('Alpha')}
+                    type="number"
+                    value={selectedElement.styles?.fillAlpha !== undefined ? selectedElement.styles.fillAlpha : 0.3}
+                    onChange={(e) => updateElement(selectedElement.id, {
+                      styles: { ...selectedElement.styles, fillAlpha: parseFloat(e.target.value) || 0 }
+                    })}
+                    size="small"
+                    inputProps={{ min: 0, max: 1, step: 0.1 }}
+                    sx={{ flex: 1 }}
+                  />
+                </Box>
+                {selectedElement.styles?._showFillPicker && (
+                  <Box sx={{ mb: 2 }}>
+                    <HexColorPicker
+                      color={selectedElement.styles?.fillColor || '#ffffff'}
+                      onChange={(color) => updateElement(selectedElement.id, {
+                        styles: { ...selectedElement.styles, fillColor: color }
+                      })}
+                    />
+                  </Box>
+                )}
+
+                <Typography variant="caption" color="text.secondary" gutterBottom>
+                  {t('Border')}
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'center' }}>
+                  <Box
+                    onClick={() => updateElement(selectedElement.id, {
+                      styles: { ...selectedElement.styles, _showBorderPicker: !selectedElement.styles?._showBorderPicker }
+                    })}
+                    sx={{
+                      width: 32, height: 32, borderRadius: 0.5, cursor: 'pointer', flexShrink: 0,
+                      bgcolor: selectedElement.styles?.borderColor || '#ffffff',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                    }}
+                  />
+                  <TextField
+                    label={t('Width')}
+                    type="number"
+                    value={selectedElement.styles?.borderWidth || 2}
+                    onChange={(e) => updateElement(selectedElement.id, {
+                      styles: { ...selectedElement.styles, borderWidth: parseInt(e.target.value) || 0 }
+                    })}
+                    size="small"
+                    inputProps={{ min: 0, max: 20 }}
+                    sx={{ flex: 1 }}
+                  />
+                  <TextField
+                    label={t('Alpha')}
+                    type="number"
+                    value={selectedElement.styles?.borderAlpha !== undefined ? selectedElement.styles.borderAlpha : 1}
+                    onChange={(e) => updateElement(selectedElement.id, {
+                      styles: { ...selectedElement.styles, borderAlpha: parseFloat(e.target.value) || 0 }
+                    })}
+                    size="small"
+                    inputProps={{ min: 0, max: 1, step: 0.1 }}
+                    sx={{ flex: 1 }}
+                  />
+                </Box>
+                {selectedElement.styles?._showBorderPicker && (
+                  <Box sx={{ mb: 2 }}>
+                    <HexColorPicker
+                      color={selectedElement.styles?.borderColor || '#ffffff'}
+                      onChange={(color) => updateElement(selectedElement.id, {
+                        styles: { ...selectedElement.styles, borderColor: color }
+                      })}
+                    />
+                  </Box>
+                )}
+              </>
+            )}
+
             {selectedElement.element_type === 'clock' && (
               <>
                 <Divider sx={{ my: 2 }} />
@@ -1377,7 +1559,7 @@ const SlideEditorPage = () => {
               </>
             )}
 
-            {['text', 'clock', 'countdown', 'production_title', 'production_authors', 'production_number', 'compo_name'].includes(selectedElement.element_type) && (
+            {['text', 'scrolling_text', 'clock', 'countdown', 'production_title', 'production_authors', 'production_number', 'compo_name'].includes(selectedElement.element_type) && (
               <>
                 <Divider sx={{ my: 2 }} />
                 <Typography variant="caption" color="text.secondary" gutterBottom>

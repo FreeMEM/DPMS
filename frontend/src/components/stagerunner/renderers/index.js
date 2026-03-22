@@ -14,4 +14,5 @@ export {
   EditionPosterRenderer,
   ClockRenderer,
   CountdownRenderer,
+  ScrollingTextRenderer,
 } from './DynamicElementRenderers';
