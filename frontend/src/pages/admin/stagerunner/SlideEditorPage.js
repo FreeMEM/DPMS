@@ -437,7 +437,6 @@ const SlideEditorPage = () => {
             y: newY,
           });
         }}
-        bounds="parent"
         onClick={() => setSelectedElementId(element.id)}
         style={{
           zIndex: element.z_index || 0,
@@ -450,7 +449,7 @@ const SlideEditorPage = () => {
           opacity: element.is_visible ? 1 : 0.4,
         }}
       >
-        <Box sx={{ textAlign: 'center', color: '#fff', overflow: 'hidden', width: '100%', height: '100%' }}>
+        <Box sx={{ textAlign: 'center', color: '#fff', overflow: 'hidden', width: '100%', height: '100%', pointerEvents: 'none' }}>
           {element.element_type === 'text' ? (
             <Typography
               sx={{
@@ -464,11 +463,11 @@ const SlideEditorPage = () => {
               {element.content || 'Text'}
             </Typography>
           ) : element.element_type === 'image' && (element._imagePreview || element.image) ? (
-            <Box
-              component="img"
+            <img
               src={element._imagePreview || element.image}
               alt={element.name}
-              sx={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              draggable={false}
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
             />
           ) : element.element_type === 'video' && (element._videoPreview || element._videoFile || element.video) ? (
             <video

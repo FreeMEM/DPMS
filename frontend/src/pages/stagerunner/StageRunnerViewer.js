@@ -411,19 +411,28 @@ const StageRunnerViewer = () => {
 
       case 'video': {
         // Uploaded video file
+        const videoStyle = {
+          maxWidth: '100%',
+          maxHeight: '100%',
+          objectFit: styles?.objectFit || 'contain',
+        };
+        const videoHoverCss = `
+          video::-webkit-media-controls { opacity: 0; transition: opacity 0.3s; }
+          video:hover::-webkit-media-controls { opacity: 1; }
+        `;
         if (element.video) {
           return (
-            <video
-              src={resolveMediaUrl(element.video)}
-              autoPlay
-              loop
-              muted={styles?.muted !== false}
-              style={{
-                maxWidth: '100%',
-                maxHeight: '100%',
-                objectFit: styles?.objectFit || 'contain',
-              }}
-            />
+            <>
+              <style>{videoHoverCss}</style>
+              <video
+                src={resolveMediaUrl(element.video)}
+                autoPlay
+                loop
+                controls
+                muted={styles?.muted !== false}
+                style={videoStyle}
+              />
+            </>
           );
         }
         // Video URL (YouTube, Vimeo, Dailymotion, or direct)
@@ -442,17 +451,17 @@ const StageRunnerViewer = () => {
           }
           if (/\.(mp4|webm|ogg|mov)(\?|$)/i.test(element.content)) {
             return (
-              <video
-                src={element.content}
-                autoPlay
-                loop
-                muted={styles?.muted !== false}
-                style={{
-                  maxWidth: '100%',
-                  maxHeight: '100%',
-                  objectFit: styles?.objectFit || 'contain',
-                }}
-              />
+              <>
+                <style>{videoHoverCss}</style>
+                <video
+                  src={element.content}
+                  autoPlay
+                  loop
+                  controls
+                  muted={styles?.muted !== false}
+                  style={videoStyle}
+                />
+              </>
             );
           }
         }
