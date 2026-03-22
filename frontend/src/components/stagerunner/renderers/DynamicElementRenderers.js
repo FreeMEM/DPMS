@@ -385,127 +385,146 @@ export const PodiumRenderer = ({ results = [], showPoints = true, styles }) => {
 };
 
 /**
- * Renders sponsor bar (horizontal scrolling)
+ * Renders sponsors in various display modes
  */
 export const SponsorBarRenderer = ({ sponsors = [], styles }) => {
+  const mode = styles?.sponsorMode || 'row';
+  const grayscale = styles?.grayscale;
+  const speed = styles?.marqueeSpeed || 30;
+  const [carouselIndex, setCarouselIndex] = useState(0);
+
+  useEffect(() => {
+    if (mode !== 'carousel' || sponsors.length === 0) return;
+    const interval = setInterval(() => {
+      setCarouselIndex(prev => (prev + 1) % sponsors.length);
+    }, (styles?.carouselInterval || 3) * 1000);
+    return () => clearInterval(interval);
+  }, [mode, sponsors.length, styles?.carouselInterval]);
+
   if (sponsors.length === 0) {
-    return null;
+    return (
+      <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Typography sx={getTextStyles({ ...styles, fontSize: 24, opacity: 0.4 })}>
+          Sponsors
+        </Typography>
+      </Box>
+    );
   }
 
-  return (
-    <Box
-      sx={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-around',
-        gap: '40px',
-        padding: '0 20px',
-      }}
-    >
-      {sponsors.map((sponsor) => (
-        <Box
-          key={sponsor.id}
-          sx={{
-            height: '80%',
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
-          {sponsor.logo ? (
-            <img
-              src={sponsor.logo}
-              alt={sponsor.name}
-              style={{
-                maxHeight: '100%',
-                maxWidth: '200px',
-                objectFit: 'contain',
-                filter: styles?.grayscale ? 'grayscale(100%)' : 'none',
-              }}
-            />
-          ) : (
-            <Typography sx={getTextStyles({ ...styles, fontSize: 24 })}>
-              {sponsor.name}
-            </Typography>
-          )}
-        </Box>
-      ))}
+  const imgFilter = grayscale ? 'grayscale(100%)' : 'none';
+
+  const renderLogo = (sponsor, maxH = '80%', maxW = '200px') => (
+    <Box key={sponsor.id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', flexShrink: 0, px: 2 }}>
+      {sponsor.logo ? (
+        <img src={sponsor.logo} alt={sponsor.name} draggable={false}
+          style={{ maxHeight: maxH, maxWidth: maxW, objectFit: 'contain', filter: imgFilter }} />
+      ) : (
+        <Typography sx={getTextStyles({ ...styles, fontSize: 24 })}>{sponsor.name}</Typography>
+      )}
     </Box>
   );
-};
 
-/**
- * Renders sponsor grid
- */
-export const SponsorGridRenderer = ({ sponsors = [], styles }) => {
-  if (sponsors.length === 0) {
-    return null;
+  // Static row
+  if (mode === 'row') {
+    return (
+      <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-around', overflow: 'hidden' }}>
+        {sponsors.map(s => renderLogo(s))}
+      </Box>
+    );
   }
 
-  // Group by tier
-  const tiers = {
-    platinum: sponsors.filter(s => s.tier === 'platinum'),
-    gold: sponsors.filter(s => s.tier === 'gold'),
-    silver: sponsors.filter(s => s.tier === 'silver'),
-    bronze: sponsors.filter(s => s.tier === 'bronze'),
-    other: sponsors.filter(s => !['platinum', 'gold', 'silver', 'bronze'].includes(s.tier)),
-  };
-
-  const renderTier = (tierSponsors, tierName, logoSize) => {
-    if (tierSponsors.length === 0) return null;
-
+  // Marquee (continuous scroll)
+  if (mode === 'marquee') {
+    const duration = sponsors.length * speed;
     return (
-      <Box key={tierName} sx={{ marginBottom: '20px' }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            gap: '30px',
-          }}
+      <Box sx={{ width: '100%', height: '100%', overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
+        <Box sx={{
+          display: 'flex', alignItems: 'center',
+          animation: `sponsorMarquee ${duration}s linear infinite`,
+          '@keyframes sponsorMarquee': {
+            '0%': { transform: 'translateX(0)' },
+            '100%': { transform: 'translateX(-50%)' },
+          },
+        }}>
+          {/* Duplicate for seamless loop */}
+          {[...sponsors, ...sponsors].map((s, i) => renderLogo(s, '70%', '180px'))}
+        </Box>
+      </Box>
+    );
+  }
+
+  // Grid
+  if (mode === 'grid') {
+    return (
+      <Box sx={{ width: '100%', height: '100%', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: 3, p: 2, overflow: 'hidden' }}>
+        {sponsors.map(s => renderLogo(s, '60%', '160px'))}
+      </Box>
+    );
+  }
+
+  // Carousel (one at a time with fade)
+  if (mode === 'carousel') {
+    const current = sponsors[carouselIndex % sponsors.length];
+    return (
+      <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+        <motion.div
+          key={carouselIndex}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8 }}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}
         >
-          {tierSponsors.map((sponsor) => (
-            <Box
-              key={sponsor.id}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              {sponsor.logo ? (
-                <img
-                  src={sponsor.logo}
-                  alt={sponsor.name}
-                  style={{
-                    maxHeight: logoSize,
-                    maxWidth: logoSize * 2,
-                    objectFit: 'contain',
-                  }}
-                />
-              ) : (
-                <Typography sx={getTextStyles({ ...styles, fontSize: logoSize / 4 })}>
-                  {sponsor.name}
-                </Typography>
+          {current.logo ? (
+            <img src={current.logo} alt={current.name} draggable={false}
+              style={{ maxHeight: '70%', maxWidth: '80%', objectFit: 'contain', filter: imgFilter }} />
+          ) : null}
+          {styles?.showName !== false && (
+            <Typography sx={getTextStyles({ ...styles, fontSize: styles?.fontSize || 28 })}>
+              {current.name}
+            </Typography>
+          )}
+        </motion.div>
+      </Box>
+    );
+  }
+
+  // Ticker (bottom band scrolling with name)
+  if (mode === 'ticker') {
+    const duration = sponsors.length * speed;
+    return (
+      <Box sx={{ width: '100%', height: '100%', overflow: 'hidden', display: 'flex', alignItems: 'center', bgcolor: 'rgba(0,0,0,0.6)', px: 2 }}>
+        <Box sx={{
+          display: 'flex', alignItems: 'center', gap: 4,
+          animation: `sponsorTicker ${duration}s linear infinite`,
+          '@keyframes sponsorTicker': {
+            '0%': { transform: 'translateX(0)' },
+            '100%': { transform: 'translateX(-50%)' },
+          },
+        }}>
+          {[...sponsors, ...sponsors].map((s, i) => (
+            <Box key={`${s.id}-${i}`} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexShrink: 0 }}>
+              {s.logo && (
+                <img src={s.logo} alt={s.name} draggable={false}
+                  style={{ height: '50px', objectFit: 'contain', filter: imgFilter }} />
               )}
+              <Typography sx={getTextStyles({ ...styles, fontSize: styles?.fontSize || 20 })}>
+                {s.name}
+              </Typography>
             </Box>
           ))}
         </Box>
       </Box>
     );
-  };
+  }
 
-  return (
-    <Box sx={{ width: '100%', height: '100%', overflow: 'hidden', padding: '20px' }}>
-      {renderTier(tiers.platinum, 'platinum', 150)}
-      {renderTier(tiers.gold, 'gold', 120)}
-      {renderTier(tiers.silver, 'silver', 100)}
-      {renderTier(tiers.bronze, 'bronze', 80)}
-      {renderTier(tiers.other, 'other', 80)}
-    </Box>
-  );
+  return null;
 };
+
+// Keep backward compatibility
+export const SponsorGridRenderer = (props) => (
+  <SponsorBarRenderer {...props} styles={{ ...props.styles, sponsorMode: 'grid' }} />
+);
 
 /**
  * Renders edition logo

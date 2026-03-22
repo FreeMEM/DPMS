@@ -15,6 +15,9 @@ class Compo(BaseModel):
         User, on_delete=models.CASCADE, related_name="compos"
     )
 
+    def __str__(self):
+        return self.name
+
 
 class HasCompo(BaseModel):
 

@@ -152,6 +152,8 @@ const StageRunnerViewer = () => {
   const [currentEffect, setCurrentEffect] = useState(0);
   const [currentEffectName, setCurrentEffectName] = useState('hyperspace');
   const [showCursor, setShowCursor] = useState(false);
+  const [slideProduction, setSlideProduction] = useState(null);
+  const [compoProductions, setCompoProductions] = useState([]);
 
   // Auto-hide cursor after 2 seconds of inactivity
   useEffect(() => {
@@ -190,6 +192,36 @@ const StageRunnerViewer = () => {
   } = useCurrentProduction(productions);
 
   // Auto-advance productions if enabled
+  // Load production data from slide's production field
+  useEffect(() => {
+    if (currentSlide?.production && !currentProduction) {
+      const client = axiosWrapper();
+      client.get(`/api/productions/${currentSlide.production}/`).then(res => {
+        setSlideProduction(res.data);
+      }).catch(() => {});
+    } else if (!currentSlide?.production) {
+      setSlideProduction(null);
+    }
+  }, [currentSlide?.production, currentProduction]);
+
+  // Use currentProduction from compo navigation, or fall back to slide's production
+  const activeProduction = currentProduction || slideProduction;
+
+  // Load productions from the same compo for numbering
+  useEffect(() => {
+    if (!activeProduction || productionCount > 0) {
+      setCompoProductions([]);
+      return;
+    }
+    const compoId = activeProduction.compo?.id || activeProduction.compo;
+    const editionId = config?.edition;
+    if (!compoId || !editionId) return;
+    const client = axiosWrapper();
+    client.get(`/api/productions/?edition=${editionId}&compo=${compoId}`).then(res => {
+      setCompoProductions(res.data.results || res.data || []);
+    }).catch(() => {});
+  }, [activeProduction?.id, activeProduction?.compo, config?.edition, productionCount]);
+
   useProductionAutoAdvance(
     productions,
     productionIndex,
@@ -327,27 +359,69 @@ const StageRunnerViewer = () => {
 
     switch (element_type) {
       case 'compo_name':
-        return <CompoNameRenderer compoData={compoData} styles={styles} />;
+        if (compoData?.compo?.name) {
+          return <CompoNameRenderer compoData={compoData} styles={styles} />;
+        }
+        // Fallback: use compo_name from active production
+        if (activeProduction?.compo_name) {
+          return (
+            <Typography sx={{
+              fontSize: styles?.fontSize || 48,
+              fontFamily: styles?.fontFamily || 'Arial, sans-serif',
+              color: styles?.color || '#ffffff',
+              textAlign: styles?.textAlign || 'center',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+              width: '100%',
+            }}>
+              {activeProduction.compo_name}
+            </Typography>
+          );
+        }
+        return null;
 
       case 'compo_description':
         return <CompoDescriptionRenderer compoData={compoData} styles={styles} />;
 
-      case 'production_number':
-        return (
-          <ProductionNumberRenderer
-            currentIndex={productionIndex}
-            totalCount={productionCount}
-            styles={styles}
-          />
-        );
+      case 'production_number': {
+        const numStyles = {
+          fontSize: styles?.fontSize || 36,
+          fontFamily: styles?.fontFamily || 'Arial, sans-serif',
+          color: styles?.color || '#ffffff',
+          textAlign: styles?.textAlign || 'center',
+          textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+          width: '100%',
+        };
+        if (productionCount > 0) {
+          return (
+            <ProductionNumberRenderer
+              currentIndex={productionIndex}
+              totalCount={productionCount}
+              styles={styles}
+            />
+          );
+        }
+        if (activeProduction) {
+          if (compoProductions.length > 0) {
+            const idx = compoProductions.findIndex(p => p.id === activeProduction.id);
+            return (
+              <Typography sx={numStyles}>
+                {idx >= 0 ? `${idx + 1} / ${compoProductions.length}` : ''}
+              </Typography>
+            );
+          }
+          // Show while loading
+          return <Typography sx={numStyles}>...</Typography>;
+        }
+        return null;
+      }
 
       case 'production_title':
-        return <ProductionTitleRenderer production={currentProduction} styles={styles} />;
+        return <ProductionTitleRenderer production={activeProduction} styles={styles} />;
 
       case 'production_authors':
         return (
           <ProductionAuthorsRenderer
-            production={currentProduction}
+            production={activeProduction}
             showAuthors={compoData?.compo?.show_authors}
             styles={styles}
           />
@@ -356,7 +430,7 @@ const StageRunnerViewer = () => {
       case 'production_video':
         return (
           <ProductionVideoRenderer
-            production={currentProduction}
+            production={activeProduction}
             videoMode={element.video_mode}
             styles={styles}
             onEnded={goToNextProduction}
@@ -522,6 +596,8 @@ const StageRunnerViewer = () => {
   }, [
     compoData,
     currentProduction,
+    activeProduction,
+    compoProductions,
     productionIndex,
     productionCount,
     productions,

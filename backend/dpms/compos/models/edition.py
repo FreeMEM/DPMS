@@ -80,3 +80,6 @@ class Edition(BaseModel):
         through_fields=("edition", "compo"),
         related_name="editions",
     )
+
+    def __str__(self):
+        return self.title

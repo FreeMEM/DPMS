@@ -540,6 +540,58 @@ class FileInlineForProduction(admin.TabularInline):
     file_preview.short_description = "File Info"
 
 
+class EditionFilter(admin.SimpleListFilter):
+    title = 'edition'
+    parameter_name = 'edition__id__exact'
+
+    def lookups(self, request, model_admin):
+        return Edition.objects.values_list('id', 'title').order_by('-created')
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(edition_id=self.value())
+        return queryset
+
+
+class CompoFilter(admin.SimpleListFilter):
+    title = 'compo'
+    parameter_name = 'compo__id__exact'
+
+    def lookups(self, request, model_admin):
+        qs = Compo.objects.all()
+        edition_id = request.GET.get('edition__id__exact')
+        if edition_id:
+            compo_ids = Production.objects.filter(edition_id=edition_id).values_list('compo_id', flat=True).distinct()
+            qs = qs.filter(id__in=compo_ids)
+        return qs.values_list('id', 'name').order_by('name')
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(compo_id=self.value())
+        return queryset
+
+
+class AuthorFilter(admin.SimpleListFilter):
+    title = 'authors'
+    parameter_name = 'authors__exact'
+
+    def lookups(self, request, model_admin):
+        qs = Production.objects.all()
+        edition_id = request.GET.get('edition__id__exact')
+        compo_id = request.GET.get('compo__id__exact')
+        if edition_id:
+            qs = qs.filter(edition_id=edition_id)
+        if compo_id:
+            qs = qs.filter(compo_id=compo_id)
+        authors = qs.exclude(authors='').values_list('authors', flat=True).distinct().order_by('authors')
+        return [(a, a) for a in authors]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(authors=self.value())
+        return queryset
+
+
 @admin.register(Production)
 class ProductionAdmin(admin.ModelAdmin):
     """Production model admin with enhanced features"""
@@ -550,6 +602,7 @@ class ProductionAdmin(admin.ModelAdmin):
         "authors",
         "edition_link",
         "compo_link",
+        "uploader_nickname",
         "uploaded_by_link",
         "files_count",
         "created_display",
@@ -569,9 +622,9 @@ class ProductionAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
-        "edition",
-        "compo",
-        "uploaded_by",
+        EditionFilter,
+        CompoFilter,
+        AuthorFilter,
         "created",
         "modified",
     )
@@ -626,6 +679,17 @@ class ProductionAdmin(admin.ModelAdmin):
         return "-"
     uploaded_by_link.short_description = "Uploaded By"
     uploaded_by_link.admin_order_field = "uploaded_by__email"
+
+    def uploader_nickname(self, obj):
+        """Show nickname and group from profile"""
+        if obj.uploaded_by and hasattr(obj.uploaded_by, 'profile'):
+            profile = obj.uploaded_by.profile
+            nick = profile.nickname or '-'
+            group = profile.group or ''
+            return f"{nick} / {group}" if group else nick
+        return "-"
+    uploader_nickname.short_description = "Nickname / Group"
+    uploader_nickname.admin_order_field = "uploaded_by__profile__nickname"
 
     def files_count(self, obj):
         """Count of files"""

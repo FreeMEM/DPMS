@@ -469,7 +469,7 @@ class SponsorForStageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Sponsor
-        fields = ['id', 'name', 'logo', 'website', 'tier', 'display_order']
+        fields = ['id', 'name', 'logo', 'url', 'display_order']
 
 
 class StageRunnerFullStateSerializer(serializers.ModelSerializer):

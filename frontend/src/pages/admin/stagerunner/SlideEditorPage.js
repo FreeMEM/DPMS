@@ -52,7 +52,7 @@ import { HexColorPicker } from 'react-colorful';
 import axiosWrapper from '../../../utils/AxiosWrapper';
 import ThreeBackground from '../../../components/common/ThreeBackground';
 import WebGL2Background from '../../../components/common/WebGL2Background';
-import { ClockRenderer, CountdownRenderer } from '../../../components/stagerunner/renderers';
+import { ClockRenderer, CountdownRenderer, SponsorBarRenderer } from '../../../components/stagerunner/renderers';
 import { getVideoEmbedUrl, isVideoUrl } from '../../../utils/videoUtils';
 
 const CANVAS_WIDTH = 1920;
@@ -94,7 +94,7 @@ const elementTypes = [
   { type: 'scrolling_text', label: 'Scrolling Text', icon: ScrollTextIcon },
   { type: 'clock', label: 'Clock', icon: ClockIcon },
   { type: 'countdown', label: 'Countdown Timer', icon: TimerIcon },
-  { type: 'production_info', label: 'Production Info', icon: ProductionIcon },
+  { type: 'production_info', label: 'Info Production', icon: ProductionIcon },
   { type: 'sponsor_bar', label: 'Sponsor Bar', icon: SponsorIcon },
 ];
 
@@ -136,6 +136,11 @@ const SlideEditorPage = () => {
   const [showTextColorPicker, setShowTextColorPicker] = useState(false);
   const [canvasScale, setCanvasScale] = useState(0.5);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [productions, setProductions] = useState([]);
+  const [compos, setCompos] = useState([]);
+  const [selectedCompoId, setSelectedCompoId] = useState(null);
+  const [selectedProduction, setSelectedProduction] = useState(null);
+  const [sponsors, setSponsors] = useState([]);
 
   const updateSlide = (updates) => {
     setSlide(prev => ({ ...prev, ...updates }));
@@ -186,10 +191,56 @@ const SlideEditorPage = () => {
       setSlide(response.data);
       setElements(response.data.elements || []);
       setLoading(false);
+      // Load productions and sponsors for the edition
+      if (response.data.config_edition) {
+        fetchProductions(response.data.config_edition);
+        fetchSponsors(response.data.config_edition);
+      }
+      // Load selected production data
+      if (response.data.production) {
+        try {
+          const prodRes = await client.get(`/api/productions/${response.data.production}/`);
+          setSelectedProduction(prodRes.data);
+          const compoId = prodRes.data.compo?.id || prodRes.data.compo;
+          if (compoId) setSelectedCompoId(compoId);
+        } catch {}
+      }
     } catch (err) {
       setError('Error loading slide');
       setLoading(false);
     }
+  };
+
+  const fetchSponsors = async (editionId) => {
+    try {
+      const client = axiosWrapper();
+      const backendUrl = process.env.REACT_APP_BACKEND_ADDRESS || 'http://localhost:8000';
+      const response = await client.get(`/api/stagerunner-data/sponsors/${editionId}/`);
+      const resolved = (response.data || []).map(s => ({
+        ...s,
+        logo: s.logo && !s.logo.startsWith('http') ? `${backendUrl}${s.logo}` : s.logo,
+      }));
+      setSponsors(resolved);
+    } catch {}
+  };
+
+  const fetchProductions = async (editionId) => {
+    try {
+      const client = axiosWrapper();
+      const response = await client.get(`/api/productions/?edition=${editionId}`);
+      const prods = response.data.results || response.data || [];
+      setProductions(prods);
+      // Extract unique compos
+      const compoMap = {};
+      prods.forEach(p => {
+        const compoId = p.compo?.id || p.compo;
+        const compoName = p.compo_name || p.compo?.name || `Compo ${compoId}`;
+        if (compoId && !compoMap[compoId]) {
+          compoMap[compoId] = { id: compoId, name: compoName };
+        }
+      });
+      setCompos(Object.values(compoMap));
+    } catch {}
   };
 
   const handleSave = async () => {
@@ -346,6 +397,45 @@ const SlideEditorPage = () => {
   };
 
   const addElement = (type) => {
+    if (type === 'production_info') {
+      const baseZ = elements.length;
+      const ts = Date.now();
+      const prodElements = [
+        { subtype: 'production_number', name: 'Prod Number', x: 5, y: 5, width: 15, height: 8, fontSize: 36 },
+        { subtype: 'compo_name', name: 'Compo Name', x: 5, y: 15, width: 40, height: 8, fontSize: 32 },
+        { subtype: 'production_title', name: 'Prod Title', x: 5, y: 30, width: 60, height: 12, fontSize: 64 },
+        { subtype: 'production_authors', name: 'Prod Authors', x: 5, y: 45, width: 40, height: 8, fontSize: 36 },
+      ].map((cfg, i) => ({
+        id: `new-${ts}-${i}`,
+        _isNew: true,
+        element_type: cfg.subtype,
+        name: cfg.name,
+        x: cfg.x,
+        y: cfg.y,
+        width: cfg.width,
+        height: cfg.height,
+        rotation: 0,
+        z_index: baseZ + i,
+        content: '',
+        styles: {
+          fontSize: cfg.fontSize,
+          fontFamily: 'Arial',
+          color: '#ffffff',
+          textAlign: 'left',
+        },
+        enter_transition: 'fade',
+        exit_transition: 'fade',
+        enter_duration: 500,
+        exit_duration: 500,
+        enter_delay: i * 100,
+        is_visible: true,
+      }));
+      setElements([...elements, ...prodElements]);
+      setSelectedElementId(prodElements[0].id);
+      setHasUnsavedChanges(true);
+      return;
+    }
+
     const newElement = {
       id: `new-${Date.now()}`,
       _isNew: true,
@@ -508,6 +598,35 @@ const SlideEditorPage = () => {
               muted
               sx={{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none' }}
             />
+          ) : element.element_type === 'compo_name' ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', transform: `scale(${canvasScale})`, transformOrigin: 'center center' }}>
+              <Typography sx={{ fontSize: element.styles?.fontSize || 32, fontFamily: element.styles?.fontFamily || 'Arial', color: element.styles?.color || '#fff', textShadow: '2px 2px 4px rgba(0,0,0,0.5)', textAlign: element.styles?.textAlign || 'left', width: '100%', opacity: selectedProduction ? 1 : 0.4 }}>
+                {selectedProduction ? (selectedProduction.compo_name || selectedProduction.compo?.name || 'Compo') : 'Compo Name'}
+              </Typography>
+            </Box>
+          ) : element.element_type === 'production_title' ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', transform: `scale(${canvasScale})`, transformOrigin: 'center center' }}>
+              <Typography sx={{ fontSize: element.styles?.fontSize || 64, fontFamily: element.styles?.fontFamily || 'Arial', color: element.styles?.color || '#fff', textShadow: '2px 2px 4px rgba(0,0,0,0.5)', textAlign: element.styles?.textAlign || 'center', width: '100%', opacity: selectedProduction ? 1 : 0.4 }}>
+                {selectedProduction?.title || 'Production Title'}
+              </Typography>
+            </Box>
+          ) : element.element_type === 'production_authors' ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', transform: `scale(${canvasScale})`, transformOrigin: 'center center' }}>
+              <Typography sx={{ fontSize: element.styles?.fontSize || 36, fontFamily: element.styles?.fontFamily || 'Arial', color: element.styles?.color || '#ccc', textShadow: '2px 2px 4px rgba(0,0,0,0.5)', textAlign: element.styles?.textAlign || 'center', width: '100%', opacity: selectedProduction ? 1 : 0.4 }}>
+                {selectedProduction ? `by ${selectedProduction.authors || selectedProduction.uploaded_by?.profile?.nickname || '?'}` : 'by Author Name'}
+              </Typography>
+            </Box>
+          ) : element.element_type === 'production_number' ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', transform: `scale(${canvasScale})`, transformOrigin: 'center center' }}>
+              <Typography sx={{ fontSize: element.styles?.fontSize || 36, fontFamily: element.styles?.fontFamily || 'Arial', color: element.styles?.color || '#fff', textShadow: '2px 2px 4px rgba(0,0,0,0.5)', textAlign: element.styles?.textAlign || 'center', width: '100%', opacity: selectedProduction ? 1 : 0.4 }}>
+                {selectedProduction ? (() => {
+                  const compoId = selectedProduction.compo?.id || selectedProduction.compo;
+                  const compoProds = productions.filter(p => (p.compo?.id || p.compo) === compoId);
+                  const idx = compoProds.findIndex(p => p.id === selectedProduction.id);
+                  return `${idx + 1} / ${compoProds.length}`;
+                })() : '1 / 12'}
+              </Typography>
+            </Box>
           ) : element.element_type === 'countdown' ? (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', transform: `scale(${canvasScale})`, transformOrigin: 'center center' }}>
               <CountdownRenderer
@@ -519,6 +638,10 @@ const SlideEditorPage = () => {
           ) : element.element_type === 'clock' ? (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', transform: `scale(${canvasScale})`, transformOrigin: 'center center' }}>
               <ClockRenderer styles={element.styles} format={element.styles?.format} />
+            </Box>
+          ) : (element.element_type === 'sponsor_bar' || element.element_type === 'sponsor_grid') ? (
+            <Box sx={{ width: '100%', height: '100%', transform: `scale(${canvasScale})`, transformOrigin: 'top left' }}>
+              <SponsorBarRenderer sponsors={sponsors} styles={element.styles} />
             </Box>
           ) : (
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
@@ -586,45 +709,31 @@ const SlideEditorPage = () => {
             {(() => {
               const sorted = [...elements].sort((a, b) => (b.z_index || 0) - (a.z_index || 0));
               return sorted.map((element, idx) => (
-              <ListItemButton
+              <Box
                 key={element.id}
-                selected={element.id === selectedElementId}
                 onClick={() => setSelectedElementId(element.id)}
-                sx={{ pr: 12, py: 0.25 }}
+                sx={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  px: 1, py: 0.5, cursor: 'pointer', borderRadius: 0.5,
+                  bgcolor: element.id === selectedElementId ? 'action.selected' : 'transparent',
+                  '&:hover': { bgcolor: 'action.hover' },
+                }}
               >
-                <ListItemText
-                  primary={element.name}
-                  primaryTypographyProps={{ variant: 'body2', noWrap: true }}
-                />
-                <ListItemSecondaryAction sx={{ display: 'flex', alignItems: 'center', gap: 0 }}>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => { e.stopPropagation(); moveLayer(element.id, 'up'); }}
-                    disabled={idx === 0}
-                    sx={{ p: 0.25 }}
-                  >
-                    <ArrowUpIcon sx={{ fontSize: 16 }} />
+                <Typography variant="caption" sx={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', mr: 0.5 }}>
+                  {element.name}
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                  <IconButton size="small" disabled={idx === 0} onClick={(e) => { e.stopPropagation(); moveLayer(element.id, 'up'); }} sx={{ p: 0 }}>
+                    <ArrowUpIcon sx={{ fontSize: 14 }} />
                   </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => { e.stopPropagation(); moveLayer(element.id, 'down'); }}
-                    disabled={idx === sorted.length - 1}
-                    sx={{ p: 0.25 }}
-                  >
-                    <ArrowDownIcon sx={{ fontSize: 16 }} />
+                  <IconButton size="small" disabled={idx === sorted.length - 1} onClick={(e) => { e.stopPropagation(); moveLayer(element.id, 'down'); }} sx={{ p: 0 }}>
+                    <ArrowDownIcon sx={{ fontSize: 14 }} />
                   </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      updateElement(element.id, { is_visible: !element.is_visible });
-                    }}
-                    sx={{ p: 0.25 }}
-                  >
-                    {element.is_visible ? <VisibleIcon sx={{ fontSize: 16 }} /> : <HiddenIcon sx={{ fontSize: 16 }} />}
+                  <IconButton size="small" onClick={(e) => { e.stopPropagation(); updateElement(element.id, { is_visible: !element.is_visible }); }} sx={{ p: 0 }}>
+                    {element.is_visible ? <VisibleIcon sx={{ fontSize: 14 }} /> : <HiddenIcon sx={{ fontSize: 14 }} />}
                   </IconButton>
-                </ListItemSecondaryAction>
-              </ListItemButton>
+                </Box>
+              </Box>
             ));
             })()}
           </List>
@@ -868,6 +977,55 @@ const SlideEditorPage = () => {
                   placeholder={t('e.g. Demo Compo starts in')}
                   sx={{ mb: 2 }}
                 />
+              </>
+            )}
+
+            {['production_title', 'production_authors', 'production_number', 'compo_name'].includes(selectedElement.element_type) && (
+              <>
+                <FormControl fullWidth size="small" sx={{ mb: 1 }}>
+                  <InputLabel>{t('Compo')}</InputLabel>
+                  <Select
+                    value={selectedCompoId || ''}
+                    onChange={(e) => {
+                      setSelectedCompoId(e.target.value || null);
+                      updateSlide({ production: null });
+                      setSelectedProduction(null);
+                    }}
+                    label={t('Compo')}
+                  >
+                    <MenuItem value="">{t('All')}</MenuItem>
+                    {compos.map(c => (
+                      <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+                  <InputLabel>{t('Production')}</InputLabel>
+                  <Select
+                    value={slide.production || ''}
+                    onChange={(e) => {
+                      const prodId = e.target.value || null;
+                      updateSlide({ production: prodId });
+                      if (prodId) {
+                        const prod = productions.find(p => p.id === prodId);
+                        setSelectedProduction(prod || null);
+                      } else {
+                        setSelectedProduction(null);
+                      }
+                    }}
+                    label={t('Production')}
+                  >
+                    <MenuItem value="">{t('None')}</MenuItem>
+                    {productions
+                      .filter(p => !selectedCompoId || (p.compo?.id || p.compo) === selectedCompoId)
+                      .map(p => (
+                        <MenuItem key={p.id} value={p.id}>
+                          {p.title} - {p.authors || p.uploaded_by?.profile?.nickname || '?'}
+                        </MenuItem>
+                      ))
+                    }
+                  </Select>
+                </FormControl>
               </>
             )}
 
@@ -1132,7 +1290,94 @@ const SlideEditorPage = () => {
               </>
             )}
 
-            {['text', 'clock', 'countdown'].includes(selectedElement.element_type) && (
+            {(selectedElement.element_type === 'sponsor_bar' || selectedElement.element_type === 'sponsor_grid') && (
+              <>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="caption" color="text.secondary" gutterBottom>
+                  {t('Display Mode')}
+                </Typography>
+                <TextField
+                  fullWidth
+                  select
+                  value={selectedElement.styles?.sponsorMode || 'row'}
+                  onChange={(e) => updateElement(selectedElement.id, {
+                    styles: { ...selectedElement.styles, sponsorMode: e.target.value }
+                  })}
+                  size="small"
+                  sx={{ mb: 2 }}
+                >
+                  <MenuItem value="row">{t('Static Row')}</MenuItem>
+                  <MenuItem value="marquee">{t('Marquee')}</MenuItem>
+                  <MenuItem value="grid">{t('Grid')}</MenuItem>
+                  <MenuItem value="carousel">{t('Carousel')}</MenuItem>
+                  <MenuItem value="ticker">{t('Ticker')}</MenuItem>
+                </TextField>
+                {(selectedElement.styles?.sponsorMode === 'marquee' || selectedElement.styles?.sponsorMode === 'ticker') && (
+                  <>
+                    <Typography variant="caption" color="text.secondary">
+                      {t('Speed')}: {selectedElement.styles?.marqueeSpeed || 30}s
+                    </Typography>
+                    <Slider
+                      value={selectedElement.styles?.marqueeSpeed || 30}
+                      onChange={(e, val) => updateElement(selectedElement.id, {
+                        styles: { ...selectedElement.styles, marqueeSpeed: val }
+                      })}
+                      min={5}
+                      max={60}
+                      step={5}
+                      size="small"
+                      sx={{ mb: 2 }}
+                    />
+                  </>
+                )}
+                {selectedElement.styles?.sponsorMode === 'carousel' && (
+                  <>
+                    <Typography variant="caption" color="text.secondary">
+                      {t('Interval')}: {selectedElement.styles?.carouselInterval || 3}s
+                    </Typography>
+                    <Slider
+                      value={selectedElement.styles?.carouselInterval || 3}
+                      onChange={(e, val) => updateElement(selectedElement.id, {
+                        styles: { ...selectedElement.styles, carouselInterval: val }
+                      })}
+                      min={1}
+                      max={10}
+                      step={1}
+                      size="small"
+                      sx={{ mb: 2 }}
+                    />
+                  </>
+                )}
+                <FormControlLabel
+                  control={
+                    <Switch
+                      size="small"
+                      checked={!!selectedElement.styles?.grayscale}
+                      onChange={(e) => updateElement(selectedElement.id, {
+                        styles: { ...selectedElement.styles, grayscale: e.target.checked }
+                      })}
+                    />
+                  }
+                  label={<Typography variant="body2">{t('Grayscale')}</Typography>}
+                />
+                {selectedElement.styles?.sponsorMode === 'carousel' && (
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        size="small"
+                        checked={selectedElement.styles?.showName !== false}
+                        onChange={(e) => updateElement(selectedElement.id, {
+                          styles: { ...selectedElement.styles, showName: e.target.checked }
+                        })}
+                      />
+                    }
+                    label={<Typography variant="body2">{t('Show Name')}</Typography>}
+                  />
+                )}
+              </>
+            )}
+
+            {['text', 'clock', 'countdown', 'production_title', 'production_authors', 'production_number', 'compo_name'].includes(selectedElement.element_type) && (
               <>
                 <Divider sx={{ my: 2 }} />
                 <Typography variant="caption" color="text.secondary" gutterBottom>

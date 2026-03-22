@@ -4,6 +4,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import axiosWrapper from '../../utils/AxiosWrapper';
 
+const BACKEND_URL = process.env.REACT_APP_BACKEND_ADDRESS || 'http://localhost:8000';
+const resolveUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+  return `${BACKEND_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 /**
  * Fetches compo data including productions list
  */
@@ -92,7 +99,7 @@ export const useSponsors = (editionId) => {
       try {
         const client = axiosWrapper();
         const response = await client.get(`/api/stagerunner-data/sponsors/${editionId}/`);
-        setSponsors(response.data);
+        setSponsors((response.data || []).map(s => ({ ...s, logo: resolveUrl(s.logo) })));
       } catch (err) {
         setError(err.message || 'Error fetching sponsors');
       } finally {
@@ -126,7 +133,8 @@ export const useEditionInfo = (editionId) => {
       try {
         const client = axiosWrapper();
         const response = await client.get(`/api/stagerunner-data/edition/${editionId}/`);
-        setEdition(response.data);
+        const ed = response.data;
+        setEdition({ ...ed, logo: resolveUrl(ed.logo), poster: resolveUrl(ed.poster) });
       } catch (err) {
         setError(err.message || 'Error fetching edition info');
       } finally {
