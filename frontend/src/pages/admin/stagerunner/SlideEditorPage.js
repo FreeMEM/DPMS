@@ -1365,7 +1365,7 @@ const SlideEditorPage = () => {
                 <Typography variant="caption" color="text.secondary" gutterBottom>
                   {t('Fill')}
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', gap: 1, mb: 0.5, alignItems: 'center' }}>
                   <Box
                     onClick={() => updateElement(selectedElement.id, {
                       styles: { ...selectedElement.styles, _showFillPicker: !selectedElement.styles?._showFillPicker }
@@ -1376,17 +1376,18 @@ const SlideEditorPage = () => {
                       border: '1px solid rgba(255,255,255,0.3)',
                     }}
                   />
-                  <TextField
-                    label={t('Alpha')}
-                    type="number"
-                    value={selectedElement.styles?.fillAlpha !== undefined ? selectedElement.styles.fillAlpha : 0.3}
-                    onChange={(e) => updateElement(selectedElement.id, {
-                      styles: { ...selectedElement.styles, fillAlpha: parseFloat(e.target.value) || 0 }
-                    })}
-                    size="small"
-                    inputProps={{ min: 0, max: 1, step: 0.1 }}
-                    sx={{ flex: 1 }}
-                  />
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      Alpha: {Math.round((selectedElement.styles?.fillAlpha !== undefined ? selectedElement.styles.fillAlpha : 0.3) * 100)}%
+                    </Typography>
+                    <Slider
+                      value={selectedElement.styles?.fillAlpha !== undefined ? selectedElement.styles.fillAlpha : 0.3}
+                      onChange={(e, val) => updateElement(selectedElement.id, {
+                        styles: { ...selectedElement.styles, fillAlpha: val }
+                      })}
+                      min={0} max={1} step={0.05} size="small"
+                    />
+                  </Box>
                 </Box>
                 {selectedElement.styles?._showFillPicker && (
                   <Box sx={{ mb: 2 }}>
@@ -1402,7 +1403,7 @@ const SlideEditorPage = () => {
                 <Typography variant="caption" color="text.secondary" gutterBottom>
                   {t('Border')}
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', gap: 1, mb: 0.5, alignItems: 'center' }}>
                   <Box
                     onClick={() => updateElement(selectedElement.id, {
                       styles: { ...selectedElement.styles, _showBorderPicker: !selectedElement.styles?._showBorderPicker }
@@ -1422,18 +1423,19 @@ const SlideEditorPage = () => {
                     })}
                     size="small"
                     inputProps={{ min: 0, max: 20 }}
-                    sx={{ flex: 1 }}
+                    sx={{ width: 70, flexShrink: 0 }}
                   />
-                  <TextField
-                    label={t('Alpha')}
-                    type="number"
+                </Box>
+                <Box sx={{ mb: 1 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    Alpha: {Math.round((selectedElement.styles?.borderAlpha !== undefined ? selectedElement.styles.borderAlpha : 1) * 100)}%
+                  </Typography>
+                  <Slider
                     value={selectedElement.styles?.borderAlpha !== undefined ? selectedElement.styles.borderAlpha : 1}
-                    onChange={(e) => updateElement(selectedElement.id, {
-                      styles: { ...selectedElement.styles, borderAlpha: parseFloat(e.target.value) || 0 }
+                    onChange={(e, val) => updateElement(selectedElement.id, {
+                      styles: { ...selectedElement.styles, borderAlpha: val }
                     })}
-                    size="small"
-                    inputProps={{ min: 0, max: 1, step: 0.1 }}
-                    sx={{ flex: 1 }}
+                    min={0} max={1} step={0.05} size="small"
                   />
                 </Box>
                 {selectedElement.styles?._showBorderPicker && (

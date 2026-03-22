@@ -589,10 +589,13 @@ const StageRunnerViewer = () => {
         if (element.content) {
           const embedUrl = getVideoEmbedUrl(element.content);
           if (embedUrl) {
+            // YouTube requires playlist=VIDEO_ID for loop to work
+            const ytMatch = element.content.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
             const params = [
               shouldAutoPlay ? 'autoplay=1' : '',
               shouldMute ? 'mute=1' : '',
               shouldLoop ? 'loop=1' : '',
+              shouldLoop && ytMatch ? `playlist=${ytMatch[1]}` : '',
             ].filter(Boolean).join('&');
             return (
               <iframe

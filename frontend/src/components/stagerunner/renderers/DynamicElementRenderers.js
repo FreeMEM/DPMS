@@ -720,7 +720,7 @@ export const ScrollingTextRenderer = ({ text, styles }) => {
     return (
       <Box sx={{
         width: '100%', height: '100%', overflow: 'hidden', position: 'relative',
-        background: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, transparent 30%, transparent 100%)',
+        background: 'transparent',
         zIndex: 1,
       }}>
         {/* Perspective container */}
@@ -733,8 +733,8 @@ export const ScrollingTextRenderer = ({ text, styles }) => {
         }}>
           <style>{`
             @keyframes sSW {
-              0% { transform: rotateX(55deg) translateY(80%); }
-              100% { transform: rotateX(55deg) translateY(-300%); }
+              0% { transform: rotateX(55deg) translateY(100%); }
+              100% { transform: rotateX(55deg) translateY(-100%); }
             }
           `}</style>
           <div style={{
@@ -756,12 +756,6 @@ export const ScrollingTextRenderer = ({ text, styles }) => {
             </Typography>
           </div>
         </div>
-        {/* Top fade to simulate vanishing point */}
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: '40%',
-          background: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 50%, transparent 100%)',
-          pointerEvents: 'none', zIndex: 2,
-        }} />
       </Box>
     );
   }

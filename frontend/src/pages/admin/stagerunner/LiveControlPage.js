@@ -21,6 +21,9 @@ import {
   Tooltip,
   ButtonGroup,
   Stack,
+  Slider,
+  Switch,
+  FormControlLabel,
 } from '@mui/material';
 import {
   PlayArrow as PlayIcon,
@@ -53,6 +56,7 @@ const LiveControlPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [syncing, setSyncing] = useState(false);
+  const [autoAdvanceInterval, setAutoAdvanceInterval] = useState(5);
 
   // Current state derived from control
   const currentSlideIndex = control?.current_slide_index || 0;
@@ -74,6 +78,7 @@ const LiveControlPage = () => {
       // Fetch config with full state
       const configResponse = await client.get(`/api/stagerunner-config/${configId}/full-state/`);
       setConfig(configResponse.data);
+      setAutoAdvanceInterval(Math.round((configResponse.data.auto_advance_interval || 5000) / 1000));
 
       // Fetch presentations
       const presentationsResponse = await client.get(`/api/stage-presentations/?config=${configId}`);
@@ -139,6 +144,17 @@ const LiveControlPage = () => {
     return () => clearInterval(interval);
   }, [configId]);
 
+  // Auto-advance slides when playing
+  useEffect(() => {
+    if (!isPlaying || !control?.id || slides.length <= 1) return;
+
+    const timer = setInterval(() => {
+      sendCommand('next');
+    }, autoAdvanceInterval * 1000);
+
+    return () => clearInterval(timer);
+  }, [isPlaying, autoAdvanceInterval, control?.id, slides.length]);
+
   // Send command to API
   const sendCommand = async (action, data = {}) => {
     if (!control?.id) return;
@@ -153,6 +169,17 @@ const LiveControlPage = () => {
     } finally {
       setSyncing(false);
     }
+  };
+
+  // Update auto-advance interval on the server
+  const updateAutoAdvanceInterval = async (seconds) => {
+    setAutoAdvanceInterval(seconds);
+    try {
+      const client = axiosWrapper();
+      await client.patch(`/api/stagerunner-config/${configId}/`, {
+        auto_advance_interval: seconds * 1000,
+      });
+    } catch {}
   };
 
   // Navigation handlers
@@ -387,47 +414,44 @@ const LiveControlPage = () => {
                 </Stack>
               </Box>
 
-              {/* Mini Preview */}
+              {/* Mini Preview - Live iframe */}
               <Paper
                 sx={{
                   width: '100%',
                   paddingTop: '56.25%', // 16:9 aspect ratio
                   position: 'relative',
-                  bgcolor: currentSlide?.background_color || '#000',
+                  bgcolor: '#000',
                   borderRadius: 1,
                   overflow: 'hidden',
                   mb: 2,
                 }}
               >
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    inset: 0,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#fff',
-                    textAlign: 'center',
-                    p: 2,
-                  }}
-                >
-                  <Typography variant="h6" sx={{ mb: 1 }}>
+                {config?.edition && (
+                  <iframe
+                    src={`/app/stagerunner/${config.edition}`}
+                    title="StageRunner Preview"
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      width: '100%',
+                      height: '100%',
+                      border: 'none',
+                      pointerEvents: 'none',
+                    }}
+                  />
+                )}
+                {/* Slide info overlay */}
+                <Box sx={{
+                  position: 'absolute', bottom: 0, left: 0, right: 0,
+                  bgcolor: 'rgba(0,0,0,0.6)', px: 1.5, py: 0.5,
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                }}>
+                  <Typography variant="caption" color="#fff">
                     {currentSlide?.name || 'No slide'}
                   </Typography>
-                  <Typography variant="body2" color="rgba(255,255,255,0.7)">
+                  <Typography variant="caption" color="rgba(255,255,255,0.5)">
                     {currentSlide?.slide_type}
                   </Typography>
-                  {isProductionSlide && currentProduction && (
-                    <Box sx={{ mt: 2 }}>
-                      <Typography variant="body1">
-                        {currentProduction.title}
-                      </Typography>
-                      <Typography variant="caption" color="rgba(255,255,255,0.5)">
-                        {currentProduction.authors}
-                      </Typography>
-                    </Box>
-                  )}
                 </Box>
               </Paper>
 
@@ -477,6 +501,51 @@ const LiveControlPage = () => {
                     </Button>
                   </Tooltip>
                 </ButtonGroup>
+              </Box>
+
+              {/* Auto-advance controls */}
+              <Box sx={{ mt: 2, p: 2, bgcolor: 'action.hover', borderRadius: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="subtitle2">
+                    {t('Auto-advance')}
+                  </Typography>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        size="small"
+                        checked={isPlaying}
+                        onChange={handleTogglePlay}
+                        color="warning"
+                      />
+                    }
+                    label={
+                      <Typography variant="body2" color={isPlaying ? 'warning.main' : 'text.secondary'}>
+                        {isPlaying ? t('ON') : t('OFF')}
+                      </Typography>
+                    }
+                    labelPlacement="start"
+                    sx={{ m: 0 }}
+                  />
+                </Box>
+                <Typography variant="caption" color="text.secondary">
+                  {t('Interval')}: {autoAdvanceInterval}s
+                </Typography>
+                <Slider
+                  value={autoAdvanceInterval}
+                  onChange={(e, val) => setAutoAdvanceInterval(val)}
+                  onChangeCommitted={(e, val) => updateAutoAdvanceInterval(val)}
+                  min={3}
+                  max={120}
+                  step={1}
+                  size="small"
+                  disabled={!isPlaying}
+                  marks={[
+                    { value: 5, label: '5s' },
+                    { value: 30, label: '30s' },
+                    { value: 60, label: '1m' },
+                    { value: 120, label: '2m' },
+                  ]}
+                />
               </Box>
 
               {/* Production Controls */}
