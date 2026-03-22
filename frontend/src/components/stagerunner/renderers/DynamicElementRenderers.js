@@ -617,7 +617,18 @@ export const CountdownRenderer = ({ targetDate, label, styles, onComplete }) => 
   }, [targetDate, onComplete]);
 
   if (!timeLeft) {
-    return null;
+    return (
+      <Box sx={{ textAlign: 'center' }}>
+        {label && (
+          <Typography sx={getTextStyles({ ...styles, fontSize: (styles?.fontSize || 48) * 0.5, marginBottom: '16px' })}>
+            {label}
+          </Typography>
+        )}
+        <Typography sx={getTextStyles({ ...styles, fontSize: styles?.fontSize || 96, fontFamily: 'monospace', opacity: 0.4 })}>
+          00:00:00
+        </Typography>
+      </Box>
+    );
   }
 
   const formatNumber = (n) => String(n).padStart(2, '0');

@@ -52,6 +52,7 @@ import { HexColorPicker } from 'react-colorful';
 import axiosWrapper from '../../../utils/AxiosWrapper';
 import ThreeBackground from '../../../components/common/ThreeBackground';
 import WebGL2Background from '../../../components/common/WebGL2Background';
+import { ClockRenderer, CountdownRenderer } from '../../../components/stagerunner/renderers';
 import { getVideoEmbedUrl, isVideoUrl } from '../../../utils/videoUtils';
 
 const CANVAS_WIDTH = 1920;
@@ -507,6 +508,18 @@ const SlideEditorPage = () => {
               muted
               sx={{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none' }}
             />
+          ) : element.element_type === 'countdown' ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', transform: `scale(${canvasScale})`, transformOrigin: 'center center' }}>
+              <CountdownRenderer
+                targetDate={element.content || null}
+                label={element.styles?.label}
+                styles={element.styles}
+              />
+            </Box>
+          ) : element.element_type === 'clock' ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', transform: `scale(${canvasScale})`, transformOrigin: 'center center' }}>
+              <ClockRenderer styles={element.styles} format={element.styles?.format} />
+            </Box>
           ) : (
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
               <ElementIcon sx={{ fontSize: 32 * canvasScale, opacity: 0.7 }} />
@@ -825,6 +838,39 @@ const SlideEditorPage = () => {
               />
             )}
 
+            {selectedElement.element_type === 'countdown' && (
+              <>
+                <TextField
+                  fullWidth
+                  label={t('Target Date & Time')}
+                  type="datetime-local"
+                  value={selectedElement.content || ''}
+                  onChange={(e) => updateElement(selectedElement.id, {
+                    content: e.target.value || ''
+                  })}
+                  size="small"
+                  InputLabelProps={{ shrink: true }}
+                  sx={{
+                    mb: 2,
+                    '& input::-webkit-calendar-picker-indicator': {
+                      filter: 'invert(1)',
+                    },
+                  }}
+                />
+                <TextField
+                  fullWidth
+                  label={t('Label')}
+                  value={selectedElement.styles?.label || ''}
+                  onChange={(e) => updateElement(selectedElement.id, {
+                    styles: { ...selectedElement.styles, label: e.target.value }
+                  })}
+                  size="small"
+                  placeholder={t('e.g. Demo Compo starts in')}
+                  sx={{ mb: 2 }}
+                />
+              </>
+            )}
+
             {selectedElement.element_type === 'image' && (
               <Box sx={{ mb: 2 }}>
                 <Typography variant="caption" color="text.secondary" gutterBottom>
@@ -1063,7 +1109,30 @@ const SlideEditorPage = () => {
               />
             </Box>
 
-            {selectedElement.element_type === 'text' && (
+            {selectedElement.element_type === 'clock' && (
+              <>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="caption" color="text.secondary" gutterBottom>
+                  {t('Format')}
+                </Typography>
+                <TextField
+                  fullWidth
+                  select
+                  value={selectedElement.styles?.format || 'time'}
+                  onChange={(e) => updateElement(selectedElement.id, {
+                    styles: { ...selectedElement.styles, format: e.target.value }
+                  })}
+                  size="small"
+                  sx={{ mb: 2 }}
+                >
+                  <MenuItem value="time">{t('Time')}</MenuItem>
+                  <MenuItem value="date">{t('Date')}</MenuItem>
+                  <MenuItem value="datetime">{t('Date & Time')}</MenuItem>
+                </TextField>
+              </>
+            )}
+
+            {['text', 'clock', 'countdown'].includes(selectedElement.element_type) && (
               <>
                 <Divider sx={{ my: 2 }} />
                 <Typography variant="caption" color="text.secondary" gutterBottom>

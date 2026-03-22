@@ -413,8 +413,8 @@ const StageRunnerViewer = () => {
       case 'countdown':
         return (
           <CountdownRenderer
-            targetDate={currentSlide?.countdown_target || control?.countdown_target}
-            label={currentSlide?.countdown_label}
+            targetDate={element.content || currentSlide?.countdown_target || control?.countdown_target}
+            label={styles?.label || currentSlide?.countdown_label}
             styles={styles}
           />
         );
