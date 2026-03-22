@@ -117,9 +117,27 @@ const SlideEditorPage = () => {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showTextColorPicker, setShowTextColorPicker] = useState(false);
   const [canvasScale, setCanvasScale] = useState(0.5);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  const updateSlide = (updates) => {
+    setSlide(prev => ({ ...prev, ...updates }));
+    setHasUnsavedChanges(true);
+  };
 
   // Get config ID from URL or from loaded slide
   const configId = urlConfigId || slide.config;
+
+  // Warn before leaving with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   // Calculate canvas scale based on container
   useEffect(() => {
@@ -242,7 +260,62 @@ const SlideEditorPage = () => {
         }
       }
 
-      navigate(`/admin/stagerunner/slides?config=${configId}`);
+      setHasUnsavedChanges(false);
+
+      // Check if any element has a video that needs conversion
+      const hasVideoUploads = elements.some(el => el._videoFile);
+
+      // Reload slide data from server
+      if (isNew) {
+        // Navigate to the saved slide's edit page
+        navigate(`/admin/stagerunner/slides/${slideId}?config=${configId}`, { replace: true });
+      } else {
+        // Reload data in place
+        const reloadResponse = await client.get(`/api/stage-slides/${id}/`);
+        setSlide(reloadResponse.data);
+        setElements(reloadResponse.data.elements || []);
+      }
+
+      setSaving(false);
+
+      if (hasVideoUploads) {
+        // Poll for video conversion completion
+        setUploadProgress({ element: t('Converting video...'), percent: -1 });
+        const pollConversion = async () => {
+          const pollClient = axiosWrapper();
+          const sid = isNew ? slideId : id;
+          for (let i = 0; i < 120; i++) { // Max 10 minutes (120 * 5s)
+            await new Promise(r => setTimeout(r, 5000));
+            try {
+              const res = await pollClient.get(`/api/stage-slides/${sid}/`);
+              const videoElements = res.data.elements?.filter(el => el.element_type === 'video' && el.video) || [];
+              // Try to probe if videos are playable
+              const allReady = await Promise.all(videoElements.map(el => {
+                return new Promise(resolve => {
+                  const video = document.createElement('video');
+                  video.preload = 'metadata';
+                  video.onloadedmetadata = () => { video.remove(); resolve(true); };
+                  video.onerror = () => { video.remove(); resolve(false); };
+                  video.src = el.video.startsWith('http') ? el.video : `${process.env.REACT_APP_BACKEND_ADDRESS || 'http://localhost:8000'}${el.video}`;
+                  setTimeout(() => { video.remove(); resolve(false); }, 10000);
+                });
+              }));
+              if (allReady.every(Boolean) || videoElements.length === 0) {
+                // Reload with converted videos
+                setSlide(res.data);
+                setElements(res.data.elements || []);
+                setUploadProgress(null);
+                return;
+              }
+              setUploadProgress({ element: t('Converting video...'), percent: Math.min(95, Math.round((i / 120) * 100)) });
+            } catch { break; }
+          }
+          setUploadProgress(null);
+        };
+        pollConversion();
+      }
+
+      return;
     } catch (err) {
       console.error('Error saving slide:', err.response?.data || err.message || err);
       const detail = err.response?.data
@@ -282,9 +355,11 @@ const SlideEditorPage = () => {
     };
     setElements([...elements, newElement]);
     setSelectedElementId(newElement.id);
+    setHasUnsavedChanges(true);
   };
 
   const updateElement = (elementId, updates) => {
+    setHasUnsavedChanges(true);
     setElements(elements.map(el =>
       el.id === elementId ? { ...el, ...updates } : el
     ));
@@ -302,6 +377,7 @@ const SlideEditorPage = () => {
       }
     }
     setElements(elements.filter(el => el.id !== elementId));
+    setHasUnsavedChanges(true);
     if (selectedElementId === elementId) {
       setSelectedElementId(null);
     }
@@ -373,13 +449,14 @@ const SlideEditorPage = () => {
               alt={element.name}
               sx={{ width: '100%', height: '100%', objectFit: 'contain' }}
             />
-          ) : element.element_type === 'video' && (element._videoPreview || element.video) ? (
-            <Box
-              component="video"
+          ) : element.element_type === 'video' && (element._videoPreview || element._videoFile || element.video) ? (
+            <video
               src={element._videoPreview || element.video}
               muted
-              sx={{ width: '100%', height: '100%', objectFit: 'contain' }}
-              onError={(e) => console.warn('Video format not supported:', e.target.src)}
+              autoPlay
+              loop
+              playsInline
+              style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
             />
           ) : element.element_type === 'video' && element.content && getVideoEmbedUrl(element.content) ? (
             <Box
@@ -429,7 +506,10 @@ const SlideEditorPage = () => {
         }}
       >
         <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-          <IconButton onClick={() => navigate(`/admin/stagerunner/slides?config=${configId}`)}>
+          <IconButton onClick={() => {
+            if (hasUnsavedChanges && !window.confirm(t('You have unsaved changes. Are you sure you want to leave?'))) return;
+            navigate(`/admin/stagerunner/slides?config=${configId}`);
+          }}>
             <BackIcon />
           </IconButton>
           <Typography variant="subtitle2" sx={{ mt: 1 }}>
@@ -497,7 +577,7 @@ const SlideEditorPage = () => {
         <Paper sx={{ p: 1.5, borderRadius: 0, display: 'flex', alignItems: 'center', gap: 2 }}>
           <TextField
             value={slide.name}
-            onChange={(e) => setSlide({ ...slide, name: e.target.value })}
+            onChange={(e) => updateSlide({ name: e.target.value })}
             placeholder={t('Slide Name')}
             size="small"
             sx={{ width: 250 }}
@@ -506,7 +586,7 @@ const SlideEditorPage = () => {
             <InputLabel>{t('Slide Type')}</InputLabel>
             <Select
               value={slide.slide_type}
-              onChange={(e) => setSlide({ ...slide, slide_type: e.target.value })}
+              onChange={(e) => updateSlide({ slide_type: e.target.value })}
               label={t('Slide Type')}
             >
               {slideTypeOptions.map(opt => (
@@ -518,7 +598,7 @@ const SlideEditorPage = () => {
             control={
               <Switch
                 checked={slide.is_active}
-                onChange={(e) => setSlide({ ...slide, is_active: e.target.checked })}
+                onChange={(e) => updateSlide({ is_active: e.target.checked })}
                 size="small"
               />
             }
@@ -540,11 +620,16 @@ const SlideEditorPage = () => {
             {t('Preview')}
           </Button>
           {uploadProgress && (
-            <Box sx={{ minWidth: 150, mr: 1 }}>
-              <Typography variant="caption" color="text.secondary">
-                {uploadProgress.element}: {uploadProgress.percent}%
+            <Box sx={{ minWidth: 180, mr: 1 }}>
+              <Typography variant="caption" color={uploadProgress.percent === -1 ? 'warning.main' : 'text.secondary'}>
+                {uploadProgress.element}{uploadProgress.percent >= 0 ? `: ${uploadProgress.percent}%` : ''}
               </Typography>
-              <LinearProgress variant="determinate" value={uploadProgress.percent} sx={{ height: 6, borderRadius: 3 }} />
+              <LinearProgress
+                variant={uploadProgress.percent === -1 ? 'indeterminate' : 'determinate'}
+                value={uploadProgress.percent >= 0 ? uploadProgress.percent : undefined}
+                color={uploadProgress.percent === -1 ? 'warning' : 'primary'}
+                sx={{ height: 6, borderRadius: 3 }}
+              />
             </Box>
           )}
           <Button
@@ -589,7 +674,7 @@ const SlideEditorPage = () => {
             <InputLabel>{t('Effect')}</InputLabel>
             <Select
               value={slide.background_effect}
-              onChange={(e) => setSlide({ ...slide, background_effect: e.target.value })}
+              onChange={(e) => updateSlide({ background_effect: e.target.value })}
               label={t('Effect')}
             >
               {backgroundEffectOptions.map(opt => (
@@ -626,7 +711,7 @@ const SlideEditorPage = () => {
               >
                 <HexColorPicker
                   color={slide.background_color}
-                  onChange={(color) => setSlide({ ...slide, background_color: color })}
+                  onChange={(color) => updateSlide({ background_color: color })}
                 />
               </Box>
             )}
@@ -731,42 +816,65 @@ const SlideEditorPage = () => {
                 <Typography variant="caption" color="text.secondary" gutterBottom>
                   {t('Video')}
                 </Typography>
-                {(selectedElement._videoPreview || selectedElement.video) ? (
-                  <Box sx={{ position: 'relative', mt: 1 }}>
+                {(selectedElement._videoFile || selectedElement._videoPreview || selectedElement.video) ? (
+                  <Box sx={{ mt: 1 }}>
+                    {/* File info */}
+                    <Box sx={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      p: 1, bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 1, mb: 1,
+                    }}>
+                      <Box sx={{ overflow: 'hidden' }}>
+                        <Typography variant="caption" sx={{ color: 'success.main', display: 'block' }}>
+                          {selectedElement._videoFile
+                            ? `${selectedElement._videoFile.name} (${(selectedElement._videoFile.size / 1024 / 1024).toFixed(1)} MB)`
+                            : selectedElement.video?.split('/').pop()
+                          }
+                        </Typography>
+                        {selectedElement._videoFile && (
+                          <Typography variant="caption" sx={{ color: 'warning.main' }}>
+                            {t('Pending upload - click Save')}
+                          </Typography>
+                        )}
+                        {selectedElement.video && !selectedElement._videoFile && (
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                            {t('Uploaded')}
+                          </Typography>
+                        )}
+                      </Box>
+                      <IconButton
+                        size="small"
+                        onClick={() => updateElement(selectedElement.id, {
+                          _videoFile: null, _videoPreview: null, video: null,
+                        })}
+                      >
+                        <ClearIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                    {/* Video preview - only show if browser can play it */}
                     <Box
                       component="video"
                       src={selectedElement._videoPreview || selectedElement.video}
                       muted
                       controls
-                      sx={{ width: '100%', borderRadius: 1, maxHeight: 150 }}
+                      sx={{
+                        width: '100%', borderRadius: 1, maxHeight: 150,
+                        display: 'block',
+                      }}
                       onError={(e) => {
-                        console.error('VIDEO PANEL ERROR:', e.target.error, 'src:', e.target.src);
-                        // If loading from server fails, video may still be converting
+                        // Hide unplayable video preview
+                        e.target.style.display = 'none';
                         if (selectedElement.video && !selectedElement._videoPreview) {
-                          const el = e.target.parentElement;
-                          if (el && !el.querySelector('.converting-msg')) {
+                          const container = e.target.parentElement;
+                          if (container && !container.querySelector('.converting-msg')) {
                             const msg = document.createElement('div');
                             msg.className = 'converting-msg';
                             msg.style.cssText = 'padding:8px;text-align:center;color:#ff9800;font-size:12px;';
                             msg.textContent = t('Video is being converted, please reload in a moment...');
-                            el.appendChild(msg);
+                            container.appendChild(msg);
                           }
                         }
                       }}
-                      onLoadedData={(e) => {
-                        const msg = e.target.parentElement?.querySelector('.converting-msg');
-                        if (msg) msg.remove();
-                      }}
                     />
-                    <IconButton
-                      size="small"
-                      onClick={() => updateElement(selectedElement.id, {
-                        _videoFile: null, _videoPreview: null, video: null,
-                      })}
-                      sx={{ position: 'absolute', top: 4, right: 4, bgcolor: 'rgba(0,0,0,0.6)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}
-                    >
-                      <ClearIcon fontSize="small" />
-                    </IconButton>
                   </Box>
                 ) : (
                   <Button

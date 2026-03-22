@@ -1024,7 +1024,7 @@ class StageRunnerDataViewSet(viewsets.ViewSet):
         GET /api/stagerunner-data/sponsors/<edition_id>/
         """
         edition = get_object_or_404(Edition, pk=edition_id)
-        sponsors = Sponsor.objects.filter(edition=edition).order_by('display_order')
+        sponsors = Sponsor.objects.filter(editions=edition).order_by('display_order')
 
         return Response(SponsorForStageSerializer(sponsors, many=True).data)
 
@@ -1050,9 +1050,6 @@ class StageRunnerDataViewSet(viewsets.ViewSet):
         return Response({
             'id': edition.id,
             'title': edition.title,
-            'subtitle': edition.subtitle,
             'logo': edition.logo.url if edition.logo else None,
             'poster': edition.poster.url if edition.poster else None,
-            'start_date': edition.start_date,
-            'end_date': edition.end_date,
         })
