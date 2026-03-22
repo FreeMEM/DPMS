@@ -31,6 +31,8 @@ import {
   Visibility as VisibleIcon,
   VisibilityOff as HiddenIcon,
   OpenInNew as OpenInNewIcon,
+  ArrowUpward as ArrowUpIcon,
+  ArrowDownward as ArrowDownIcon,
   TextFields as TextIcon,
   Image as ImageIcon,
   VideoLibrary as VideoIcon,
@@ -365,6 +367,24 @@ const SlideEditorPage = () => {
     ));
   };
 
+  const moveLayer = (elementId, direction) => {
+    // Sort ascending by z_index, then renormalize to 0..n-1 to avoid duplicates
+    const sorted = [...elements].sort((a, b) => (a.z_index || 0) - (b.z_index || 0));
+    const idx = sorted.findIndex(el => el.id === elementId);
+    if (idx === -1) return;
+    const swapIdx = direction === 'up' ? idx + 1 : idx - 1;
+    if (swapIdx < 0 || swapIdx >= sorted.length) return;
+
+    // Swap positions
+    [sorted[idx], sorted[swapIdx]] = [sorted[swapIdx], sorted[idx]];
+
+    // Reassign z_index sequentially
+    const updates = {};
+    sorted.forEach((el, i) => { updates[el.id] = i; });
+    setElements(elements.map(el => ({ ...el, z_index: updates[el.id] })));
+    setHasUnsavedChanges(true);
+  };
+
   const deleteElement = async (elementId) => {
     const element = elements.find(el => el.id === elementId);
     if (element && !element._isNew) {
@@ -420,6 +440,7 @@ const SlideEditorPage = () => {
         bounds="parent"
         onClick={() => setSelectedElementId(element.id)}
         style={{
+          zIndex: element.z_index || 0,
           border: isSelected ? '2px solid #2196f3' : '1px dashed rgba(255,255,255,0.3)',
           background: isSelected ? 'rgba(33,150,243,0.1)' : 'transparent',
           display: 'flex',
@@ -535,30 +556,50 @@ const SlideEditorPage = () => {
             {t('Layers')}
           </Typography>
           <List dense sx={{ maxHeight: 200, overflow: 'auto' }}>
-            {elements.map((element) => (
+            {(() => {
+              const sorted = [...elements].sort((a, b) => (b.z_index || 0) - (a.z_index || 0));
+              return sorted.map((element, idx) => (
               <ListItemButton
                 key={element.id}
                 selected={element.id === selectedElementId}
                 onClick={() => setSelectedElementId(element.id)}
-                sx={{ pr: 6 }}
+                sx={{ pr: 12, py: 0.25 }}
               >
                 <ListItemText
                   primary={element.name}
                   primaryTypographyProps={{ variant: 'body2', noWrap: true }}
                 />
-                <ListItemSecondaryAction>
+                <ListItemSecondaryAction sx={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                  <IconButton
+                    size="small"
+                    onClick={(e) => { e.stopPropagation(); moveLayer(element.id, 'up'); }}
+                    disabled={idx === 0}
+                    sx={{ p: 0.25 }}
+                  >
+                    <ArrowUpIcon sx={{ fontSize: 16 }} />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={(e) => { e.stopPropagation(); moveLayer(element.id, 'down'); }}
+                    disabled={idx === sorted.length - 1}
+                    sx={{ p: 0.25 }}
+                  >
+                    <ArrowDownIcon sx={{ fontSize: 16 }} />
+                  </IconButton>
                   <IconButton
                     size="small"
                     onClick={(e) => {
                       e.stopPropagation();
                       updateElement(element.id, { is_visible: !element.is_visible });
                     }}
+                    sx={{ p: 0.25 }}
                   >
-                    {element.is_visible ? <VisibleIcon fontSize="small" /> : <HiddenIcon fontSize="small" />}
+                    {element.is_visible ? <VisibleIcon sx={{ fontSize: 16 }} /> : <HiddenIcon sx={{ fontSize: 16 }} />}
                   </IconButton>
                 </ListItemSecondaryAction>
               </ListItemButton>
-            ))}
+            ));
+            })()}
           </List>
         </Box>
       </Paper>
