@@ -333,5 +333,3 @@ tags
 *.csv
 *.xlsx
 *.xls
-
-migrations
