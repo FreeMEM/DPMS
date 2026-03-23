@@ -81,12 +81,8 @@ SECURE_CONTENT_TYPE_NOSNIFF = env.bool(
 #     ),
 # ]
 
-# # Email
-# DEFAULT_FROM_EMAIL = env(
-#     "DJANGO_DEFAULT_FROM_EMAIL", default="Comparte Ride <noreply@comparteride.com>"
-# )
-# SERVER_EMAIL = env("DJANGO_SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
-# EMAIL_SUBJECT_PREFIX = env("DJANGO_EMAIL_SUBJECT_PREFIX", default="[Comparte Ride]")
+# Email
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 
 EMAIL_HOST = env("EMAIL_HOST")
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
