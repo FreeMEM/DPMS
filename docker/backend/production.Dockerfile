@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Install system dependencies for psycopg2
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq-dev gcc ffmpeg \
+    libpq-dev gcc libc6-dev ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 ADD ./backend/requirements /app/backend/requirements

@@ -3,7 +3,7 @@
 #   docker compose -f init-ssl.yml up -d
 #   docker compose -f init-ssl.yml run --rm certbot certonly \
 #     --webroot --webroot-path=/var/www/certbot \
-#     -d dpms.freemem.space \
+#     -d dpms.freemem.space -d api.dpms.freemem.space \
 #     --email admin@freemem.space \
 #     --agree-tos --non-interactive
 #   docker compose -f init-ssl.yml down

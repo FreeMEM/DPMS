@@ -10,6 +10,109 @@ from django.utils.safestring import mark_safe
 
 # Models
 from dpms.users.models import User, Profile
+from dpms.compos.models.productions import Production
+from dpms.compos.models.voting import Vote, JuryMember, AttendeeVerification
+from dpms.compos.models.files import File
+
+
+class ProductionInline(admin.TabularInline):
+    """Productions uploaded by this user"""
+    model = Production
+    fk_name = "uploaded_by"
+    extra = 0
+    fields = ("title", "compo", "authors", "created")
+    readonly_fields = ("title", "compo", "authors", "created")
+    show_change_link = True
+    verbose_name_plural = "Productions"
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+class VoteInline(admin.TabularInline):
+    """Votes cast by this user"""
+    model = Vote
+    fk_name = "user"
+    extra = 0
+    fields = ("production", "score", "is_jury_vote", "created")
+    readonly_fields = ("production", "score", "is_jury_vote", "created")
+    show_change_link = True
+    verbose_name_plural = "Votes"
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+class JuryMemberInline(admin.TabularInline):
+    """Jury memberships for this user"""
+    model = JuryMember
+    fk_name = "user"
+    extra = 0
+    fields = ("edition", "created")
+    readonly_fields = ("edition", "created")
+    show_change_link = True
+    verbose_name_plural = "Jury Memberships"
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+class AttendeeVerificationInline(admin.TabularInline):
+    """Attendance verifications for this user"""
+    model = AttendeeVerification
+    fk_name = "user"
+    extra = 0
+    fields = ("edition", "is_verified", "created")
+    readonly_fields = ("edition", "is_verified", "created")
+    show_change_link = True
+    verbose_name_plural = "Attendance Verifications"
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+class FileInline(admin.TabularInline):
+    """Files uploaded by this user"""
+    model = File
+    fk_name = "uploaded_by"
+    extra = 0
+    fields = ("original_filename", "title", "created")
+    readonly_fields = ("original_filename", "title", "created")
+    show_change_link = True
+    verbose_name_plural = "Uploaded Files"
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 class ProfileInline(admin.StackedInline):
@@ -25,7 +128,7 @@ class ProfileInline(admin.StackedInline):
 class CustomUserAdmin(UserAdmin):
     """User model admin with enhanced features"""
 
-    inlines = (ProfileInline,)
+    inlines = (ProfileInline, ProductionInline, VoteInline, JuryMemberInline, AttendeeVerificationInline, FileInline)
 
     fieldsets = (
         *UserAdmin.fieldsets,
