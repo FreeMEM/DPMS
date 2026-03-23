@@ -103,8 +103,14 @@ const ResetPassword = () => {
               margin="normal"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (!passwordConfirmation) {
+                  setPasswordConfirmation(e.target.value);
+                }
+              }}
               required
+              autoComplete="new-password"
               inputProps={{ minLength: 5 }}
             />
             <TextField
@@ -113,6 +119,7 @@ const ResetPassword = () => {
               fullWidth
               margin="normal"
               type="password"
+              autoComplete="new-password"
               value={passwordConfirmation}
               onChange={(e) => setPasswordConfirmation(e.target.value)}
               required
