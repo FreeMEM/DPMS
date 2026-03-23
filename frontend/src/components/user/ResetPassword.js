@@ -4,6 +4,7 @@ import { Box, Button, TextField, Typography, Paper, CircularProgress } from "@mu
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import axiosWrapper from "../../utils/AxiosWrapper";
+import EditionLogo from "../common/EditionLogo";
 
 const ResetPassword = () => {
   const { uid, token } = useParams();
@@ -74,13 +75,7 @@ const ResetPassword = () => {
           color: theme.palette.text.primary,
         }}
       >
-        <Box display="flex" justifyContent="center" mb={2}>
-          <img
-            src={`${process.env.PUBLIC_URL}/assets/logo_pp_192.png`}
-            alt="Posadas Party Logo"
-            style={{ height: 192 }}
-          />
-        </Box>
+        <EditionLogo />
         <Typography variant="h5" align="center" gutterBottom>
           {t("Reset password")}
         </Typography>

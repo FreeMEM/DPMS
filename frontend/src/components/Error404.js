@@ -1,34 +1,21 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Box, Button, Typography, Paper } from "@mui/material";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import ThreeBackground from "./common/ThreeBackground";
 import BackgroundToggle from "./common/BackgroundToggle";
-
-const theme = createTheme({
-  palette: {
-    mode: "dark",
-    primary: {
-      main: "#FFA500",
-    },
-    background: {
-      default: "#121212",
-    },
-    text: {
-      primary: "#FFFFFF",
-    },
-  },
-});
+import EditionLogo from "./common/EditionLogo";
 
 const Error404 = () => {
   const { t } = useTranslation();
+  const theme = useTheme();
 
   return (
-    <ThemeProvider theme={theme}>
+    <>
       <ThreeBackground variant="user" />
       <BackgroundToggle />
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh" bgcolor="background.default" sx={{ position: 'relative', zIndex: 1 }}>
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh" bgcolor={theme.palette.background.default} sx={{ position: 'relative', zIndex: 1 }}>
         <Paper
           elevation={3}
           sx={{
@@ -38,13 +25,7 @@ const Error404 = () => {
             margin: { xs: 2, sm: 3 },
           }}
         >
-          <Box display="flex" justifyContent="center" mb={2}>
-            <img
-              src={`${process.env.PUBLIC_URL}/assets/logo_pp_192.png`}
-              alt="Posadas Party Logo"
-              style={{ height: 192 }}
-            />
-          </Box>
+          <EditionLogo />
           <Typography variant="h5" align="center" gutterBottom>
             {t("404 - Page Not Found")}
           </Typography>
@@ -60,7 +41,7 @@ const Error404 = () => {
           </Button>
         </Paper>
       </Box>
-    </ThemeProvider>
+    </>
   );
 };
 

@@ -2,8 +2,9 @@ import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AuthContext } from "../../AuthContext";
 import { Box, Button, Typography, Paper } from "@mui/material";
-import { useTheme } from "@mui/material/styles"; // Importar useTheme
+import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
+import EditionLogo from "../common/EditionLogo";
 
 const VerifyAccount = () => {
   const { verifyAccount } = useContext(AuthContext);
@@ -52,13 +53,7 @@ const VerifyAccount = () => {
           color: theme.palette.text.primary, // Color del texto
         }}
       >
-        <Box display="flex" justifyContent="center" mb={2}>
-          <img
-            src={`${process.env.PUBLIC_URL}/assets/logo_pp_192.png`}
-            alt="Posadas Party Logo"
-            style={{ height: 192 }}
-          />
-        </Box>
+        <EditionLogo />
         <Typography variant="h5" align="center" gutterBottom>
           {t("Account Verification")}
         </Typography>
