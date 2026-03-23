@@ -42,9 +42,11 @@ def create_test_data():
         }
     )
     if created:
-        admin.set_password('REDACTED_PASSWORD')
+        from django.utils.crypto import get_random_string
+        temp_password = get_random_string(24)
+        admin.set_password(temp_password)
         admin.save()
-        print(f"   ✓ Created admin user: {admin.email} / REDACTED_PASSWORD")
+        print(f"   ✓ Created admin user: {admin.email} / {temp_password}")
     else:
         print(f"   ✓ Admin user exists: {admin.email}")
 
@@ -61,7 +63,6 @@ def create_test_data():
             'username': 'scener1',
             'first_name': 'Demo',
             'last_name': 'Coder',
-            'password': 'REDACTED_PASSWORD',
             'nickname': 'DemoCoder',
             'group_name': 'Digital Artists',
         },
@@ -70,7 +71,6 @@ def create_test_data():
             'username': 'scener2',
             'first_name': 'Pixel',
             'last_name': 'Master',
-            'password': 'REDACTED_PASSWORD',
             'nickname': 'PixelMaster',
             'group_name': 'Pixel Pushers',
         },
@@ -87,7 +87,8 @@ def create_test_data():
             }
         )
         if created:
-            user.set_password(user_data['password'])
+            user_password = get_random_string(16)
+            user.set_password(user_password)
             user.save()
             user.groups.add(user_group)
 
@@ -100,7 +101,7 @@ def create_test_data():
                     'group': user_data['group_name'],
                 }
             )
-            print(f"   ✓ Created user: {user.email} / {user_data['password']}")
+            print(f"   ✓ Created user: {user.email} / {user_password}")
         else:
             print(f"   ✓ User exists: {user.email}")
 
@@ -252,10 +253,7 @@ def create_test_data():
             print(f"   ✓ Production exists: {production.title}")
 
     print("\n✅ Test data creation complete!")
-    print("\n📝 Login credentials:")
-    print("   Admin: admin@freemem.space / REDACTED_PASSWORD")
-    print("   User 1: scener1@test.com / REDACTED_PASSWORD")
-    print("   User 2: scener2@test.com / REDACTED_PASSWORD")
+    print("\n📝 Login credentials were printed above during creation.")
     print("\n🌐 URLs:")
     print("   Landing: http://localhost:8000/")
     print("   App: http://localhost:3000/app/login")

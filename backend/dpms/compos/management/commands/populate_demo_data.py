@@ -6,6 +6,7 @@ import random
 from datetime import datetime, timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+from django.utils.crypto import get_random_string
 from django.contrib.auth import get_user_model
 
 from dpms.users.models import Profile
@@ -112,11 +113,14 @@ class Command(BaseCommand):
             return admin
 
         # Create new admin if none exists
+        from django.utils.crypto import get_random_string
+        temp_password = get_random_string(24)
         admin = User.objects.create_superuser(
             email="admin@posadasparty.com",
             username="admin",
-            password="REDACTED_PASSWORD",
+            password=temp_password,
         )
+        self.stdout.write(f"  Admin temp password: {temp_password}")
         admin.is_verified = True
         admin.save()
         Profile.objects.create(
@@ -176,7 +180,7 @@ class Command(BaseCommand):
                 },
             )
             if created:
-                user.set_password("REDACTED_PASSWORD")
+                user.set_password(get_random_string(16))
                 user.save()
                 Profile.objects.create(
                     user=user,

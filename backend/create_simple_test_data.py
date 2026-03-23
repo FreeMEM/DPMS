@@ -59,14 +59,16 @@ for email, username, first, last, nickname, group_name in test_users_data:
         }
     )
     if created:
-        user.set_password('REDACTED_PASSWORD')
+        from django.utils.crypto import get_random_string
+        user_password = get_random_string(16)
+        user.set_password(user_password)
         user.save()
         user.groups.add(user_group)
         Profile.objects.get_or_create(
             user=user,
             defaults={'nickname': nickname, 'group': group_name}
         )
-        print(f"   ✓ Created: {email} / REDACTED_PASSWORD")
+        print(f"   ✓ Created: {email} / {user_password}")
     else:
         print(f"   ✓ Exists: {email}")
     test_users.append(user)
@@ -147,10 +149,7 @@ for title, authors, desc, compo, user in productions_data:
     print(f"   {'✓ Created' if created else '✓ Exists'}: {title} by {authors}")
 
 print("\n✅ Test data creation complete!")
-print("\n📝 Login credentials:")
-print("   Admin: admin@freemem.space / REDACTED_PASSWORD")
-print("   User 1: scener1@test.com / REDACTED_PASSWORD")
-print("   User 2: scener2@test.com / REDACTED_PASSWORD")
+print("\n📝 Login credentials were printed above during creation.")
 print("\n🌐 URLs:")
 print("   App Login: http://localhost:3000/app/login")
 print("   Competitions: http://localhost:3000/app/compos")

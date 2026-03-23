@@ -305,12 +305,15 @@ class Command(BaseCommand):
             if self.dry_run:
                 self.stdout.write("  Would create admin user: admin@dpms.local")
                 return None
+            from django.utils.crypto import get_random_string
+            temp_password = get_random_string(24)
             admin = User.objects.create_superuser(
                 email='admin@dpms.local',
                 username='admin',
-                password='REDACTED_PASSWORD',
+                password=temp_password,
                 is_verified=True,
             )
+            self.stdout.write(self.style.WARNING(f"Admin temp password: {temp_password}"))
             self.stdout.write(self.style.WARNING("Created admin user: admin@dpms.local"))
         return admin
 
@@ -474,8 +477,9 @@ class Command(BaseCommand):
                     is_verified=False,  # Force password reset
                     is_active=True,
                 )
-                # Set temporary password
-                user.set_password('REDACTED_TEMP_PASSWORD')
+                # Set temporary password (user must reset via email)
+                from django.utils.crypto import get_random_string
+                user.set_password(get_random_string(24))
                 user.save()
 
                 # Update created timestamp
