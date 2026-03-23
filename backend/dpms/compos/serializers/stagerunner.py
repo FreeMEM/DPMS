@@ -435,7 +435,7 @@ class ProductionForStageSerializer(serializers.ModelSerializer):
         ]
 
     def get_authors(self, obj):
-        return obj.get_authors_display()
+        return obj.authors
 
     def get_video_url(self, obj):
         video_extensions = ['.mp4', '.webm', '.mov', '.avi', '.mkv']
