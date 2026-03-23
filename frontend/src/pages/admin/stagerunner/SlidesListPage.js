@@ -66,26 +66,26 @@ const SlidesListPage = () => {
   const [selectedSlide, setSelectedSlide] = useState(null);
 
   useEffect(() => {
+    const fetchSlides = async () => {
+      if (!configId || configId === 'null' || configId === 'undefined') {
+        navigate('/admin/stagerunner');
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const client = axiosWrapper();
+        const response = await client.get(`/api/stage-slides/?config=${configId}`);
+        setSlides(response.data.results || response.data);
+        setLoading(false);
+      } catch (err) {
+        setError(t('Error loading slides'));
+        setLoading(false);
+      }
+    };
+
     fetchSlides();
-  }, [configId]);
-
-  const fetchSlides = async () => {
-    if (!configId || configId === 'null' || configId === 'undefined') {
-      navigate('/admin/stagerunner');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const client = axiosWrapper();
-      const response = await client.get(`/api/stage-slides/?config=${configId}`);
-      setSlides(response.data.results || response.data);
-      setLoading(false);
-    } catch (err) {
-      setError(t('Error loading slides'));
-      setLoading(false);
-    }
-  };
+  }, [configId, navigate, t]);
 
   const handleDelete = async () => {
     if (!deleteDialog.slide) return;

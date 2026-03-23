@@ -153,10 +153,10 @@ const LiveControlPage = () => {
     }, autoAdvanceInterval * 1000);
 
     return () => clearInterval(timer);
-  }, [isPlaying, autoAdvanceInterval, control?.id, slides.length]);
+  }, [isPlaying, autoAdvanceInterval, control?.id, slides.length, sendCommand]);
 
   // Send command to API
-  const sendCommand = async (action, data = {}) => {
+  const sendCommand = useCallback(async (action, data = {}) => {
     if (!control?.id) return;
 
     setSyncing(true);
@@ -169,7 +169,7 @@ const LiveControlPage = () => {
     } finally {
       setSyncing(false);
     }
-  };
+  }, [control?.id]);
 
   // Update auto-advance interval on the server
   const updateAutoAdvanceInterval = async (seconds) => {
@@ -293,7 +293,6 @@ const LiveControlPage = () => {
   }
 
   const productions = compoData?.productions || [];
-  const currentProduction = productions[currentProductionIndex];
   const isResultsSlide = ['results_live', 'results_final', 'podium'].includes(currentSlide?.slide_type);
   const isProductionSlide = currentSlide?.slide_type === 'production_show' || currentSlide?.slide_type === 'production_list';
 

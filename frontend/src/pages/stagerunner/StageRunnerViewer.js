@@ -221,7 +221,7 @@ const StageRunnerViewer = () => {
     client.get(`/api/productions/?edition=${editionId}&compo=${compoId}`).then(res => {
       setCompoProductions(res.data.results || res.data || []);
     }).catch(() => {});
-  }, [activeProduction?.id, activeProduction?.compo, config?.edition, productionCount]);
+  }, [activeProduction, activeProduction?.id, activeProduction?.compo, config?.edition, productionCount]);
 
   useProductionAutoAdvance(
     productions,
@@ -631,7 +631,6 @@ const StageRunnerViewer = () => {
     }
   }, [
     compoData,
-    currentProduction,
     activeProduction,
     compoProductions,
     productionIndex,

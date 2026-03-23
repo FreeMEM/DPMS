@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Button,
@@ -26,7 +26,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
-import { ConfirmDialog, LoadingSpinner, StatusChip, InfoField, EmptyState } from '../../components/admin/common';
+import { ConfirmDialog, LoadingSpinner, StatusChip, EmptyState } from '../../components/admin/common';
 import { formatDateTime } from '../../utils/dateFormatting';
 import axiosWrapper from '../../utils/AxiosWrapper';
 
@@ -40,11 +40,7 @@ const ProductionDetailPage = () => {
   const [statusDialog, setStatusDialog] = useState({ open: false, status: null });
   const [updating, setUpdating] = useState(false);
 
-  useEffect(() => {
-    fetchProduction();
-  }, [id]);
-
-  const fetchProduction = async () => {
+  const fetchProduction = useCallback(async () => {
     try {
       setLoading(true);
       const client = axiosWrapper();
@@ -57,7 +53,11 @@ const ProductionDetailPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchProduction();
+  }, [fetchProduction]);
 
   const handleStatusChange = async () => {
     try {

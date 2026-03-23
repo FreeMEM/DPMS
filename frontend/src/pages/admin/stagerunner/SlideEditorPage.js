@@ -20,7 +20,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  ListItemSecondaryAction,
   Slider,
   LinearProgress,
 } from '@mui/material';
@@ -181,37 +180,37 @@ const SlideEditorPage = () => {
 
   // Load slide data
   useEffect(() => {
+    const fetchSlide = async () => {
+      try {
+        const client = axiosWrapper();
+        const response = await client.get(`/api/stage-slides/${id}/`);
+        setSlide(response.data);
+        setElements(response.data.elements || []);
+        setLoading(false);
+        // Load productions and sponsors for the edition
+        if (response.data.config_edition) {
+          fetchProductions(response.data.config_edition);
+          fetchSponsors(response.data.config_edition);
+        }
+        // Load selected production data
+        if (response.data.production) {
+          try {
+            const prodRes = await client.get(`/api/productions/${response.data.production}/`);
+            setSelectedProduction(prodRes.data);
+            const compoId = prodRes.data.compo?.id || prodRes.data.compo;
+            if (compoId) setSelectedCompoId(compoId);
+          } catch {}
+        }
+      } catch (err) {
+        setError('Error loading slide');
+        setLoading(false);
+      }
+    };
+
     if (!isNew && id) {
       fetchSlide();
     }
   }, [id, isNew]);
-
-  const fetchSlide = async () => {
-    try {
-      const client = axiosWrapper();
-      const response = await client.get(`/api/stage-slides/${id}/`);
-      setSlide(response.data);
-      setElements(response.data.elements || []);
-      setLoading(false);
-      // Load productions and sponsors for the edition
-      if (response.data.config_edition) {
-        fetchProductions(response.data.config_edition);
-        fetchSponsors(response.data.config_edition);
-      }
-      // Load selected production data
-      if (response.data.production) {
-        try {
-          const prodRes = await client.get(`/api/productions/${response.data.production}/`);
-          setSelectedProduction(prodRes.data);
-          const compoId = prodRes.data.compo?.id || prodRes.data.compo;
-          if (compoId) setSelectedCompoId(compoId);
-        } catch {}
-      }
-    } catch (err) {
-      setError('Error loading slide');
-      setLoading(false);
-    }
-  };
 
   const fetchSponsors = async (editionId) => {
     try {
@@ -616,7 +615,6 @@ const SlideEditorPage = () => {
               const baseStyle = { width: '100%', height: '100%', background: bg, border, boxSizing: 'border-box' };
               if (shapeType === 'circle') return <div style={{ ...baseStyle, borderRadius: '50%' }} />;
               if (shapeType === 'triangle') {
-                const size = Math.min(100, 100);
                 return (
                   <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%' }}>
                     <polygon points="50,5 95,95 5,95"
