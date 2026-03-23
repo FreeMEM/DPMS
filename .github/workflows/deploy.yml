@@ -15,14 +15,16 @@ jobs:
     runs-on: self-hosted
     timeout-minutes: 15
 
+    env:
+      HOME: /root
+
     steps:
       - name: Pull latest code
         env:
           GIT_SSH_COMMAND: "ssh -i /root/.ssh/id_rsa -o StrictHostKeyChecking=no"
         run: |
-          git config --global --add safe.directory /var/www/DPMS
-          git fetch origin main
-          git reset --hard origin/main
+          git -c safe.directory=/var/www/DPMS fetch origin main
+          git -c safe.directory=/var/www/DPMS reset --hard origin/main
 
       - name: Rebuild and restart services
         run: |
