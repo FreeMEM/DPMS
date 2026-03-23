@@ -39,8 +39,6 @@ Apasionado de la informatica desde 1984. Organice la [RadyKal Party](https://www
 ## Requisitos Previos
 
 - Docker y Docker Compose
-- Node.js 18+ y Yarn (para desarrollo frontend)
-- Python 3.9+ (para desarrollo backend sin Docker)
 
 ## Inicio Rapido
 
@@ -74,12 +72,7 @@ POSTGRES_USER=dpms_user
 POSTGRES_PASSWORD=dpms_password
 ```
 
-**frontend/.env** (opcional, para desarrollo)
-```env
-REACT_APP_BACKEND_ADDRESS=http://localhost:8000
-```
-
-### 3. Iniciar el backend con Docker Compose
+### 3. Iniciar todos los servicios con Docker Compose
 
 ```bash
 docker compose -f local.yml up -d
@@ -88,18 +81,9 @@ docker compose -f local.yml up -d
 Esto iniciara:
 - Base de datos PostgreSQL
 - API backend Django en http://localhost:8000
+- Frontend React en http://localhost:3000
 
-### 4. Instalar dependencias del frontend e iniciar servidor de desarrollo
-
-```bash
-cd frontend
-yarn install
-yarn start
-```
-
-El frontend estara disponible en http://localhost:3000
-
-### 5. Crear un superusuario (opcional)
+### 4. Crear un superusuario (opcional)
 
 ```bash
 docker compose -f local.yml exec backend_party python manage.py createsuperuser
@@ -141,23 +125,21 @@ docker compose -f local.yml exec backend_party python manage.py shell
 
 ### Desarrollo Frontend
 
+El frontend se ejecuta dentro de Docker. Los archivos fuente en `frontend/src/` y `frontend/public/` estan montados como volumenes, por lo que los cambios se reflejan inmediatamente via hot reload.
+
 **Ejecutar tests:**
 ```bash
-cd frontend
-yarn test
+docker compose -f local.yml exec frontend yarn test
 ```
 
 **Compilar para produccion:**
 ```bash
-cd frontend
-yarn build
+docker compose -f local.yml exec frontend yarn build
 ```
 
-**Configurar URL del backend:**
-
-Crear un archivo `.env` en el directorio `frontend/`:
-```env
-REACT_APP_BACKEND_ADDRESS=http://localhost:8000
+**Ver logs del frontend:**
+```bash
+docker compose -f local.yml logs -f frontend
 ```
 
 ### Detener la aplicacion
@@ -166,9 +148,6 @@ REACT_APP_BACKEND_ADDRESS=http://localhost:8000
 ```bash
 docker compose -f local.yml down
 ```
-
-**Detener el frontend:**
-Pulsar `Ctrl+C` en el terminal donde se ejecuta `yarn start`
 
 ## Despliegue en Produccion
 

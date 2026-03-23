@@ -190,7 +190,7 @@ docker compose -f local.yml exec backend_party ls -la /app/backend/staticfiles/m
 
 ## Verificación en Frontend
 
-1. Iniciar frontend: `cd frontend && yarn start`
+1. Iniciar todos los servicios: `docker compose -f local.yml up -d`
 2. Navegar a la lista de ediciones
 3. Verificar "Posadas Party 2025" aparece
 4. Verificar compos y producciones listadas

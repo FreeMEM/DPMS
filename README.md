@@ -39,8 +39,6 @@ I'm computing passionated since 1984. I organized [RadyKal Party](https://www.yo
 ## Prerequisites
 
 - Docker and Docker Compose
-- Node.js 18+ and Yarn (for frontend development)
-- Python 3.9+ (for backend development without Docker)
 
 ## Quick Start
 
@@ -74,12 +72,7 @@ POSTGRES_USER=dpms_user
 POSTGRES_PASSWORD=dpms_password
 ```
 
-**frontend/.env** (optional, for development)
-```env
-REACT_APP_BACKEND_ADDRESS=http://localhost:8000
-```
-
-### 3. Start the backend with Docker Compose
+### 3. Start all services with Docker Compose
 
 ```bash
 docker compose -f local.yml up -d
@@ -88,18 +81,9 @@ docker compose -f local.yml up -d
 This will start:
 - PostgreSQL database
 - Django backend API on http://localhost:8000
+- React frontend on http://localhost:3000
 
-### 4. Install frontend dependencies and start development server
-
-```bash
-cd frontend
-yarn install
-yarn start
-```
-
-Frontend will be available at http://localhost:3000
-
-### 5. Create a superuser (optional)
+### 4. Create a superuser (optional)
 
 ```bash
 docker compose -f local.yml exec backend_party python manage.py createsuperuser
@@ -141,23 +125,21 @@ docker compose -f local.yml exec backend_party python manage.py shell
 
 ### Frontend Development
 
+The frontend runs inside Docker. Source files in `frontend/src/` and `frontend/public/` are mounted as volumes, so changes are reflected immediately via hot reload.
+
 **Run tests:**
 ```bash
-cd frontend
-yarn test
+docker compose -f local.yml exec frontend yarn test
 ```
 
 **Build for production:**
 ```bash
-cd frontend
-yarn build
+docker compose -f local.yml exec frontend yarn build
 ```
 
-**Configure backend URL:**
-
-Create a `.env` file in the `frontend/` directory:
-```env
-REACT_APP_BACKEND_ADDRESS=http://localhost:8000
+**View frontend logs:**
+```bash
+docker compose -f local.yml logs -f frontend
 ```
 
 ### Stopping the application
@@ -166,9 +148,6 @@ REACT_APP_BACKEND_ADDRESS=http://localhost:8000
 ```bash
 docker compose -f local.yml down
 ```
-
-**Stop frontend:**
-Press `Ctrl+C` in the terminal running `yarn start`
 
 ## Production Deployment
 

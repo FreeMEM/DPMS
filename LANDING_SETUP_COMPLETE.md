@@ -76,27 +76,21 @@ Todos los enlaces en los templates usan la variable `{{ FRONTEND_URL }}`:
 
 ## Probar en Desarrollo
 
-### 1. Iniciar Backend (Django)
+### 1. Iniciar todos los servicios
 
 ```bash
-docker compose -f local.yml up -d backend_party
+docker compose -f local.yml up -d
 ```
+
+Esto inicia PostgreSQL, Django (backend) y React (frontend).
 
 Verifica que está corriendo:
 ```bash
 curl http://localhost:8000/
+curl http://localhost:3000/
 ```
 
-### 2. Iniciar Frontend (React)
-
-```bash
-cd frontend
-yarn start
-```
-
-Se abrirá automáticamente en `http://localhost:3000`
-
-### 3. Flujo Completo
+### 2. Flujo Completo
 
 1. **Abre** `http://localhost:8000/` (landing Django)
 2. **Click** en "Acceder" o "Registrarse"
@@ -155,11 +149,7 @@ server {
 
 ### Build del Frontend
 
-```bash
-cd /path/to/dpms/frontend
-yarn build
-# El directorio build/ queda listo para ser servido por nginx
-```
+El build de producción se genera dentro del contenedor Docker (ver `docker/frontend/production.Dockerfile`).
 
 ### Flujo en Producción
 
@@ -229,14 +219,12 @@ Sin cambios adicionales. Ya estaba configurado en el paso anterior con:
 
 ### React no carga en localhost:3000
 
-**Problema**: `yarn start` falla o la página no carga.
+**Problema**: El frontend no carga.
 
 **Solución**:
 ```bash
-cd frontend
-rm -rf node_modules yarn.lock
-yarn install
-yarn start
+docker compose -f local.yml logs -f frontend
+docker compose -f local.yml restart frontend
 ```
 
 ### CORS errors al hacer login

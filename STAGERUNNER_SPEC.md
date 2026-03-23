@@ -622,8 +622,7 @@ No new dependencies required (uses existing Django/DRF)
 ### Frontend
 
 ```bash
-cd frontend
-yarn add react-rnd framer-motion react-colorful
+docker compose -f local.yml exec frontend yarn add react-rnd framer-motion react-colorful
 ```
 
 | Package | Purpose |

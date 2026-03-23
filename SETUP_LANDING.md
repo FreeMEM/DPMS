@@ -182,19 +182,13 @@ await client.get(`/api/users/verify?token=${token}`);
 
 ### Frontend
 
-1. **Instalar dependencias** (si no lo has hecho):
-   ```bash
-   cd frontend
-   yarn install
-   ```
+El frontend se ejecuta dentro de Docker junto con el backend:
 
-2. **Iniciar dev server**:
-   ```bash
-   yarn start
-   ```
-   Se abrirá en `http://localhost:3000`
+```bash
+docker compose -f local.yml up -d
+```
 
-3. **Verificar rutas**:
+1. **Verificar rutas**:
    - `http://localhost:3000/` → Debería redirigir a `/app/dashboard`
    - `http://localhost:3000/app/login` → Formulario de login
    - `http://localhost:3000/app/signup` → Formulario de registro
@@ -259,45 +253,15 @@ server {
 }
 ```
 
-### 2. Build del Frontend
+### 2. Deploy con Docker Compose
+
+Todo el despliegue se gestiona mediante Docker Compose:
 
 ```bash
-cd /path/to/dpms/frontend
-yarn install
-yarn build
-
-# El build se genera en frontend/build/
-# nginx lo sirve directamente desde ahí
+docker compose -f production.yml up -d --build
 ```
 
-### 3. Script de Deploy Automático
-
-```bash
-#!/bin/bash
-# deploy.sh
-
-cd /path/to/dpms
-
-# Backend
-echo "Deploying backend..."
-cd backend
-source venv/bin/activate
-pip install -r requirements/production.txt
-python manage.py migrate
-python manage.py collectstatic --noinput
-systemctl restart uwsgi
-
-# Frontend
-echo "Building frontend..."
-cd ../frontend
-yarn install
-yarn build
-
-echo "Reloading nginx..."
-systemctl reload nginx
-
-echo "Deploy complete!"
-```
+Esto construye y despliega backend, frontend y nginx con ModSecurity automáticamente.
 
 ---
 
