@@ -6,11 +6,11 @@ Una aplicacion web moderna y segura para gestionar fiestas de la demoscene, comp
 
 ## Acerca de
 
-DPMS esta diseñado como una alternativa mas segura y preparada para internet a los sistemas de gestion de partys existentes como wuhu. Mientras que las soluciones PMS tradicionales funcionan bien como aplicaciones de intranet durante los eventos, DPMS se centra en la seguridad, la gestion de usuarios y la capacidad de funcionar online antes, durante y despues de la party.
+DPMS es un sistema de gestion de partys diseñado con un enfoque en la seguridad, la gestion de usuarios y la capacidad de funcionar online antes, durante y despues de la party.
 
 ### Historia
 
-Apasionado de la informatica desde 1984. Organice la [RadyKal Party](https://www.youtube.com/watch?v=p66lT8mlqkk) en [Granada, España en 1998](https://www.youtube.com/watch?v=A3jAjhgOorI) ([mas videos](https://www.youtube.com/watch?v=4ILiIh-O4Vk)) y visito cada año otras Amiga Parties por España. Los ultimos años he colaborado con Posadas Party y Capacitor Party. Comence a desarrollar una aplicacion web para gestionar la siguiente Capacitor Amiga Party pero la pandemia cancelo el proyecto. El verano pasado (2022), Posadas Party celebro una nueva edicion y necesitabamos una herramienta para que la gente votara las competiciones. Usamos wuhu, un conocido Party Management System (PMS) escrito en PHP. Me gustaron sus funciones y como gestiona los datos de las competiciones y su sistema de "beamer". Pero su sistema de registro es demasiado simple e inseguro. Wuhu esta pensado mas como una aplicacion de intranet usada solo el dia del evento. Pero yo queria algo mas seguro para mantener online en internet.
+Apasionado de la informatica desde 1984. Organice la [RadyKal Party](https://www.youtube.com/watch?v=p66lT8mlqkk) en [Granada, España en 1998](https://www.youtube.com/watch?v=A3jAjhgOorI) ([mas videos](https://www.youtube.com/watch?v=4ILiIh-O4Vk)) y visito cada año otras Amiga Parties por España. Los ultimos años he colaborado con Posadas Party y Capacitor Party. Comence a desarrollar una aplicacion web para gestionar la siguiente Capacitor Amiga Party pero la pandemia cancelo el proyecto. El verano pasado (2022), Posadas Party celebro una nueva edicion y necesitabamos una herramienta para que la gente votara las competiciones. Usamos wuhu, un conocido Party Management System (PMS) escrito en PHP. Me gustaron sus funciones, como gestiona los datos de las competiciones y su sistema de "beamer". Inspirado por wuhu, decidi construir DPMS usando tecnologias web modernas con un enfoque en la seguridad y la capacidad de mantenerse online en internet.
 
 ## Caracteristicas
 

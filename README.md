@@ -6,11 +6,11 @@ A modern, secure web application for managing demoscene parties, competitions, p
 
 ## About
 
-DPMS is designed as a more secure and internet-ready alternative to existing party management systems like wuhu. While traditional PMS solutions work well as intranet applications during events, DPMS focuses on security, user management, and the ability to run online before, during, and after the party.
+DPMS is a party management system designed with a focus on security, user management, and the ability to run online before, during, and after the party.
 
 ### Background
 
-I'm computing passionated since 1984. I organized [RadyKal Party](https://www.youtube.com/watch?v=p66lT8mlqkk) at [Granada, Spain in 1998](https://www.youtube.com/watch?v=A3jAjhgOorI) ([more videos](https://www.youtube.com/watch?v=4ILiIh-O4Vk)) and I visit every years another Amiga Parties around Spain. The last years I've collaborated with Posadas Party and Capacitor Party. I began to develop a web application to manage the next Capacitor Amiga Party but the pandemic cancelled the project. Last summer (2022), Posadas Party celebrated a new edition and we needed a tool for the people to vote the competitions. We used wuhu, a well known Party Management System (PMS) written in PHP programing language. I liked its functions and how manages the data to the competitions and its "beamer" system. But its register system it's too simple and insecure. Wuhu it's though more like a intranet application used only for the event day. But I would want something more secure to keep online on internet.
+I'm computing passionated since 1984. I organized [RadyKal Party](https://www.youtube.com/watch?v=p66lT8mlqkk) at [Granada, Spain in 1998](https://www.youtube.com/watch?v=A3jAjhgOorI) ([more videos](https://www.youtube.com/watch?v=4ILiIh-O4Vk)) and I visit every years another Amiga Parties around Spain. The last years I've collaborated with Posadas Party and Capacitor Party. I began to develop a web application to manage the next Capacitor Amiga Party but the pandemic cancelled the project. Last summer (2022), Posadas Party celebrated a new edition and we needed a tool for the people to vote the competitions. We used wuhu, a well known Party Management System (PMS) written in PHP. I liked its functions, how it manages competition data and its "beamer" system. Inspired by wuhu, I decided to build DPMS using modern web technologies with a focus on security and the ability to stay online on the internet.
 
 ## Features
 
