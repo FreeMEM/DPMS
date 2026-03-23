@@ -279,6 +279,6 @@ FreeMem - Demoscene enthusiast and party organizer since 1984
 
 ## Acknowledgments
 
-- **Wuhu Team**: Special thanks to the wuhu Party Management System development team for their excellent work. Wuhu has been an inspiration and a reference for this project, showing me what a party management system should be. I hope to contribute to the demoscene with new technologies while building upon the solid foundation they established.
+- **[Wuhu](https://github.com/Gargaj/wuhu) Team**: Special thanks to the wuhu Party Management System development team for their excellent work. Wuhu has been an inspiration and a reference for this project, showing me what a party management system should be. I hope to contribute to the demoscene with new technologies while building upon the solid foundation they established.
 - Built with love for the demoscene community
 - Special thanks to Posadas Party and Capacitor Party organizers for their support and feedback
