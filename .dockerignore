@@ -1,0 +1,27 @@
+# Frontend
+frontend/node_modules
+frontend/.pnp
+frontend/.pnp.js
+
+# Backend
+backend/__pycache__
+backend/.venv
+backend/*.pyc
+
+# Git
+.git
+.gitignore
+
+# CI/CD
+.github
+
+# SQL dumps
+*.sql
+*.sql.gz
+
+# IDE
+.vscode
+.idea
+
+# Misc
+*.md
