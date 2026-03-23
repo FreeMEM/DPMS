@@ -66,6 +66,18 @@ class Edition(BaseModel):
         default=0,
         help_text="Border width in pixels (0 = no border)"
     )
+    start_date = models.DateTimeField(
+        "Start Date",
+        blank=True,
+        null=True,
+        help_text="Date and time when the edition starts"
+    )
+    end_date = models.DateTimeField(
+        "End Date",
+        blank=True,
+        null=True,
+        help_text="Date and time when the edition ends"
+    )
     public = models.BooleanField(default=False)
     open_to_upload = models.BooleanField(default=False)
     open_to_update = models.BooleanField(default=False)

@@ -35,6 +35,8 @@ const EditionFormPage = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    start_date: '',
+    end_date: '',
     logo_border_color: '#FFA500',
     logo_border_width: 0,
     public: false,
@@ -70,6 +72,8 @@ const EditionFormPage = () => {
       setFormData({
         title: response.data.title || '',
         description: response.data.description || '',
+        start_date: response.data.start_date ? response.data.start_date.slice(0, 16) : '',
+        end_date: response.data.end_date ? response.data.end_date.slice(0, 16) : '',
         logo_border_color: response.data.logo_border_color || '#FFA500',
         logo_border_width: response.data.logo_border_width || 0,
         public: response.data.public || false,
@@ -166,6 +170,8 @@ const EditionFormPage = () => {
       const submitData = new FormData();
       submitData.append('title', formData.title);
       submitData.append('description', formData.description);
+      if (formData.start_date) submitData.append('start_date', new Date(formData.start_date).toISOString());
+      if (formData.end_date) submitData.append('end_date', new Date(formData.end_date).toISOString());
       submitData.append('logo_border_color', formData.logo_border_color);
       submitData.append('logo_border_width', formData.logo_border_width);
       submitData.append('public', formData.public);
@@ -265,6 +271,30 @@ const EditionFormPage = () => {
               fullWidth
               helperText="Descripción detallada de la edición"
             />
+
+            {/* Dates */}
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <TextField
+                label="Fecha y hora de inicio"
+                name="start_date"
+                type="datetime-local"
+                value={formData.start_date}
+                onChange={handleChange}
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                helperText="Fecha y hora en que comienza la edición"
+              />
+              <TextField
+                label="Fecha y hora de fin"
+                name="end_date"
+                type="datetime-local"
+                value={formData.end_date}
+                onChange={handleChange}
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                helperText="Fecha y hora en que termina la edición"
+              />
+            </Box>
 
             {/* Images Section */}
             <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>

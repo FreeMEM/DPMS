@@ -72,6 +72,7 @@ class EditionAdmin(admin.ModelAdmin):
         "productions_public_badge",
         "compos_count",
         "productions_count",
+        "start_date",
         "created_display",
         "modified_display",
     )
@@ -96,7 +97,7 @@ class EditionAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ("Basic Information", {
-            "fields": ("title", "description", "uploaded_by")
+            "fields": ("title", "description", "uploaded_by", "start_date", "end_date")
         }),
         ("Images", {
             "fields": ("logo", "logo_preview", "logo_border_color", "logo_border_width", "poster", "poster_preview"),
