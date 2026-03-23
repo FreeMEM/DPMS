@@ -17,7 +17,10 @@ jobs:
 
     steps:
       - name: Pull latest code
+        env:
+          GIT_SSH_COMMAND: "ssh -i /root/.ssh/id_rsa -o StrictHostKeyChecking=no"
         run: |
+          git config --global --add safe.directory /var/www/DPMS
           git fetch origin main
           git reset --hard origin/main
 
