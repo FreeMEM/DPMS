@@ -11,8 +11,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 ADD ./backend/requirements /app/backend/requirements
-RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r backend/requirements/production.txt
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --upgrade pip \
+    && pip install -r backend/requirements/production.txt
 
 ADD ./backend /app/backend
 ADD ./docker /app/docker

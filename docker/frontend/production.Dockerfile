@@ -9,7 +9,7 @@ RUN corepack enable
 COPY frontend/package.json frontend/yarn.lock frontend/.yarnrc.yml ./
 COPY frontend/.yarn ./.yarn
 
-RUN yarn install
+RUN --mount=type=cache,target=/app/.yarn/cache yarn install
 
 COPY frontend/ ./
 
