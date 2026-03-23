@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+defaults:
+  run:
+    working-directory: /var/www/DPMS
+
 jobs:
   deploy:
     name: Deploy DPMS
@@ -13,19 +17,16 @@ jobs:
 
     steps:
       - name: Pull latest code
-        working-directory: /var/www/DPMS
         run: |
           git fetch origin main
           git reset --hard origin/main
 
       - name: Rebuild and restart services
-        working-directory: /var/www/DPMS
         run: |
           docker compose -f production.yml build --parallel
           docker compose -f production.yml up -d
 
       - name: Wait for services to be healthy
-        working-directory: /var/www/DPMS
         run: |
           echo "Waiting for services to start..."
           sleep 10
