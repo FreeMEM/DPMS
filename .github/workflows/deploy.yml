@@ -1,0 +1,58 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy DPMS
+    runs-on: self-hosted
+    timeout-minutes: 15
+
+    steps:
+      - name: Pull latest code
+        working-directory: /var/www/DPMS
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Rebuild and restart services
+        working-directory: /var/www/DPMS
+        run: |
+          docker compose -f production.yml build --parallel
+          docker compose -f production.yml up -d
+
+      - name: Wait for services to be healthy
+        working-directory: /var/www/DPMS
+        run: |
+          echo "Waiting for services to start..."
+          sleep 10
+
+          # Check that all services are running
+          RUNNING=$(docker compose -f production.yml ps --status running --format json | wc -l)
+          TOTAL=$(docker compose -f production.yml ps --format json | wc -l)
+
+          echo "Running: $RUNNING / Total: $TOTAL"
+
+          if [ "$RUNNING" -lt "$TOTAL" ]; then
+            echo "Some services failed to start:"
+            docker compose -f production.yml ps
+            exit 1
+          fi
+
+          # Quick health check on nginx (HTTP -> HTTPS redirect = 301)
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ || true)
+          echo "HTTP response code: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" = "000" ]; then
+            echo "Nginx is not responding"
+            docker compose -f production.yml logs nginx --tail 20
+            exit 1
+          fi
+
+          echo "Deploy successful!"
+
+      - name: Cleanup old Docker images
+        run: docker image prune -f
