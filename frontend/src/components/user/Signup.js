@@ -212,7 +212,12 @@ const Signup = () => {
               type="password"
               name="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (!passwordConfirmation) {
+                  setPasswordConfirmation(e.target.value);
+                }
+              }}
               placeholder={t("Enter your password")}
               autoComplete="new-password"
               required

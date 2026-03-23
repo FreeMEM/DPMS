@@ -6,6 +6,7 @@ import Signup from "./components/user/Signup";
 import ConfirmationSent from "./components/user/ConfirmationSent";
 import VerifyAccount from "./components/user/VerifyAccount";
 import ForgotPassword from "./components/user/ForgotPassword";
+import ResetPassword from "./components/user/ResetPassword";
 import DemoPartyDashboard from "./components/DemoPartyDashboard";
 import Error404 from "./components/Error404";
 import ComposList from "./components/productions/ComposList";
@@ -274,6 +275,7 @@ const AppRoutes = () => {
         <Route path="/productions/:id" element={<ProductionDetail />} />
         <Route path="/" element={<Navigate to="/demo-party/dashboard" />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
         <Route path="/verify-account/:token" element={<VerifyAccount />} />
         <Route path="/confirmation-sent" element={<ConfirmationSent />} />
         <Route path="*" element={<Error404 />} />

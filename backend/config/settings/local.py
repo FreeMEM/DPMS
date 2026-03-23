@@ -34,6 +34,7 @@ EMAIL_BACKEND = env(
 )
 EMAIL_HOST = "localhost"
 EMAIL_PORT = 1025
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@localhost")
 
 # django-extensions
 INSTALLED_APPS += ["django_extensions"]  # noqa F405

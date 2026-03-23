@@ -13,6 +13,8 @@ from dpms.users.serializers import (
     UserSignUpSerializer,
     AccountVerificationSerializer,
     ProfileModelSerializer,
+    PasswordResetRequestSerializer,
+    PasswordResetConfirmSerializer,
 )
 
 # Models
@@ -51,7 +53,7 @@ class UserViewSet(
 
     def get_permissions(self):
         """Assign permissions based on action"""
-        if self.action in ["signup", "login", "verify"]:
+        if self.action in ["signup", "login", "verify", "password_reset_request", "password_reset_confirm"]:
             permissions = [AllowAny]
         elif self.action in [
             "retrieve",
@@ -166,3 +168,25 @@ class UserViewSet(
         response.data = data
 
         return response
+
+    @action(detail=False, methods=["post"], url_path="password-reset")
+    def password_reset_request(self, request):
+        """Request a password reset email."""
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            {"message": "If an account with that email exists, a reset link has been sent."},
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=False, methods=["post"], url_path="password-reset-confirm")
+    def password_reset_confirm(self, request):
+        """Confirm password reset with token and new password."""
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            {"message": "Password has been reset successfully."},
+            status=status.HTTP_200_OK,
+        )
