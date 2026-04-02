@@ -188,7 +188,7 @@ const MainBar = () => {
           left: isDesktop ? '64px' : 0,
           right: 0,
           zIndex: theme.zIndex.drawer - 1,
-          paddingLeft: isDesktop ? '0px' : '8px',
+          paddingLeft: isDesktop ? '0px' : '12px',
           paddingRight: '16px',
           transition: theme.transitions.create('left', {
             easing: theme.transitions.easing.sharp,
@@ -299,6 +299,8 @@ const MainBar = () => {
             }),
             overflowX: 'hidden',
             zIndex: theme.zIndex.drawer,
+            bgcolor: '#121212',
+            backgroundImage: 'none',
           },
         }}
       >

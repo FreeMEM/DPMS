@@ -250,6 +250,7 @@ const DemoPartyDashboard = () => {
                         <Button
                           variant="contained"
                           size="large"
+                          fullWidth
                           endIcon={<ArrowForwardIcon />}
                           onClick={() => navigate('/compos')}
                           sx={{ mt: 2 }}
