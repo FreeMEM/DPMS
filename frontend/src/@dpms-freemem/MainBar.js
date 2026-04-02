@@ -185,7 +185,7 @@ const MainBar = () => {
         sx={{
           position: 'fixed',
           top: 0,
-          left: isDesktop ? (open ? '240px' : '64px') : 0,
+          left: isDesktop ? '64px' : 0,
           right: 0,
           zIndex: theme.zIndex.drawer - 1,
           paddingLeft: isDesktop ? '0px' : '8px',
@@ -266,13 +266,28 @@ const MainBar = () => {
           </MenuItem>
         </Menu>
       </Box>
+      {/* Backdrop overlay when drawer is open on desktop */}
+      {isDesktop && open && (
+        <Box
+          onClick={toggleDrawer}
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            bgcolor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: theme.zIndex.drawer - 1,
+          }}
+        />
+      )}
       <Drawer
         variant={isMobile ? "temporary" : "permanent"}
-        open={open}
-        onClose={isMobile ? toggleDrawer : null}
+        open={isMobile ? open : true}
+        onClose={isMobile ? toggleDrawer : undefined}
         ModalProps={{ keepMounted: true }}
         sx={{
-          width: open ? 240 : 64,
+          width: isMobile ? 0 : 64,
           flexShrink: 0,
           whiteSpace: 'nowrap',
           boxSizing: 'border-box',
