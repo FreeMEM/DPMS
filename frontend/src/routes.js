@@ -1,47 +1,57 @@
-import { useContext } from "react";
+import { useContext, lazy, Suspense } from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
+import CircularProgress from "@mui/material/CircularProgress";
+import Box from "@mui/material/Box";
+
+// Eager imports for auth pages (most common entry points)
 import Login from "./components/user/Login";
 import Signup from "./components/user/Signup";
-import ConfirmationSent from "./components/user/ConfirmationSent";
-import VerifyAccount from "./components/user/VerifyAccount";
-import ForgotPassword from "./components/user/ForgotPassword";
-import ResetPassword from "./components/user/ResetPassword";
-import DemoPartyDashboard from "./components/DemoPartyDashboard";
-import Error404 from "./components/Error404";
-import ComposList from "./components/productions/ComposList";
-import ProductionForm from "./components/productions/ProductionForm";
-import MyProductions from "./components/productions/MyProductions";
-import ProductionDetail from "./components/productions/ProductionDetail";
-import AdminRoute from "./components/common/AdminRoute";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import EditionsPage from "./pages/admin/EditionsPage";
-import EditionFormPage from "./pages/admin/EditionFormPage";
-import EditionDetailPage from "./pages/admin/EditionDetailPage";
-import ComposPage from "./pages/admin/ComposPage";
-import CompoFormPage from "./pages/admin/CompoFormPage";
-import CompoDetailPage from "./pages/admin/CompoDetailPage";
-import ProductionsPage from "./pages/admin/ProductionsPage";
-import ProductionDetailPage from "./pages/admin/ProductionDetailPage";
-import VotingConfigPage from "./pages/admin/VotingConfigPage";
-import AttendanceCodesPage from "./pages/admin/AttendanceCodesPage";
-import JuryManagementPage from "./pages/admin/JuryManagementPage";
-import SponsorsPage from "./pages/admin/SponsorsPage";
-import SponsorFormPage from "./pages/admin/SponsorFormPage";
-import {
-  StageRunnerPage,
-  SlidesListPage,
-  SlideEditorPage,
-  LiveControlPage,
-} from "./pages/admin/stagerunner";
-import StageRunnerViewer from "./pages/stagerunner/StageRunnerViewer";
-import Gallery from "./components/gallery/Gallery";
+
+// Lazy imports for everything else
+const ConfirmationSent = lazy(() => import("./components/user/ConfirmationSent"));
+const VerifyAccount = lazy(() => import("./components/user/VerifyAccount"));
+const ForgotPassword = lazy(() => import("./components/user/ForgotPassword"));
+const ResetPassword = lazy(() => import("./components/user/ResetPassword"));
+const DemoPartyDashboard = lazy(() => import("./components/DemoPartyDashboard"));
+const Error404 = lazy(() => import("./components/Error404"));
+const ComposList = lazy(() => import("./components/productions/ComposList"));
+const ProductionForm = lazy(() => import("./components/productions/ProductionForm"));
+const MyProductions = lazy(() => import("./components/productions/MyProductions"));
+const ProductionDetail = lazy(() => import("./components/productions/ProductionDetail"));
+const AdminRoute = lazy(() => import("./components/common/AdminRoute"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const EditionsPage = lazy(() => import("./pages/admin/EditionsPage"));
+const EditionFormPage = lazy(() => import("./pages/admin/EditionFormPage"));
+const EditionDetailPage = lazy(() => import("./pages/admin/EditionDetailPage"));
+const ComposPage = lazy(() => import("./pages/admin/ComposPage"));
+const CompoFormPage = lazy(() => import("./pages/admin/CompoFormPage"));
+const CompoDetailPage = lazy(() => import("./pages/admin/CompoDetailPage"));
+const ProductionsPage = lazy(() => import("./pages/admin/ProductionsPage"));
+const ProductionDetailPage = lazy(() => import("./pages/admin/ProductionDetailPage"));
+const VotingConfigPage = lazy(() => import("./pages/admin/VotingConfigPage"));
+const AttendanceCodesPage = lazy(() => import("./pages/admin/AttendanceCodesPage"));
+const JuryManagementPage = lazy(() => import("./pages/admin/JuryManagementPage"));
+const SponsorsPage = lazy(() => import("./pages/admin/SponsorsPage"));
+const SponsorFormPage = lazy(() => import("./pages/admin/SponsorFormPage"));
+const StageRunnerPage = lazy(() => import("./pages/admin/stagerunner").then(m => ({ default: m.StageRunnerPage })));
+const SlidesListPage = lazy(() => import("./pages/admin/stagerunner").then(m => ({ default: m.SlidesListPage })));
+const SlideEditorPage = lazy(() => import("./pages/admin/stagerunner").then(m => ({ default: m.SlideEditorPage })));
+const LiveControlPage = lazy(() => import("./pages/admin/stagerunner").then(m => ({ default: m.LiveControlPage })));
+const StageRunnerViewer = lazy(() => import("./pages/stagerunner/StageRunnerViewer"));
+const Gallery = lazy(() => import("./components/gallery/Gallery"));
+
+const LazyFallback = () => (
+  <Box display="flex" alignItems="center" justifyContent="center" minHeight="100vh" bgcolor="#121212">
+    <CircularProgress sx={{ color: "#FFA500" }} />
+  </Box>
+);
 
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useContext(AuthContext);
 
   if (loading) {
-    return <div>Loading...</div>; // Puedes mostrar un spinner de carga aquí
+    return <LazyFallback />;
   }
 
   return isAuthenticated ? children : <Navigate to="/login" />;
@@ -56,6 +66,7 @@ const AppRoutes = () => {
         v7_relativeSplatPath: true
       }}
     >
+      <Suspense fallback={<LazyFallback />}>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
@@ -280,6 +291,7 @@ const AppRoutes = () => {
         <Route path="/confirmation-sent" element={<ConfirmationSent />} />
         <Route path="*" element={<Error404 />} />
       </Routes>
+      </Suspense>
     </Router>
   );
 };
