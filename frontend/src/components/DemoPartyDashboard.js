@@ -141,19 +141,19 @@ const DemoPartyDashboard = () => {
   };
 
   const CountdownBox = ({ value, label }) => (
-    <Box sx={{ textAlign: 'center', px: 2 }}>
+    <Box sx={{ textAlign: 'center', px: { xs: 0.5, sm: 0.75, md: 1 } }}>
       <Typography
-        variant="h3"
         sx={{
           fontWeight: 700,
           color: 'primary.main',
           fontFamily: 'monospace',
           textShadow: '0 0 20px rgba(255, 165, 0, 0.5)',
+          fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
         }}
       >
         {String(value).padStart(2, '0')}
       </Typography>
-      <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase' }}>
+      <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontSize: { xs: '0.6rem', sm: '0.65rem', md: '0.7rem' } }}>
         {label}
       </Typography>
     </Box>
@@ -168,12 +168,13 @@ const DemoPartyDashboard = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
+          p: { xs: 1.5, sm: 3 },
           mt: 8,
-          ml: { sm: '64px' },
           position: 'relative',
           zIndex: 1,
           minHeight: '100vh',
+          overflow: 'hidden',
+          minWidth: 0,
         }}
       >
         <Container maxWidth="xl">
@@ -196,11 +197,11 @@ const DemoPartyDashboard = () => {
                     mb: 4,
                     background: 'linear-gradient(135deg, rgba(255, 165, 0, 0.15) 0%, rgba(30, 30, 30, 0.9) 100%)',
                     border: '1px solid rgba(255, 165, 0, 0.3)',
-                    overflow: 'visible',
+                    overflow: 'hidden',
                   }}
                 >
-                  <CardContent sx={{ p: 4 }}>
-                    <Grid container spacing={4} alignItems="center">
+                  <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
+                    <Grid container spacing={{ xs: 2, md: 4 }} alignItems="center">
                       <Grid item xs={12} md={7}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                           <CelebrationIcon sx={{ fontSize: 40, color: 'primary.main' }} />
@@ -212,14 +213,15 @@ const DemoPartyDashboard = () => {
                           />
                         </Box>
                         <Typography
-                          variant="h3"
                           sx={{
                             fontWeight: 700,
                             mb: 2,
+                            fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
                             background: 'linear-gradient(90deg, #FFA500, #FFD700)',
                             backgroundClip: 'text',
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',
+                            wordBreak: 'break-word',
                           }}
                         >
                           {activeEdition.name}
@@ -258,7 +260,7 @@ const DemoPartyDashboard = () => {
                       <Grid item xs={12} md={5}>
                         <Box
                           sx={{
-                            p: 3,
+                            p: { xs: 1.5, sm: 2, md: 3 },
                             borderRadius: 2,
                             bgcolor: 'rgba(0, 0, 0, 0.4)',
                             border: '1px solid rgba(255, 165, 0, 0.2)',
@@ -271,13 +273,13 @@ const DemoPartyDashboard = () => {
                           >
                             Cuenta Atrás
                           </Typography>
-                          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', flexWrap: 'nowrap' }}>
                             <CountdownBox value={countdown.days} label="Días" />
-                            <Typography variant="h3" sx={{ color: 'primary.main', alignSelf: 'flex-start', mt: 0.5 }}>:</Typography>
+                            <Typography sx={{ color: 'primary.main', mt: 0.5, fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' } }}>:</Typography>
                             <CountdownBox value={countdown.hours} label="Horas" />
-                            <Typography variant="h3" sx={{ color: 'primary.main', alignSelf: 'flex-start', mt: 0.5 }}>:</Typography>
+                            <Typography sx={{ color: 'primary.main', mt: 0.5, fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' } }}>:</Typography>
                             <CountdownBox value={countdown.minutes} label="Min" />
-                            <Typography variant="h3" sx={{ color: 'primary.main', alignSelf: 'flex-start', mt: 0.5 }}>:</Typography>
+                            <Typography sx={{ color: 'primary.main', mt: 0.5, fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' } }}>:</Typography>
                             <CountdownBox value={countdown.seconds} label="Seg" />
                           </Box>
                         </Box>

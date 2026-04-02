@@ -188,7 +188,7 @@ const MainBar = () => {
           left: isDesktop ? (open ? '240px' : '64px') : 0,
           right: 0,
           zIndex: theme.zIndex.drawer - 1,
-          paddingLeft: '0 !important',
+          paddingLeft: isDesktop ? '0px' : '8px',
           paddingRight: '16px',
           transition: theme.transitions.create('left', {
             easing: theme.transitions.easing.sharp,
