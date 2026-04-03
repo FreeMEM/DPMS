@@ -50,7 +50,11 @@ urlpatterns = [
 
 def serve_media(request, path):
     """Serve media files with HTTP Range request support for video streaming."""
-    file_path = os.path.join(settings.MEDIA_ROOT, path)
+    from django.utils._os import safe_join
+    try:
+        file_path = safe_join(settings.MEDIA_ROOT, path)
+    except ValueError:
+        raise Http404
     if not os.path.isfile(file_path):
         raise Http404
 

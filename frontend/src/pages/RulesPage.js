@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import DOMPurify from 'dompurify';
 import {
   Box,
   Typography,
@@ -47,7 +48,7 @@ const SimpleMarkdown = ({ children }) => {
         <Box component="ul" key={`ul-${elements.length}`} sx={{ pl: 2, my: 0.5 }}>
           {listItems.map((item, i) => (
             <Typography component="li" key={i} variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}
-              dangerouslySetInnerHTML={{ __html: item.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')) }}
             />
           ))}
         </Box>
@@ -73,7 +74,7 @@ const SimpleMarkdown = ({ children }) => {
       flushList();
       elements.push(
         <Typography key={i} variant="body2" color="text.secondary" sx={{ lineHeight: 1.8, mb: 0.5 }}
-          dangerouslySetInnerHTML={{ __html: trimmed.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(trimmed.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')) }}
         />
       );
     }

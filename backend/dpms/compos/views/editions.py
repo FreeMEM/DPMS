@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.throttling import ScopedRateThrottle
 from django.core.mail import send_mail
 from django.conf import settings
 
@@ -106,7 +107,7 @@ class EditionViewSet(viewsets.ModelViewSet):
         serializer = ProductionSerializer(productions, many=True, context={'request': request})
         return Response(serializer.data)
 
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['post'], throttle_classes=[ScopedRateThrottle], throttle_scope='contact')
     def contact(self, request):
         """
         Send a contact message for an edition.
@@ -136,11 +137,14 @@ class EditionViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        subject = f"[{edition.title}] {data['subject']}"
+        # Sanitize subject to prevent header injection
+        clean_subject = data['subject'].replace('\r', '').replace('\n', ' ').strip()
+        clean_name = data['name'].replace('\r', '').replace('\n', ' ').strip()
+        subject = f"[{edition.title}] {clean_subject}"
         body = (
             f"Mensaje de contacto desde {edition.title}\n"
             f"{'=' * 40}\n\n"
-            f"Nombre: {data['name']}\n"
+            f"Nombre: {clean_name}\n"
             f"Email: {data['email']}\n"
             f"Asunto: {data['subject']}\n\n"
             f"Mensaje:\n{data['message']}\n"

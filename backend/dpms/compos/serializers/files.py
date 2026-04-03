@@ -1,5 +1,6 @@
 """File serializers"""
 
+import os
 from rest_framework import serializers
 from dpms.compos.models import File
 from dpms.users.serializers import ResumedUserModelSerializer
@@ -83,13 +84,18 @@ class FileUploadSerializer(serializers.ModelSerializer):
                 f"File size cannot exceed 100MB. Your file is {value.size / (1024*1024):.2f}MB."
             )
 
-        # You can add file type validation here if needed
-        # allowed_extensions = ['.zip', '.png', '.jpg', '.mp3', '.mp4']
-        # ext = os.path.splitext(value.name)[1].lower()
-        # if ext not in allowed_extensions:
-        #     raise serializers.ValidationError(
-        #         f"File type {ext} is not allowed. Allowed types: {', '.join(allowed_extensions)}"
-        #     )
+        # Block dangerous file types that could be executed server-side or contain XSS
+        blocked_extensions = [
+            '.php', '.py', '.rb', '.sh', '.bash', '.cgi', '.pl',
+            '.exe', '.bat', '.cmd', '.com', '.msi', '.scr', '.pif',
+            '.js', '.html', '.htm', '.svg', '.xml', '.xhtml',
+            '.asp', '.aspx', '.jsp', '.war',
+        ]
+        ext = os.path.splitext(value.name)[1].lower()
+        if ext in blocked_extensions:
+            raise serializers.ValidationError(
+                f"File type '{ext}' is not allowed for security reasons."
+            )
 
         return value
 

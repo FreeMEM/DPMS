@@ -22,6 +22,7 @@ from dpms.users.models import User
 
 # Permissions
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.throttling import ScopedRateThrottle
 from dpms.users.permissions import IsAccountOwner
 
 # Utilities
@@ -102,7 +103,7 @@ class UserViewSet(
 
     """ API Actions """
 
-    @action(detail=False, methods=["post"])
+    @action(detail=False, methods=["post"], throttle_classes=[ScopedRateThrottle], throttle_scope='auth')
     def login(self, request):
         """User sign in."""
 
@@ -139,11 +140,9 @@ class UserViewSet(
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
 
-    @action(detail=False, methods=["post"])
+    @action(detail=False, methods=["post"], throttle_classes=[ScopedRateThrottle], throttle_scope='auth')
     def signup(self, request):
         """User sign up."""
-        logger.info("User sign up")
-        logger.info(request.data)
         serializer = UserSignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()

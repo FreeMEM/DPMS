@@ -70,13 +70,21 @@ class UserSignUpSerializer(serializers.Serializer):
     # Account
     email = serializers.EmailField(
         validators=[
-            UniqueValidator(queryset=User.objects.all())
-        ],  # Valida que sea único dentro del modelo User
+            UniqueValidator(
+                queryset=User.objects.all(),
+                message="Registration could not be completed with this data."
+            )
+        ],
     )
     username = serializers.CharField(
         min_length=2,
         max_length=50,
-        validators=[UniqueValidator(queryset=User.objects.all())],
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(),
+                message="Registration could not be completed with this data."
+            )
+        ],
     )
 
     # Password
@@ -96,7 +104,6 @@ class UserSignUpSerializer(serializers.Serializer):
     )
 
     def validate(self, data):
-        logger.info(data)
         """Verify passwords match"""
         passwd = data["password"]
         passwd_conf = data["password_confirmation"]
@@ -110,7 +117,6 @@ class UserSignUpSerializer(serializers.Serializer):
     def create(self, data):
         """Handle user and profile creation."""
         try:
-            logger.info(data)
             data.pop("password_confirmation")
             user_data = {
                 "email": data.get("email"),

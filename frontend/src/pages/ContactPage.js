@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import DOMPurify from 'dompurify';
 import {
   Box,
   Typography,
@@ -41,7 +42,7 @@ const SimpleMarkdown = ({ children }) => {
         <Box component="ul" key={`ul-${elements.length}`} sx={{ pl: 2, my: 0.5 }}>
           {listItems.map((item, i) => (
             <Typography component="li" key={i} variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}
-              dangerouslySetInnerHTML={{ __html: renderInline(item) }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(renderInline(item)) }}
             />
           ))}
         </Box>
@@ -67,7 +68,7 @@ const SimpleMarkdown = ({ children }) => {
       flushList();
       elements.push(
         <Typography key={i} variant="body2" color="text.secondary" sx={{ lineHeight: 1.8, mb: 0.5 }}
-          dangerouslySetInnerHTML={{ __html: renderInline(trimmed) }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(renderInline(trimmed)) }}
         />
       );
     }
