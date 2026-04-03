@@ -1,4 +1,4 @@
-from .editions import EditionSerializer, EditionDetailSerializer, EditionListSerializer
+from .editions import EditionSerializer, EditionDetailSerializer, EditionListSerializer, ContactFormSerializer
 from .compos import CompoSerializer, CompoDetailSerializer, HasCompoSerializer
 from .productions import ProductionSerializer, ProductionDetailSerializer, ProductionCreateSerializer
 from .files import FileSerializer, FileUploadSerializer, FileUpdateSerializer
@@ -53,6 +53,7 @@ __all__ = [
     'EditionSerializer',
     'EditionDetailSerializer',
     'EditionListSerializer',
+    'ContactFormSerializer',
     'CompoSerializer',
     'CompoDetailSerializer',
     'HasCompoSerializer',

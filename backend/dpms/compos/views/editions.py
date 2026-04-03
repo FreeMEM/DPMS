@@ -5,7 +5,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from django.db.models import Q
+from django.core.mail import send_mail
+from django.conf import settings
 
 from dpms.compos.models import Edition
 from dpms.compos.serializers import (
@@ -14,6 +15,7 @@ from dpms.compos.serializers import (
     EditionListSerializer,
     ProductionSerializer,
     HasCompoSerializer,
+    ContactFormSerializer,
 )
 from dpms.compos.permissions import IsAdminOrReadOnly, IsOwnerOrAdmin
 
@@ -68,8 +70,7 @@ class EditionViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         """Set permissions based on action"""
-        if self.action in ['list', 'retrieve', 'compos', 'productions']:
-            # Allow anyone to view public editions
+        if self.action in ['list', 'retrieve', 'compos', 'productions', 'contact']:
             return [AllowAny()]
         return [IsAuthenticated(), IsOwnerOrAdmin()]
 
@@ -104,3 +105,60 @@ class EditionViewSet(viewsets.ModelViewSet):
 
         serializer = ProductionSerializer(productions, many=True, context={'request': request})
         return Response(serializer.data)
+
+    @action(detail=False, methods=['post'])
+    def contact(self, request):
+        """
+        Send a contact message for an edition.
+
+        POST /api/editions/contact/
+        """
+        serializer = ContactFormSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        data = serializer.validated_data
+        try:
+            edition = Edition.objects.get(pk=data['edition'])
+        except Edition.DoesNotExist:
+            return Response(
+                {"error": "Edition not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        if not edition.contact_form_enabled:
+            return Response(
+                {"error": "Contact form is not enabled for this edition"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not edition.contact_email:
+            return Response(
+                {"error": "No contact email configured for this edition"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        subject = f"[{edition.title}] {data['subject']}"
+        body = (
+            f"Mensaje de contacto desde {edition.title}\n"
+            f"{'=' * 40}\n\n"
+            f"Nombre: {data['name']}\n"
+            f"Email: {data['email']}\n"
+            f"Asunto: {data['subject']}\n\n"
+            f"Mensaje:\n{data['message']}\n"
+        )
+
+        try:
+            send_mail(
+                subject=subject,
+                message=body,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[edition.contact_email],
+                reply_to=[data['email']],
+                fail_silently=False,
+            )
+        except Exception:
+            return Response(
+                {"error": "Failed to send message. Please try again later."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response({"status": "Message sent successfully"})

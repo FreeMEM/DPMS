@@ -19,6 +19,7 @@ export const editionsAPI = {
   delete: (id) => getAxios().delete(`/api/editions/${id}/`),
   getCompos: (id) => getAxios().get(`/api/editions/${id}/compos/`),
   getProductions: (id, params) => getAxios().get(`/api/editions/${id}/productions/`, { params }),
+  sendContact: (data) => getAxios().post('/api/editions/contact/', data),
 };
 
 // Compos API

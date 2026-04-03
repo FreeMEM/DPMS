@@ -41,6 +41,7 @@ const LiveControlPage = lazy(() => import("./pages/admin/stagerunner").then(m =>
 const StageRunnerViewer = lazy(() => import("./pages/stagerunner/StageRunnerViewer"));
 const Gallery = lazy(() => import("./components/gallery/Gallery"));
 const RulesPage = lazy(() => import("./pages/RulesPage"));
+const ContactPage = lazy(() => import("./pages/ContactPage"));
 
 const LazyFallback = () => (
   <Box display="flex" alignItems="center" justifyContent="center" minHeight="100vh" bgcolor="#121212">
@@ -260,6 +261,7 @@ const AppRoutes = () => {
         <Route path="/stagerunner/:editionId" element={<StageRunnerViewer />} />
         <Route path="/compos" element={<ComposList />} />
         <Route path="/rules" element={<RulesPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route
           path="/productions/new"

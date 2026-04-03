@@ -5,6 +5,14 @@ from dpms.compos.models import Edition, HasCompo, Sponsor
 from dpms.users.serializers import ResumedUserModelSerializer
 
 
+EDITION_CONTACT_FIELDS = [
+    'contact_info',
+    'travel_info',
+    'contact_form_enabled',
+    'contact_email',
+]
+
+
 class SponsorInlineSerializer(serializers.ModelSerializer):
     """Inline serializer for sponsors in Edition detail"""
 
@@ -39,6 +47,7 @@ class EditionListSerializer(serializers.ModelSerializer):
             'open_to_update',
             'productions_public',
             'auto_approve_productions',
+            *EDITION_CONTACT_FIELDS,
             'compos_count',
             'productions_count',
             'created',
@@ -47,11 +56,9 @@ class EditionListSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created', 'modified', 'uploaded_by']
 
     def get_compos_count(self, obj):
-        """Return count of associated compos"""
         return obj.compos.count()
 
     def get_productions_count(self, obj):
-        """Return count of productions in this edition"""
         return obj.productions.count()
 
 
@@ -78,6 +85,7 @@ class EditionSerializer(serializers.ModelSerializer):
             'open_to_update',
             'productions_public',
             'auto_approve_productions',
+            *EDITION_CONTACT_FIELDS,
             'created',
             'modified',
         ]
@@ -141,6 +149,7 @@ class EditionDetailSerializer(serializers.ModelSerializer):
             'open_to_update',
             'productions_public',
             'auto_approve_productions',
+            *EDITION_CONTACT_FIELDS,
             'hascompo_set',
             'sponsors',
             'compos_count',
@@ -151,9 +160,16 @@ class EditionDetailSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created', 'modified', 'uploaded_by']
 
     def get_compos_count(self, obj):
-        """Return count of associated compos"""
         return obj.compos.count()
 
     def get_productions_count(self, obj):
-        """Return count of productions in this edition"""
         return obj.productions.count()
+
+
+class ContactFormSerializer(serializers.Serializer):
+    """Serializer for the public contact form"""
+    edition = serializers.IntegerField()
+    name = serializers.CharField(max_length=255)
+    email = serializers.EmailField()
+    subject = serializers.CharField(max_length=255)
+    message = serializers.CharField()

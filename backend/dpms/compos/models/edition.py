@@ -91,6 +91,26 @@ class Edition(BaseModel):
         default=True,
         help_text="Automatically approve new productions on submission. If disabled, productions require manual admin approval."
     )
+    contact_info = models.TextField(
+        "Contact Info",
+        blank=True, default='',
+        help_text="Contact information in markdown format (social media, email, Telegram, etc.)"
+    )
+    travel_info = models.TextField(
+        "Travel Info",
+        blank=True, default='',
+        help_text="How to get there: venue address, airports, trains, buses, parking, accommodation (markdown)"
+    )
+    contact_form_enabled = models.BooleanField(
+        "Contact Form Enabled",
+        default=False,
+        help_text="Enable the public contact form for this edition"
+    )
+    contact_email = models.EmailField(
+        "Contact Email",
+        blank=True, default='',
+        help_text="Email address where contact form messages will be sent"
+    )
     compos = models.ManyToManyField(
         "compos.Compo",
         through="compos.HasCompo",
