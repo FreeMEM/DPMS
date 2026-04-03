@@ -9,11 +9,8 @@ import {
   Alert,
   CircularProgress,
   Chip,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Collapse,
+  ToggleButton,
+  ToggleButtonGroup,
   List,
   ListItem,
   ListItemText,
@@ -33,8 +30,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import {
   EmojiEvents as TrophyIcon,
-  ExpandMore as ExpandMoreIcon,
-  ExpandLess as ExpandLessIcon,
   Close as CloseIcon,
   Person as PersonIcon,
   CalendarToday as CalendarIcon,
@@ -369,7 +364,6 @@ const ProductionDetailDialog = ({ open, onClose, productionId, result, t }) => {
 };
 
 const CompoCard = ({ hasCompo, results, resultsPublished, onProductionClick, t }) => {
-  const [expanded, setExpanded] = useState(false);
   const hasResults = resultsPublished && results && results.length > 0;
   const navigate = useNavigate();
 
@@ -424,66 +418,56 @@ const CompoCard = ({ hasCompo, results, resultsPublished, onProductionClick, t }
         {/* Productions list when results are published */}
         {hasResults && (
           <Box sx={{ mt: 2 }}>
-            <Button
-              size="small"
-              onClick={() => setExpanded(!expanded)}
-              endIcon={expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-              sx={{ mb: 1 }}
-            >
-              {expanded ? t('Hide results') : t('Show results')}
-            </Button>
-            <Collapse in={expanded}>
-              <List dense disablePadding>
-                {results.map((result, idx) => (
-                  <React.Fragment key={result.production_id}>
-                    {idx > 0 && <Divider component="li" />}
-                    <ListItemButton
-                      onClick={() => onProductionClick(result)}
-                      sx={{
-                        px: 1,
-                        borderRadius: 1,
-                        bgcolor: result.ranking <= 3 ? 'rgba(255, 165, 0, 0.06)' : 'transparent',
-                        '&:hover': {
-                          bgcolor: result.ranking <= 3 ? 'rgba(255, 165, 0, 0.12)' : 'action.hover',
-                        },
-                      }}
-                    >
-                      <ListItemIcon sx={{ minWidth: 36 }}>
-                        <Typography
-                          variant="body2"
-                          fontWeight={700}
-                          sx={{
-                            color: RANKING_COLORS[result.ranking] || 'text.secondary',
-                            fontSize: result.ranking <= 3 ? '1rem' : '0.875rem',
-                          }}
-                        >
-                          #{result.ranking}
-                        </Typography>
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={result.production_title}
-                        secondary={result.production_authors}
-                        primaryTypographyProps={{
-                          variant: 'body2',
-                          fontWeight: result.ranking <= 3 ? 600 : 400,
+            <List dense disablePadding>
+              {results.map((result, idx) => (
+                <React.Fragment key={result.production_id}>
+                  {idx > 0 && <Divider component="li" />}
+                  <ListItemButton
+                    onClick={() => onProductionClick(result)}
+                    sx={{
+                      px: 1,
+                      borderRadius: 1,
+                      bgcolor: result.ranking <= 3 ? 'rgba(255, 165, 0, 0.06)' : 'transparent',
+                      '&:hover': {
+                        bgcolor: result.ranking <= 3 ? 'rgba(255, 165, 0, 0.12)' : 'action.hover',
+                      },
+                    }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 36 }}>
+                      <Typography
+                        variant="body2"
+                        fontWeight={700}
+                        sx={{
+                          color: RANKING_COLORS[result.ranking] || 'text.secondary',
+                          fontSize: result.ranking <= 3 ? '1rem' : '0.875rem',
                         }}
-                        secondaryTypographyProps={{ variant: 'caption' }}
-                      />
-                      {result.final_score != null && (
-                        <Typography
-                          variant="caption"
-                          color="primary.main"
-                          fontWeight={600}
-                          sx={{ ml: 1, whiteSpace: 'nowrap' }}
-                        >
-                          {Number(result.final_score).toFixed(1)} pts
-                        </Typography>
-                      )}
-                    </ListItemButton>
-                  </React.Fragment>
-                ))}
-              </List>
-            </Collapse>
+                      >
+                        #{result.ranking}
+                      </Typography>
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={result.production_title}
+                      secondary={result.production_authors}
+                      primaryTypographyProps={{
+                        variant: 'body2',
+                        fontWeight: result.ranking <= 3 ? 600 : 400,
+                      }}
+                      secondaryTypographyProps={{ variant: 'caption' }}
+                    />
+                    {result.final_score != null && (
+                      <Typography
+                        variant="caption"
+                        color="primary.main"
+                        fontWeight={600}
+                        sx={{ ml: 1, whiteSpace: 'nowrap' }}
+                      >
+                        {Number(result.final_score).toFixed(1)} pts
+                      </Typography>
+                    )}
+                  </ListItemButton>
+                </React.Fragment>
+              ))}
+            </List>
           </Box>
         )}
       </CardContent>
@@ -597,26 +581,40 @@ const ComposList = () => {
       )}
 
       {editions.length > 0 && (
-        <FormControl fullWidth sx={{ mb: 3 }}>
-          <InputLabel>{t("Edition")}</InputLabel>
-          <Select
-            value={selectedEdition || ''}
-            onChange={(e) => setSelectedEdition(e.target.value)}
-            label={t("Edition")}
-          >
-            {editions.map((edition) => (
-              <MenuItem key={edition.id} value={edition.id}>
-                {edition.title}
-                <Chip
-                  label={edition.open_to_upload ? t("Open") : t("Closed")}
-                  size="small"
-                  color={edition.open_to_upload ? "success" : "default"}
-                  sx={{ ml: 1 }}
-                />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <ToggleButtonGroup
+          value={selectedEdition}
+          exclusive
+          onChange={(e, val) => { if (val !== null) setSelectedEdition(val); }}
+          sx={{
+            mb: 3,
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 1,
+            '& .MuiToggleButtonGroup-grouped': {
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: '20px !important',
+              px: 2,
+              py: 0.75,
+              textTransform: 'none',
+              '&.Mui-selected': {
+                bgcolor: 'primary.main',
+                color: 'primary.contrastText',
+                borderColor: 'primary.main',
+                '&:hover': { bgcolor: 'primary.dark' },
+              },
+            },
+          }}
+        >
+          {editions.map((edition) => (
+            <ToggleButton key={edition.id} value={edition.id}>
+              {edition.title}
+              {edition.open_to_upload && (
+                <Chip label={t("Open")} size="small" color="success" sx={{ ml: 1, height: 20 }} />
+              )}
+            </ToggleButton>
+          ))}
+        </ToggleButtonGroup>
       )}
 
       {loading && selectedEdition ? (
