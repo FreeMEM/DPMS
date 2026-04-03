@@ -11,3 +11,13 @@ class IsAccountOwner(BasePermission):
     def has_object_permission(self, request, view, obj):
         """Check obj and user are the same"""
         return request.user == obj
+
+
+class IsDPMSAdmin(BasePermission):
+    """Allow access only to DPMS Admins group members."""
+
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and request.user.groups.filter(name="DPMS Admins").exists()
+        )

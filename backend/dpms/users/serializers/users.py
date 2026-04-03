@@ -183,10 +183,8 @@ class UserLoginSerializer(serializers.Serializer):
     def validate(self, data):
         """Check credentials."""
         user = authenticate(username=data["email"], password=data["password"])
-        if not user:
+        if not user or not user.is_verified:
             raise serializers.ValidationError("Invalid credentials")
-        if not user.is_verified:
-            raise serializers.ValidationError("Account is not active yet :-(")
         self.context["user"] = user
 
         return data
@@ -242,6 +240,8 @@ class AccountVerificationSerializer(serializers.Serializer):
         """Update user's verified status."""
         payload = self.context["payload"]
         user = User.objects.get(email=payload["user"])
+        if user.is_verified:
+            raise serializers.ValidationError("Account is already verified.")
         user.is_verified = True
         user.save()
 

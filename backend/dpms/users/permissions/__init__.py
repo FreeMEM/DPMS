@@ -1,1 +1,1 @@
-from .users import IsAccountOwner
+from .users import IsAccountOwner, IsDPMSAdmin

@@ -12,7 +12,9 @@ environ.Env.read_env()  # reading .env file
 # Base
 DEBUG = env.bool("DJANGO_DEBUG", False)
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
-# SECRET_KEY = env("DJANGO_SECRET_KEY")
+# SECRET_KEY must be set in local.py or production.py
+# If it reaches this point without being set, Django will raise ImproperlyConfigured
+
 # Language and timezone
 TIME_ZONE = "Europe/Madrid"
 LANGUAGE_CODE = "es"

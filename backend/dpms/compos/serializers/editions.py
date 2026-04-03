@@ -183,3 +183,10 @@ class ContactFormSerializer(serializers.Serializer):
     email = serializers.EmailField()
     subject = serializers.CharField(max_length=255)
     message = serializers.CharField()
+    # Honeypot field - must be empty, bots will fill it
+    website = serializers.CharField(required=False, allow_blank=True, default='')
+
+    def validate_website(self, value):
+        if value:
+            raise serializers.ValidationError("Form submission rejected.")
+        return value

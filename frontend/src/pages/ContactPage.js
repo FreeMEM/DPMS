@@ -83,7 +83,7 @@ const ContactPage = () => {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
+  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '', website: '' });
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -123,9 +123,10 @@ const ContactPage = () => {
         email: form.email.trim(),
         subject: form.subject.trim(),
         message: form.message.trim(),
+        website: form.website,
       });
       setSnackbar({ open: true, message: t('Message sent successfully!'), severity: 'success' });
-      setForm({ name: '', email: '', subject: '', message: '' });
+      setForm({ name: '', email: '', subject: '', message: '', website: '' });
       setErrors({});
     } catch (err) {
       const msg = err.response?.data?.error || t('Failed to send message. Please try again later.');
@@ -228,6 +229,15 @@ const ContactPage = () => {
                   helperText={errors.subject}
                   fullWidth
                   required
+                />
+                {/* Honeypot field - hidden from humans, bots will fill it */}
+                <TextField
+                  name="website"
+                  value={form.website}
+                  onChange={handleChange('website')}
+                  autoComplete="off"
+                  tabIndex={-1}
+                  sx={{ position: 'absolute', left: '-9999px', opacity: 0, height: 0, overflow: 'hidden' }}
                 />
                 <TextField
                   label={t("Message")}

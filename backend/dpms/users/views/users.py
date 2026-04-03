@@ -23,7 +23,7 @@ from dpms.users.models import User
 # Permissions
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.throttling import SimpleRateThrottle
-from dpms.users.permissions import IsAccountOwner
+from dpms.users.permissions import IsAccountOwner, IsDPMSAdmin
 
 
 class AuthRateThrottle(SimpleRateThrottle):
@@ -77,14 +77,9 @@ class UserViewSet(
 
         return [permission() for permission in permissions]
 
-    @action(detail=False, methods=["get"])
+    @action(detail=False, methods=["get"], permission_classes=[IsDPMSAdmin])
     def search(self, request):
         """Search users by email or nickname. Admin only."""
-        if not request.user.groups.filter(name='DPMS Admins').exists():
-            return Response(
-                {"detail": "Not authorized."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
 
         q = request.query_params.get("q", "").strip()
         if len(q) < 2:
