@@ -30,6 +30,9 @@ django-cors-headers==4.9.0
 # Swagger
 drf-yasg==1.21.11
 
+# Translations
+django-modeltranslation==0.19.13
+
 # Tools
 django-extensions==4.1
 

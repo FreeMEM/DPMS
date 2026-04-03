@@ -8,11 +8,51 @@ import {
   Alert,
   CircularProgress,
   Grid,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import { Save as SaveIcon, ArrowBack as BackIcon } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import axiosWrapper from '../../utils/AxiosWrapper';
+
+const LangTabs = ({ label, esValue, enValue, onChange, rows = 3, helperText, disabled }) => {
+  const [tab, setTab] = useState(0);
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 0.5 }}>
+        <Typography variant="body2" fontWeight={500}>{label}</Typography>
+        <Tabs value={tab} onChange={(e, v) => setTab(v)} sx={{ minHeight: 32, '& .MuiTab-root': { minHeight: 32, py: 0.5, px: 1.5, fontSize: '0.75rem' } }}>
+          <Tab label="ES" />
+          <Tab label="EN" />
+        </Tabs>
+      </Box>
+      {tab === 0 && (
+        <TextField
+          fullWidth
+          value={esValue}
+          onChange={(e) => onChange('es', e.target.value)}
+          multiline
+          rows={rows}
+          disabled={disabled}
+          helperText={helperText}
+        />
+      )}
+      {tab === 1 && (
+        <TextField
+          fullWidth
+          value={enValue}
+          onChange={(e) => onChange('en', e.target.value)}
+          multiline
+          rows={rows}
+          disabled={disabled}
+          helperText="English version"
+          placeholder="English translation..."
+        />
+      )}
+    </Box>
+  );
+};
 
 const CompoFormPage = () => {
   const navigate = useNavigate();
@@ -21,8 +61,10 @@ const CompoFormPage = () => {
 
   const [formData, setFormData] = useState({
     name: '',
-    description: '',
-    rules: '',
+    description_es: '',
+    description_en: '',
+    rules_es: '',
+    rules_en: '',
     icon: '',
     display_order: 0,
   });
@@ -42,12 +84,15 @@ const CompoFormPage = () => {
       setLoading(true);
       const client = axiosWrapper();
       const response = await client.get(`/api/compos/${id}/`);
+      const d = response.data;
       setFormData({
-        name: response.data.name || '',
-        description: response.data.description || '',
-        rules: response.data.rules || '',
-        icon: response.data.icon || '',
-        display_order: response.data.display_order || 0,
+        name: d.name || '',
+        description_es: d.description_es || d.description || '',
+        description_en: d.description_en || '',
+        rules_es: d.rules_es || d.rules || '',
+        rules_en: d.rules_en || '',
+        icon: d.icon || '',
+        display_order: d.display_order || 0,
       });
       setError(null);
     } catch (err) {
@@ -66,6 +111,10 @@ const CompoFormPage = () => {
     }));
   };
 
+  const handleLangChange = (field, lang, value) => {
+    setFormData((prev) => ({ ...prev, [`${field}_${lang}`]: value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -79,10 +128,20 @@ const CompoFormPage = () => {
       setError(null);
       const client = axiosWrapper();
 
+      const payload = {
+        name: formData.name,
+        description: formData.description_es,
+        description_es: formData.description_es,
+        description_en: formData.description_en,
+        rules: formData.rules_es,
+        rules_es: formData.rules_es,
+        rules_en: formData.rules_en,
+      };
+
       if (isEdit) {
-        await client.put(`/api/compos/${id}/`, formData);
+        await client.put(`/api/compos/${id}/`, payload);
       } else {
-        await client.post('/api/compos/', formData);
+        await client.post('/api/compos/', payload);
       }
 
       setSuccess(true);
@@ -148,57 +207,26 @@ const CompoFormPage = () => {
             </Grid>
 
             <Grid item xs={12}>
-              <TextField
-                fullWidth
+              <LangTabs
                 label="Descripción"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                multiline
+                esValue={formData.description_es}
+                enValue={formData.description_en}
+                onChange={(lang, val) => handleLangChange('description', lang, val)}
                 rows={3}
-                disabled={saving}
                 helperText="Descripción breve de la competición"
+                disabled={saving}
               />
             </Grid>
 
             <Grid item xs={12}>
-              <TextField
-                fullWidth
+              <LangTabs
                 label="Reglas"
-                name="rules"
-                value={formData.rules}
-                onChange={handleChange}
-                multiline
+                esValue={formData.rules_es}
+                enValue={formData.rules_en}
+                onChange={(lang, val) => handleLangChange('rules', lang, val)}
                 rows={6}
-                disabled={saving}
                 helperText="Reglas y restricciones de la competición (markdown soportado)"
-              />
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Icono"
-                name="icon"
-                value={formData.icon}
-                onChange={handleChange}
                 disabled={saving}
-                helperText="Emoji o icono para representar la competición"
-                placeholder="🎨"
-              />
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                type="number"
-                label="Orden de visualización"
-                name="display_order"
-                value={formData.display_order}
-                onChange={handleChange}
-                disabled={saving}
-                helperText="Orden en que se muestra (menor = primero)"
-                inputProps={{ min: 0 }}
               />
             </Grid>
 

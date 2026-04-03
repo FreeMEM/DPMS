@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
 from django.db.models import Count
+from modeltranslation.admin import TranslationAdmin
 from .models import (
     Edition,
     Compo,
@@ -59,7 +60,7 @@ class ProductionInlineForEdition(admin.TabularInline):
 
 
 @admin.register(Edition)
-class EditionAdmin(admin.ModelAdmin):
+class EditionAdmin(TranslationAdmin):
     """Edition model admin with enhanced features"""
 
     list_display = (
@@ -279,7 +280,7 @@ class EditionAdmin(admin.ModelAdmin):
 
 
 @admin.register(Compo)
-class CompoAdmin(admin.ModelAdmin):
+class CompoAdmin(TranslationAdmin):
     """Compo model admin with enhanced features"""
 
     list_display = (

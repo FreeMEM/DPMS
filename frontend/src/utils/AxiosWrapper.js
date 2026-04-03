@@ -5,8 +5,12 @@ const axiosWrapper = () => {
   const baseURL = process.env.REACT_APP_BACKEND_ADDRESS || "http://localhost:8000";
   const token = localStorage.getItem("token");
 
+  // Detect current language from i18next or browser
+  const lang = localStorage.getItem("i18nextLng") || navigator.language || "es";
+
   const headers = {
     "Content-Type": "application/json",
+    "Accept-Language": lang,
   };
 
   // Add authorization token if available

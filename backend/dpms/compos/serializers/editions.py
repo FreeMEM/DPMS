@@ -7,7 +7,11 @@ from dpms.users.serializers import ResumedUserModelSerializer
 
 EDITION_CONTACT_FIELDS = [
     'contact_info',
+    'contact_info_es',
+    'contact_info_en',
     'travel_info',
+    'travel_info_es',
+    'travel_info_en',
     'contact_form_enabled',
     'contact_email',
 ]
@@ -35,6 +39,8 @@ class EditionListSerializer(serializers.ModelSerializer):
             'id',
             'title',
             'description',
+            'description_es',
+            'description_en',
             'logo',
             'poster',
             'logo_border_color',
@@ -73,6 +79,8 @@ class EditionSerializer(serializers.ModelSerializer):
             'id',
             'title',
             'description',
+            'description_es',
+            'description_en',
             'logo',
             'poster',
             'logo_border_color',
@@ -137,6 +145,8 @@ class EditionDetailSerializer(serializers.ModelSerializer):
             'id',
             'title',
             'description',
+            'description_es',
+            'description_en',
             'logo',
             'poster',
             'logo_border_color',

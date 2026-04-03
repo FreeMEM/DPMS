@@ -24,6 +24,35 @@ import { useNavigate, useParams } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import axiosWrapper from '../../utils/AxiosWrapper';
 
+const LangTabs = ({ label, esValue, enValue, onChange, rows = 3, helperText, disabled }) => {
+  const [tab, setTab] = React.useState(0);
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 0.5 }}>
+        <Typography variant="subtitle2">{label}</Typography>
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          {['ES', 'EN'].map((lang, i) => (
+            <Button key={lang} size="small" variant={tab === i ? 'contained' : 'outlined'}
+              onClick={() => setTab(i)}
+              sx={{ minWidth: 36, px: 1, py: 0.25, fontSize: '0.7rem' }}
+            >{lang}</Button>
+          ))}
+        </Box>
+      </Box>
+      <TextField
+        fullWidth
+        value={tab === 0 ? esValue : enValue}
+        onChange={(e) => onChange(tab === 0 ? 'es' : 'en', e.target.value)}
+        multiline
+        rows={rows}
+        disabled={disabled}
+        helperText={tab === 0 ? helperText : 'English version'}
+        placeholder={tab === 1 ? 'English translation...' : ''}
+      />
+    </Box>
+  );
+};
+
 const EditionFormPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -44,6 +73,14 @@ const EditionFormPage = () => {
     open_to_update: false,
     productions_public: false,
     auto_approve_productions: true,
+    description_es: '',
+    description_en: '',
+    contact_info_es: '',
+    contact_info_en: '',
+    travel_info_es: '',
+    travel_info_en: '',
+    contact_form_enabled: false,
+    contact_email: '',
   });
 
   // Image states
@@ -70,18 +107,27 @@ const EditionFormPage = () => {
       setLoading(true);
       const client = axiosWrapper();
       const response = await client.get(`/api/editions/${id}/`);
+      const d = response.data;
       setFormData({
-        title: response.data.title || '',
-        description: response.data.description || '',
-        start_date: response.data.start_date ? response.data.start_date.slice(0, 16) : '',
-        end_date: response.data.end_date ? response.data.end_date.slice(0, 16) : '',
-        logo_border_color: response.data.logo_border_color || '#FFA500',
-        logo_border_width: response.data.logo_border_width || 0,
-        public: response.data.public || false,
-        open_to_upload: response.data.open_to_upload || false,
-        open_to_update: response.data.open_to_update || false,
-        productions_public: response.data.productions_public || false,
-        auto_approve_productions: response.data.auto_approve_productions !== false,
+        title: d.title || '',
+        description: d.description || '',
+        start_date: d.start_date ? d.start_date.slice(0, 16) : '',
+        end_date: d.end_date ? d.end_date.slice(0, 16) : '',
+        logo_border_color: d.logo_border_color || '#FFA500',
+        logo_border_width: d.logo_border_width || 0,
+        public: d.public || false,
+        open_to_upload: d.open_to_upload || false,
+        open_to_update: d.open_to_update || false,
+        productions_public: d.productions_public || false,
+        auto_approve_productions: d.auto_approve_productions !== false,
+        description_es: d.description_es || d.description || '',
+        description_en: d.description_en || '',
+        contact_info_es: d.contact_info_es || d.contact_info || '',
+        contact_info_en: d.contact_info_en || '',
+        travel_info_es: d.travel_info_es || d.travel_info || '',
+        travel_info_en: d.travel_info_en || '',
+        contact_form_enabled: d.contact_form_enabled || false,
+        contact_email: d.contact_email || '',
       });
       // Set existing images
       if (response.data.logo) {
@@ -171,7 +217,9 @@ const EditionFormPage = () => {
       // Use FormData for file uploads
       const submitData = new FormData();
       submitData.append('title', formData.title);
-      submitData.append('description', formData.description);
+      submitData.append('description', formData.description_es);
+      submitData.append('description_es', formData.description_es);
+      submitData.append('description_en', formData.description_en);
       if (formData.start_date) submitData.append('start_date', new Date(formData.start_date).toISOString());
       if (formData.end_date) submitData.append('end_date', new Date(formData.end_date).toISOString());
       submitData.append('logo_border_color', formData.logo_border_color);
@@ -181,6 +229,14 @@ const EditionFormPage = () => {
       submitData.append('open_to_update', formData.open_to_update);
       submitData.append('productions_public', formData.productions_public);
       submitData.append('auto_approve_productions', formData.auto_approve_productions);
+      submitData.append('contact_info', formData.contact_info_es);
+      submitData.append('contact_info_es', formData.contact_info_es);
+      submitData.append('contact_info_en', formData.contact_info_en);
+      submitData.append('travel_info', formData.travel_info_es);
+      submitData.append('travel_info_es', formData.travel_info_es);
+      submitData.append('travel_info_en', formData.travel_info_en);
+      submitData.append('contact_form_enabled', formData.contact_form_enabled);
+      submitData.append('contact_email', formData.contact_email);
 
       // Add files if selected
       if (logoFile) {
@@ -264,14 +320,12 @@ const EditionFormPage = () => {
             />
 
             {/* Description */}
-            <TextField
+            <LangTabs
               label="Descripción"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              multiline
+              esValue={formData.description_es}
+              enValue={formData.description_en}
+              onChange={(lang, val) => setFormData(prev => ({ ...prev, [`description_${lang}`]: val }))}
               rows={4}
-              fullWidth
               helperText="Descripción detallada de la edición"
             />
 
@@ -549,6 +603,52 @@ const EditionFormPage = () => {
               <Typography variant="caption" display="block" sx={{ ml: 6, color: 'text.secondary' }}>
                 Si está activado, las producciones se aprueban automáticamente al subirlas. Si está desactivado, requieren aprobación manual del administrador.
               </Typography>
+            </Box>
+
+            {/* Contact & Travel Section */}
+            <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
+              Contacto y Cómo Llegar
+            </Typography>
+
+            <LangTabs
+              label="Información de contacto"
+              esValue={formData.contact_info_es}
+              enValue={formData.contact_info_en}
+              onChange={(lang, val) => setFormData(prev => ({ ...prev, [`contact_info_${lang}`]: val }))}
+              rows={5}
+              helperText="Emails, redes sociales, Telegram, etc. (markdown soportado)"
+            />
+
+            <LangTabs
+              label="Cómo llegar"
+              esValue={formData.travel_info_es}
+              enValue={formData.travel_info_en}
+              onChange={(lang, val) => setFormData(prev => ({ ...prev, [`travel_info_${lang}`]: val }))}
+              rows={6}
+              helperText="Dirección, aeropuertos, trenes, parking, alojamiento (markdown soportado)"
+            />
+
+            <Box sx={{ display: 'flex', gap: 3, alignItems: 'center' }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    name="contact_form_enabled"
+                    checked={formData.contact_form_enabled}
+                    onChange={handleChange}
+                  />
+                }
+                label="Activar formulario de contacto"
+              />
+              <TextField
+                label="Email de destino"
+                name="contact_email"
+                type="email"
+                value={formData.contact_email}
+                onChange={handleChange}
+                sx={{ flexGrow: 1 }}
+                helperText="Los mensajes del formulario se enviarán a este email"
+                disabled={!formData.contact_form_enabled}
+              />
             </Box>
 
             {/* Actions */}

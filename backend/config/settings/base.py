@@ -20,7 +20,13 @@ LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 # SECRET_KEY = env("DJANGO_SECRET_KEY")
 # Language and timezone
 TIME_ZONE = "Europe/Madrid"
-LANGUAGE_CODE = "es-es"
+LANGUAGE_CODE = "es"
+LANGUAGES = [
+    ("es", "Español"),
+    ("en", "English"),
+]
+MODELTRANSLATION_DEFAULT_LANGUAGE = "es"
+MODELTRANSLATION_FALLBACK_LANGUAGES = ("es", "en")
 SITE_ID = 1
 USE_I18N = True
 USE_L10N = True
@@ -74,6 +80,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Apps
 DJANGO_APPS = [
+    "modeltranslation",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -125,6 +132,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
