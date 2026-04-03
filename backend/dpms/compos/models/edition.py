@@ -86,6 +86,11 @@ class Edition(BaseModel):
         default=False,
         help_text="If False, users can only see their own productions. Enable after voting to publish all productions."
     )
+    auto_approve_productions = models.BooleanField(
+        "Auto-approve Productions",
+        default=True,
+        help_text="Automatically approve new productions on submission. If disabled, productions require manual admin approval."
+    )
     compos = models.ManyToManyField(
         "compos.Compo",
         through="compos.HasCompo",

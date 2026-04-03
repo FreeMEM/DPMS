@@ -48,6 +48,8 @@ class ProductionSerializer(serializers.ModelSerializer):
     compo_name = serializers.CharField(source='compo.name', read_only=True)
     files_count = serializers.SerializerMethodField()
 
+    screenshot_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Production
         fields = [
@@ -60,11 +62,27 @@ class ProductionSerializer(serializers.ModelSerializer):
             'edition_title',
             'compo',
             'compo_name',
+            'platform',
+            'release_date',
+            'screenshot_url',
+            'youtube_url',
+            'demozoo_url',
+            'pouet_url',
+            'scene_org_url',
             'files_count',
+            'status',
+            'rejection_reason',
+            'rejection_notes',
             'created',
             'modified',
         ]
-        read_only_fields = ['id', 'created', 'modified', 'uploaded_by']
+        read_only_fields = ['id', 'created', 'modified', 'uploaded_by', 'status', 'rejection_reason', 'rejection_notes']
+
+    def get_screenshot_url(self, obj):
+        request = self.context.get('request')
+        if request and obj.screenshot:
+            return request.build_absolute_uri(obj.screenshot.url)
+        return None
 
     def get_files_count(self, obj):
         """Return count of associated files"""
@@ -75,9 +93,12 @@ class ProductionDetailSerializer(serializers.ModelSerializer):
     """Detailed serializer for Production with nested files"""
 
     uploaded_by = ResumedUserModelSerializer(read_only=True)
+    reviewed_by = ResumedUserModelSerializer(read_only=True)
     edition_title = serializers.CharField(source='edition.title', read_only=True)
     compo_name = serializers.CharField(source='compo.name', read_only=True)
     files = ProductionFileSerializer(many=True, read_only=True)
+    screenshot_url = serializers.SerializerMethodField()
+    platform_display = serializers.CharField(source='get_platform_display', read_only=True)
 
     class Meta:
         model = Production
@@ -91,11 +112,30 @@ class ProductionDetailSerializer(serializers.ModelSerializer):
             'edition_title',
             'compo',
             'compo_name',
+            'platform',
+            'platform_display',
+            'release_date',
+            'screenshot_url',
+            'youtube_url',
+            'demozoo_url',
+            'pouet_url',
+            'scene_org_url',
             'files',
+            'status',
+            'rejection_reason',
+            'rejection_notes',
+            'reviewed_by',
+            'reviewed_at',
             'created',
             'modified',
         ]
         read_only_fields = ['id', 'created', 'modified', 'uploaded_by']
+
+    def get_screenshot_url(self, obj):
+        request = self.context.get('request')
+        if request and obj.screenshot:
+            return request.build_absolute_uri(obj.screenshot.url)
+        return None
 
 
 class ProductionCreateSerializer(serializers.ModelSerializer):
@@ -117,6 +157,13 @@ class ProductionCreateSerializer(serializers.ModelSerializer):
             'edition',
             'compo',
             'files',
+            'platform',
+            'release_date',
+            'screenshot',
+            'youtube_url',
+            'demozoo_url',
+            'pouet_url',
+            'scene_org_url',
         ]
         read_only_fields = ['id']
 
@@ -164,9 +211,17 @@ class ProductionCreateSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        """Set uploaded_by to current user"""
+        """Set uploaded_by to current user and auto-approve if edition allows it"""
         files = validated_data.pop('files', [])
         validated_data['uploaded_by'] = self.context['request'].user
+
+        # Auto-approve if edition has it enabled
+        edition = validated_data.get('edition')
+        if edition and edition.auto_approve_productions:
+            validated_data['status'] = 'approved'
+        else:
+            validated_data['status'] = 'pending'
+
         production = super().create(validated_data)
 
         # Associate files

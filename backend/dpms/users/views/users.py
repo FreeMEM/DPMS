@@ -66,6 +66,40 @@ class UserViewSet(
 
         return [permission() for permission in permissions]
 
+    @action(detail=False, methods=["get"])
+    def search(self, request):
+        """Search users by email or nickname. Admin only."""
+        if not request.user.groups.filter(name='DPMS Admins').exists():
+            return Response(
+                {"detail": "Not authorized."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        q = request.query_params.get("q", "").strip()
+        if len(q) < 2:
+            return Response([])
+
+        from django.db.models import Q
+
+        users = User.objects.filter(
+            Q(email__icontains=q)
+            | Q(profile__nickname__icontains=q)
+            | Q(first_name__icontains=q)
+            | Q(last_name__icontains=q)
+        ).filter(is_active=True)[:20]
+
+        data = [
+            {
+                "id": u.id,
+                "email": u.email,
+                "nickname": getattr(u.profile, "nickname", "") if hasattr(u, "profile") else "",
+                "first_name": u.first_name,
+                "last_name": u.last_name,
+            }
+            for u in users
+        ]
+        return Response(data)
+
     """ API Actions """
 
     @action(detail=False, methods=["post"])

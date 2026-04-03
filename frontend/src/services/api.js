@@ -117,3 +117,8 @@ export const sponsorsAPI = {
   delete: (id) => getAxios().delete(`/api/sponsors/${id}/`),
   byEdition: (editionId) => getAxios().get('/api/sponsors/by_edition/', { params: { edition: editionId } }),
 };
+
+// Voting Results API
+export const votingResultsAPI = {
+  editionResults: (editionId) => getAxios().get('/api/voting-results/edition_results/', { params: { edition: editionId } }),
+};

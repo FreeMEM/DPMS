@@ -165,9 +165,28 @@ const MyProductions = () => {
                       label={production.compo_name}
                       size="small"
                       variant="outlined"
-                      sx={{ mb: 1 }}
+                      sx={{ mr: 1, mb: 1 }}
                     />
+                    {production.status && (
+                      <Chip
+                        label={production.status === 'approved' ? 'Aprobada' : production.status === 'rejected' ? 'Rechazada' : 'Pendiente'}
+                        size="small"
+                        color={production.status === 'approved' ? 'success' : production.status === 'rejected' ? 'error' : 'warning'}
+                        sx={{ mb: 1 }}
+                      />
+                    )}
                   </Box>
+                  {production.status === 'rejected' && production.rejection_reason && (
+                    <Alert severity="error" sx={{ mb: 1, py: 0 }} variant="outlined">
+                      <Typography variant="caption">
+                        {production.rejection_reason === 'technical' ? 'No cumple requisitos técnicos' :
+                         production.rejection_reason === 'inappropriate' ? 'Contenido inapropiado' :
+                         production.rejection_reason === 'wrong_compo' ? 'Compo incorrecta' :
+                         production.rejection_reason === 'duplicate' ? 'Duplicado' : 'Otro'}
+                        {production.rejection_notes ? `: ${production.rejection_notes}` : ''}
+                      </Typography>
+                    </Alert>
+                  )}
 
                   {production.description && (
                     <Typography

@@ -26,6 +26,7 @@ import {
   MenuItem,
   Grid,
   LinearProgress,
+  Autocomplete,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -41,7 +42,9 @@ const JuryManagementPage = () => {
   const [juryMembers, setJuryMembers] = useState([]);
   const [editions, setEditions] = useState([]);
   const [compos, setCompos] = useState([]);
-  const [, setUsers] = useState([]); // users will be used when search endpoint is implemented
+  const [userOptions, setUserOptions] = useState([]);
+  const [userSearchLoading, setUserSearchLoading] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -84,13 +87,20 @@ const JuryManagementPage = () => {
     }
   };
 
-  const fetchUsers = async () => {
+  const searchUsers = async (query) => {
+    if (!query || query.length < 2) {
+      setUserOptions([]);
+      return;
+    }
     try {
-      // TODO: Implement user search endpoint
-      // For now, we'll use a placeholder
-      setUsers([]);
+      setUserSearchLoading(true);
+      const client = axiosWrapper();
+      const res = await client.get('/api/users/search/', { params: { q: query } });
+      setUserOptions(res.data);
     } catch (err) {
-      console.error('Error fetching users:', err);
+      console.error('Error searching users:', err);
+    } finally {
+      setUserSearchLoading(false);
     }
   };
 
@@ -101,17 +111,17 @@ const JuryManagementPage = () => {
         edition: member.edition,
         compos: member.compos || [],
       });
+      setSelectedUser({ id: member.user, email: member.user_email });
     } else {
       setFormData({
         user: '',
         edition: '',
         compos: [],
       });
+      setSelectedUser(null);
+      setUserOptions([]);
     }
     setFormDialog({ open: true, member });
-    if (!member) {
-      fetchUsers();
-    }
   };
 
   const handleCloseForm = () => {
@@ -422,13 +432,47 @@ const JuryManagementPage = () => {
         <DialogContent>
           <Grid container spacing={3} sx={{ mt: 0.5 }}>
             <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="ID de Usuario"
-                value={formData.user}
-                onChange={(e) => setFormData({ ...formData, user: e.target.value })}
-                helperText="Ingresa el ID del usuario que será miembro del jurado"
-                type="number"
+              <Autocomplete
+                value={selectedUser}
+                options={userOptions}
+                getOptionLabel={(option) => {
+                  const parts = [option.email];
+                  if (option.nickname) parts.push(`(${option.nickname})`);
+                  else if (option.first_name || option.last_name)
+                    parts.push(`(${[option.first_name, option.last_name].filter(Boolean).join(' ')})`);
+                  return parts.join(' ');
+                }}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                loading={userSearchLoading}
+                onInputChange={(event, value, reason) => {
+                  if (reason === 'input') searchUsers(value);
+                }}
+                onChange={(event, value) => {
+                  setSelectedUser(value);
+                  setFormData({ ...formData, user: value ? value.id : '' });
+                }}
+                noOptionsText="Escribe al menos 2 caracteres para buscar"
+                loadingText="Buscando..."
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Usuario"
+                    helperText="Busca por email, nickname o nombre"
+                  />
+                )}
+                renderOption={(props, option) => (
+                  <li {...props} key={option.id}>
+                    <Box>
+                      <Typography variant="body2">{option.email}</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {[option.nickname, [option.first_name, option.last_name].filter(Boolean).join(' ')]
+                          .filter(Boolean)
+                          .join(' - ')}
+                      </Typography>
+                    </Box>
+                  </li>
+                )}
+                disabled={!!formDialog.member}
               />
             </Grid>
 

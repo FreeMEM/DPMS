@@ -43,6 +43,7 @@ const EditionFormPage = () => {
     open_to_upload: false,
     open_to_update: false,
     productions_public: false,
+    auto_approve_productions: true,
   });
 
   // Image states
@@ -80,6 +81,7 @@ const EditionFormPage = () => {
         open_to_upload: response.data.open_to_upload || false,
         open_to_update: response.data.open_to_update || false,
         productions_public: response.data.productions_public || false,
+        auto_approve_productions: response.data.auto_approve_productions !== false,
       });
       // Set existing images
       if (response.data.logo) {
@@ -178,6 +180,7 @@ const EditionFormPage = () => {
       submitData.append('open_to_upload', formData.open_to_upload);
       submitData.append('open_to_update', formData.open_to_update);
       submitData.append('productions_public', formData.productions_public);
+      submitData.append('auto_approve_productions', formData.auto_approve_productions);
 
       // Add files if selected
       if (logoFile) {
@@ -529,6 +532,22 @@ const EditionFormPage = () => {
               />
               <Typography variant="caption" display="block" sx={{ ml: 6, color: 'text.secondary' }}>
                 Si está desactivado, los usuarios solo ven sus propias producciones. Activar después de las votaciones.
+              </Typography>
+            </Box>
+
+            <Box sx={{ mb: 2 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    name="auto_approve_productions"
+                    checked={formData.auto_approve_productions}
+                    onChange={handleChange}
+                  />
+                }
+                label="Auto-aprobar producciones"
+              />
+              <Typography variant="caption" display="block" sx={{ ml: 6, color: 'text.secondary' }}>
+                Si está activado, las producciones se aprueban automáticamente al subirlas. Si está desactivado, requieren aprobación manual del administrador.
               </Typography>
             </Box>
 

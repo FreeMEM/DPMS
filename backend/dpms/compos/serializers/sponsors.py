@@ -26,6 +26,8 @@ class SponsorSerializer(serializers.ModelSerializer):
 class SponsorListSerializer(serializers.ModelSerializer):
     """Serializer for listing sponsors (minimal data for display)"""
 
+    editions_names = serializers.SerializerMethodField()
+
     class Meta:
         model = Sponsor
         fields = [
@@ -34,8 +36,13 @@ class SponsorListSerializer(serializers.ModelSerializer):
             'logo',
             'url',
             'display_order',
+            'editions_names',
         ]
         read_only_fields = ['id']
+
+    def get_editions_names(self, obj):
+        """Return list of edition titles"""
+        return [edition.title for edition in obj.editions.all()]
 
 
 class SponsorDetailSerializer(serializers.ModelSerializer):

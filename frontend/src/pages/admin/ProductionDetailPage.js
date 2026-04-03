@@ -17,6 +17,15 @@ import {
   TableHead,
   TableRow,
   Link,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
 } from '@mui/material';
 import {
   ArrowBack as BackIcon,
@@ -30,6 +39,14 @@ import { ConfirmDialog, LoadingSpinner, StatusChip, EmptyState } from '../../com
 import { formatDateTime } from '../../utils/dateFormatting';
 import axiosWrapper from '../../utils/AxiosWrapper';
 
+const REJECTION_REASONS = [
+  { value: 'technical', label: 'No cumple requisitos técnicos' },
+  { value: 'inappropriate', label: 'Contenido inapropiado' },
+  { value: 'wrong_compo', label: 'Compo incorrecta' },
+  { value: 'duplicate', label: 'Duplicado' },
+  { value: 'other', label: 'Otro' },
+];
+
 const ProductionDetailPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -37,8 +54,15 @@ const ProductionDetailPage = () => {
   const [production, setProduction] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [statusDialog, setStatusDialog] = useState({ open: false, status: null });
   const [updating, setUpdating] = useState(false);
+
+  // Approve dialog
+  const [approveDialog, setApproveDialog] = useState(false);
+
+  // Reject dialog
+  const [rejectDialog, setRejectDialog] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [rejectionNotes, setRejectionNotes] = useState('');
 
   const fetchProduction = useCallback(async () => {
     try {
@@ -59,19 +83,41 @@ const ProductionDetailPage = () => {
     fetchProduction();
   }, [fetchProduction]);
 
-  const handleStatusChange = async () => {
+  const handleApprove = async () => {
     try {
       setUpdating(true);
       const client = axiosWrapper();
-      await client.patch(`/api/productions/${id}/`, {
-        status: statusDialog.status,
+      await client.patch(`/api/productions/${id}/update_status/`, {
+        status: 'approved',
       });
       await fetchProduction();
-      setStatusDialog({ open: false, status: null });
+      setApproveDialog(false);
       setError(null);
     } catch (err) {
-      console.error('Error updating status:', err);
-      setError('Error al actualizar el estado');
+      console.error('Error approving production:', err);
+      setError('Error al aprobar la producción');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      setUpdating(true);
+      const client = axiosWrapper();
+      await client.patch(`/api/productions/${id}/update_status/`, {
+        status: 'rejected',
+        rejection_reason: rejectionReason,
+        rejection_notes: rejectionNotes,
+      });
+      await fetchProduction();
+      setRejectDialog(false);
+      setRejectionReason('');
+      setRejectionNotes('');
+      setError(null);
+    } catch (err) {
+      console.error('Error rejecting production:', err);
+      setError('Error al rechazar la producción');
     } finally {
       setUpdating(false);
     }
@@ -85,10 +131,18 @@ const ProductionDetailPage = () => {
     );
   }
 
-  if (error || !production) {
+  if (error && !production) {
     return (
       <AdminLayout title="Detalle de Producción">
         <Alert severity="error">{error || 'Producción no encontrada'}</Alert>
+      </AdminLayout>
+    );
+  }
+
+  if (!production) {
+    return (
+      <AdminLayout title="Detalle de Producción">
+        <Alert severity="error">Producción no encontrada</Alert>
       </AdminLayout>
     );
   }
@@ -121,7 +175,7 @@ const ProductionDetailPage = () => {
             variant="contained"
             color="success"
             startIcon={<ApproveIcon />}
-            onClick={() => setStatusDialog({ open: true, status: 'approved' })}
+            onClick={() => setApproveDialog(true)}
             disabled={updating}
           >
             Aprobar
@@ -132,7 +186,7 @@ const ProductionDetailPage = () => {
             variant="contained"
             color="error"
             startIcon={<RejectIcon />}
-            onClick={() => setStatusDialog({ open: true, status: 'rejected' })}
+            onClick={() => setRejectDialog(true)}
             disabled={updating}
           >
             Rechazar
@@ -192,6 +246,41 @@ const ProductionDetailPage = () => {
               </Typography>
               <Box sx={{ mt: 1 }}><StatusChip status={production.status} size="medium" /></Box>
             </Box>
+
+            {/* Rejection info */}
+            {production.status === 'rejected' && (
+              <Box sx={{ mb: 2, p: 2, bgcolor: 'rgba(244, 67, 54, 0.08)', borderRadius: 1, border: '1px solid rgba(244, 67, 54, 0.2)' }}>
+                <Typography variant="body2" color="error" fontWeight={600} gutterBottom>
+                  Motivo de rechazo
+                </Typography>
+                <Typography variant="body1">
+                  {REJECTION_REASONS.find(r => r.value === production.rejection_reason)?.label || production.rejection_reason || '-'}
+                </Typography>
+                {production.rejection_notes && (
+                  <>
+                    <Typography variant="body2" color="error" fontWeight={600} sx={{ mt: 1 }} gutterBottom>
+                      Notas
+                    </Typography>
+                    <Typography variant="body1">
+                      {production.rejection_notes}
+                    </Typography>
+                  </>
+                )}
+                {production.reviewed_by && (
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                    Revisado por {production.reviewed_by.email} el {formatDateTime(production.reviewed_at)}
+                  </Typography>
+                )}
+              </Box>
+            )}
+
+            {production.status === 'approved' && production.reviewed_by && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="caption" color="text.secondary">
+                  Aprobado por {production.reviewed_by.email} el {formatDateTime(production.reviewed_at)}
+                </Typography>
+              </Box>
+            )}
 
             <Box sx={{ mb: 2 }}>
               <Typography variant="body2" color="text.secondary">
@@ -322,15 +411,63 @@ const ProductionDetailPage = () => {
         </Grid>
       </Grid>
 
+      {/* Approve dialog */}
       <ConfirmDialog
-        open={statusDialog.open}
-        onClose={() => setStatusDialog({ open: false, status: null })}
-        onConfirm={handleStatusChange}
-        title={`${statusDialog.status === 'approved' ? 'Aprobar' : 'Rechazar'} Producción`}
-        message={`¿Estás seguro de que deseas ${
-          statusDialog.status === 'approved' ? 'aprobar' : 'rechazar'
-        } la producción "${production.title}"?`}
+        open={approveDialog}
+        onClose={() => setApproveDialog(false)}
+        onConfirm={handleApprove}
+        title="Aprobar Producción"
+        message={`¿Estás seguro de que deseas aprobar la producción "${production.title}"?`}
       />
+
+      {/* Reject dialog with reason selection */}
+      <Dialog
+        open={rejectDialog}
+        onClose={() => setRejectDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Rechazar Producción</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            ¿Estás seguro de que deseas rechazar la producción "{production.title}"?
+          </Typography>
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel>Motivo de rechazo</InputLabel>
+            <Select
+              value={rejectionReason}
+              label="Motivo de rechazo"
+              onChange={(e) => setRejectionReason(e.target.value)}
+            >
+              {REJECTION_REASONS.map((reason) => (
+                <MenuItem key={reason.value} value={reason.value}>
+                  {reason.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            fullWidth
+            multiline
+            rows={3}
+            label="Notas adicionales"
+            placeholder="Detalles sobre el motivo de rechazo..."
+            value={rejectionNotes}
+            onChange={(e) => setRejectionNotes(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRejectDialog(false)}>Cancelar</Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleReject}
+            disabled={updating || !rejectionReason}
+          >
+            Rechazar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </AdminLayout>
   );
 };
