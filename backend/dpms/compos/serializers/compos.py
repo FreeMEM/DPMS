@@ -17,6 +17,7 @@ class CompoSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'description',
+            'rules',
             'created_by',
             'productions_count',
             'created',
@@ -47,6 +48,7 @@ class CompoDetailSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'description',
+            'rules',
             'created_by',
             'editions_info',
             'productions_count',
@@ -80,6 +82,7 @@ class HasCompoSerializer(serializers.ModelSerializer):
     edition_title = serializers.CharField(source='edition.title', read_only=True)
     compo_name = serializers.CharField(source='compo.name', read_only=True)
     compo_description = serializers.CharField(source='compo.description', read_only=True)
+    compo_rules = serializers.CharField(source='compo.rules', read_only=True)
     created_by = ResumedUserModelSerializer(read_only=True)
 
     class Meta:
@@ -91,6 +94,7 @@ class HasCompoSerializer(serializers.ModelSerializer):
             'compo',
             'compo_name',
             'compo_description',
+            'compo_rules',
             'start',
             'show_authors_on_slide',
             'open_to_upload',

@@ -11,6 +11,7 @@ class Compo(BaseModel):
 
     name = models.CharField(max_length=255)
     description = models.TextField()
+    rules = models.TextField(blank=True, default='')
     created_by = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="compos"
     )

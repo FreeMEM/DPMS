@@ -95,6 +95,7 @@ class HasCompoInlineSerializer(serializers.ModelSerializer):
     compo_id = serializers.IntegerField(source='compo.id', read_only=True)
     compo_name = serializers.CharField(source='compo.name', read_only=True)
     compo_description = serializers.CharField(source='compo.description', read_only=True)
+    compo_rules = serializers.CharField(source='compo.rules', read_only=True)
 
     class Meta:
         model = HasCompo
@@ -103,6 +104,7 @@ class HasCompoInlineSerializer(serializers.ModelSerializer):
             'compo_id',
             'compo_name',
             'compo_description',
+            'compo_rules',
             'start',
             'show_authors_on_slide',
             'open_to_upload',
