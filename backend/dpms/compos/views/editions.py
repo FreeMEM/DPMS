@@ -5,7 +5,17 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from rest_framework.throttling import ScopedRateThrottle
+from rest_framework.throttling import SimpleRateThrottle
+
+
+class ContactRateThrottle(SimpleRateThrottle):
+    rate = '3/minute'
+
+    def get_cache_key(self, request, view):
+        return self.cache_format % {
+            'scope': 'contact',
+            'ident': self.get_ident(request),
+        }
 from django.core.mail import send_mail
 from django.conf import settings
 
@@ -99,6 +109,13 @@ class EditionViewSet(viewsets.ModelViewSet):
         edition = self.get_object()
         productions = edition.productions.all().select_related('uploaded_by', 'compo')
 
+        # Non-admin users only see approved productions
+        is_admin = request.user.is_authenticated and request.user.groups.filter(
+            name="DPMS Admins"
+        ).exists()
+        if not is_admin:
+            productions = productions.filter(status='approved')
+
         # Filter by compo if specified
         compo_id = request.query_params.get('compo')
         if compo_id:
@@ -107,7 +124,7 @@ class EditionViewSet(viewsets.ModelViewSet):
         serializer = ProductionSerializer(productions, many=True, context={'request': request})
         return Response(serializer.data)
 
-    @action(detail=False, methods=['post'], throttle_classes=[ScopedRateThrottle], throttle_scope='contact')
+    @action(detail=False, methods=['post'], throttle_classes=[ContactRateThrottle])
     def contact(self, request):
         """
         Send a contact message for an edition.

@@ -22,8 +22,18 @@ from dpms.users.models import User
 
 # Permissions
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.throttling import ScopedRateThrottle
+from rest_framework.throttling import SimpleRateThrottle
 from dpms.users.permissions import IsAccountOwner
+
+
+class AuthRateThrottle(SimpleRateThrottle):
+    rate = '5/minute'
+
+    def get_cache_key(self, request, view):
+        return self.cache_format % {
+            'scope': 'auth',
+            'ident': self.get_ident(request),
+        }
 
 # Utilities
 from django.utils import timezone
@@ -103,7 +113,7 @@ class UserViewSet(
 
     """ API Actions """
 
-    @action(detail=False, methods=["post"], throttle_classes=[ScopedRateThrottle], throttle_scope='auth')
+    @action(detail=False, methods=["post"], throttle_classes=[AuthRateThrottle])
     def login(self, request):
         """User sign in."""
 
@@ -140,7 +150,7 @@ class UserViewSet(
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
 
-    @action(detail=False, methods=["post"], throttle_classes=[ScopedRateThrottle], throttle_scope='auth')
+    @action(detail=False, methods=["post"], throttle_classes=[AuthRateThrottle])
     def signup(self, request):
         """User sign up."""
         serializer = UserSignUpSerializer(data=request.data)

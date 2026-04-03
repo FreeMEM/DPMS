@@ -17,6 +17,12 @@ SECRET_KEY = env(
 )
 ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "192.168.1.74"]
 
+# Development CORS origins
+CORS_ALLOWED_ORIGINS += [
+    "http://localhost:3000",
+    "http://192.168.1.74:3000",
+]
+
 # Cache
 CACHES = {
     "default": {

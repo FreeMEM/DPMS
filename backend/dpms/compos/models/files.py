@@ -21,18 +21,17 @@ def production_file_upload_to(instance, filename):
     # Store the original filename in the instance
     instance.original_filename = filename
 
+    ext = filename.split(".")[-1]
+    filename_slug = slugify(os.path.splitext(filename)[0])
+    unique_filename = f"{filename_slug}_{uuid.uuid4().hex}.{ext}"
+
     # Access the first associated production
     production = instance.productions.first()
     if production:
         edition_title = slugify(production.edition.title)
         compo_name = slugify(production.compo.name)
-        # Generate a unique filename using UUID
-        ext = filename.split(".")[-1]
-        filename_slug = slugify(os.path.splitext(filename)[0])
-        unique_filename = f"{filename_slug}_{uuid.uuid4().hex}.{ext}"
         path = os.path.join("files", edition_title, compo_name, unique_filename)
     else:
-        unique_filename = f"{slugify(filename)}_{uuid.uuid4().hex}.{ext}"
         path = os.path.join(
             "files", "unknown_edition", "unknown_compo", unique_filename
         )

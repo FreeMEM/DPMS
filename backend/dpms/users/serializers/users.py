@@ -213,7 +213,6 @@ class UserLoginSerializer(serializers.Serializer):
             "iat": int(timezone.now().timestamp()),
             "exp": int(exp_date.timestamp()),
             "type": "expiration date",
-            "email": self.context["user"].email,
         }
         token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
         return token
