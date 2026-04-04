@@ -5,6 +5,11 @@ on:
     branches:
       - main
 
+# Cancel in-progress deploys when a new push arrives
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
 defaults:
   run:
     working-directory: /var/www/DPMS
@@ -19,23 +24,66 @@ jobs:
       HOME: /root
 
     steps:
+      - name: Detect changes
+        id: changes
+        run: |
+          cd /var/www/DPMS
+          OLD_HEAD=$(git -c safe.directory=/var/www/DPMS rev-parse HEAD)
+          echo "old_head=$OLD_HEAD" >> $GITHUB_OUTPUT
+
+          # Fetch and check what changed
+          git -c safe.directory=/var/www/DPMS fetch origin main
+          CHANGED=$(git -c safe.directory=/var/www/DPMS diff --name-only $OLD_HEAD origin/main)
+          echo "Changed files:"
+          echo "$CHANGED"
+
+          # Detect what needs rebuild
+          NEED_BACKEND_BUILD="false"
+          NEED_FRONTEND_BUILD="false"
+          NEED_BACKEND_RESTART="false"
+          NEED_NGINX_RESTART="false"
+
+          echo "$CHANGED" | grep -qE "^docker/backend/|^backend/requirements/" && NEED_BACKEND_BUILD="true"
+          echo "$CHANGED" | grep -qE "^docker/frontend/|^frontend/package\.json|^frontend/yarn\.lock|^frontend/\.yarn" && NEED_FRONTEND_BUILD="true"
+          echo "$CHANGED" | grep -qE "^backend/" && NEED_BACKEND_RESTART="true"
+          echo "$CHANGED" | grep -qE "^frontend/src/" && NEED_FRONTEND_BUILD="true"
+          echo "$CHANGED" | grep -qE "^nginx/" && NEED_NGINX_RESTART="true"
+
+          echo "need_backend_build=$NEED_BACKEND_BUILD" >> $GITHUB_OUTPUT
+          echo "need_frontend_build=$NEED_FRONTEND_BUILD" >> $GITHUB_OUTPUT
+          echo "need_backend_restart=$NEED_BACKEND_RESTART" >> $GITHUB_OUTPUT
+          echo "need_nginx_restart=$NEED_NGINX_RESTART" >> $GITHUB_OUTPUT
+
       - name: Pull latest code
         env:
           GIT_SSH_COMMAND: "ssh -i /root/.ssh/id_rsa -o StrictHostKeyChecking=no"
         run: |
-          git -c safe.directory=/var/www/DPMS fetch origin main
           git -c safe.directory=/var/www/DPMS reset --hard origin/main
 
-      - name: Rebuild and restart services
+      - name: Rebuild backend image
+        if: steps.changes.outputs.need_backend_build == 'true'
+        run: docker compose -f production.yml build backend_party
+
+      - name: Rebuild frontend image
+        if: steps.changes.outputs.need_frontend_build == 'true'
+        run: docker compose -f production.yml build frontend
+
+      - name: Restart services
         run: |
-          docker compose -f production.yml build --parallel
-          docker compose -f production.yml up -d
+          if [ "${{ steps.changes.outputs.need_backend_build }}" = "true" ] || [ "${{ steps.changes.outputs.need_frontend_build }}" = "true" ]; then
+            # Full restart when images were rebuilt
+            docker compose -f production.yml up -d
+          elif [ "${{ steps.changes.outputs.need_backend_restart }}" = "true" ]; then
+            # Only restart backend (code changes, migrations, etc.)
+            docker compose -f production.yml restart backend_party
+          elif [ "${{ steps.changes.outputs.need_nginx_restart }}" = "true" ]; then
+            docker compose -f production.yml restart nginx
+          else
+            echo "No restart needed"
+          fi
 
       - name: Wait for services to be healthy
         run: |
-          echo "Waiting for services to start..."
-
-          # Poll until nginx responds (up to 30s)
           for i in $(seq 1 15); do
             HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ || true)
             if [ "$HTTP_CODE" != "000" ]; then
@@ -44,7 +92,6 @@ jobs:
             sleep 2
           done
 
-          # Check that all services are running
           RUNNING=$(docker compose -f production.yml ps --status running --format json | wc -l)
           TOTAL=$(docker compose -f production.yml ps --format json | wc -l)
 
@@ -56,15 +103,13 @@ jobs:
             exit 1
           fi
 
-          echo "HTTP response code: $HTTP_CODE"
-
           if [ "$HTTP_CODE" = "000" ]; then
             echo "Nginx is not responding"
             docker compose -f production.yml logs nginx --tail 20
             exit 1
           fi
 
-          echo "Deploy successful!"
+          echo "Deploy successful! (HTTP $HTTP_CODE)"
 
       - name: Cleanup old Docker images
         run: docker image prune -f
