@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import {
   Box,
   TextField,
@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { editionsAPI, productionsAPI } from '../../services/api';
+import { AuthContext } from '../../AuthContext';
 import FileUpload from './FileUpload';
 import MainBar from '../../@dpms-freemem/MainBar';
 
@@ -22,13 +23,22 @@ const ProductionForm = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { id: productionId } = useParams();
+  const { user } = useContext(AuthContext);
+
+  // Build default author from user profile
+  const defaultAuthor = (() => {
+    if (!user?.profile) return '';
+    const { nickname, group } = user.profile;
+    if (nickname && group) return `${nickname} / ${group}`;
+    return nickname || group || '';
+  })();
 
   const [formData, setFormData] = useState({
     title: '',
-    authors: '',
+    authors: productionId ? '' : defaultAuthor,
     description: '',
-    edition: searchParams.get('edition') || '',
-    compo: searchParams.get('compo') || '',
+    edition: searchParams.get('edition') ? parseInt(searchParams.get('edition')) : '',
+    compo: searchParams.get('compo') ? parseInt(searchParams.get('compo')) : '',
     files: [],
   });
 
@@ -219,7 +229,7 @@ const ProductionForm = () => {
               required
             >
               {compos.map((hasCompo) => (
-                <MenuItem key={hasCompo.compo_id} value={hasCompo.compo_id}>
+                <MenuItem key={hasCompo.compo} value={hasCompo.compo}>
                   {hasCompo.compo_name}
                 </MenuItem>
               ))}

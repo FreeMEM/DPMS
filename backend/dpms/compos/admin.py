@@ -243,15 +243,19 @@ class EditionAdmin(TranslationAdmin):
     make_private.short_description = "Make private"
 
     def open_uploads(self, request, queryset):
-        """Open uploads for selected editions"""
+        """Open uploads for selected editions and their compos"""
         updated = queryset.update(open_to_upload=True)
-        self.message_user(request, f"{updated} editions are now open for uploads.")
+        from dpms.compos.models import HasCompo
+        HasCompo.objects.filter(edition__in=queryset).update(open_to_upload=True)
+        self.message_user(request, f"{updated} editions and their compos are now open for uploads.")
     open_uploads.short_description = "Open uploads"
 
     def close_uploads(self, request, queryset):
-        """Close uploads for selected editions"""
+        """Close uploads for selected editions and their compos"""
         updated = queryset.update(open_to_upload=False)
-        self.message_user(request, f"{updated} editions are now closed for uploads.")
+        from dpms.compos.models import HasCompo
+        HasCompo.objects.filter(edition__in=queryset).update(open_to_upload=False)
+        self.message_user(request, f"{updated} editions and their compos are now closed for uploads.")
     close_uploads.short_description = "Close uploads"
 
     def open_updates(self, request, queryset):

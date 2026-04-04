@@ -118,5 +118,22 @@ class Edition(BaseModel):
         related_name="editions",
     )
 
+    def save(self, *args, **kwargs):
+        # Track if open_to_upload changed
+        if self.pk:
+            try:
+                old = Edition.objects.get(pk=self.pk)
+                open_changed = old.open_to_upload != self.open_to_upload
+            except Edition.DoesNotExist:
+                open_changed = False
+        else:
+            open_changed = False
+
+        super().save(*args, **kwargs)
+
+        # Propagate open_to_upload to all related HasCompo entries
+        if open_changed:
+            self.hascompo_set.update(open_to_upload=self.open_to_upload)
+
     def __str__(self):
         return self.title
