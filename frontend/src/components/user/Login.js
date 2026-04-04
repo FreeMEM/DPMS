@@ -23,13 +23,20 @@ const Login = () => {
   const [passwordError, setPasswordError] = useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
   const [open, setOpen] = useState(false);
-  const { login } = useContext(AuthContext);
+  const { login, isAuthenticated, loading } = useContext(AuthContext);
   const [loginError, setLoginError] = useState("");
   const [edition, setEdition] = useState(null);
   const [editionLoaded, setEditionLoaded] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
   const theme = useTheme();
+
+  // Si ya está autenticado, redirigir al dashboard
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      navigate("/", { replace: true });
+    }
+  }, [loading, isAuthenticated, navigate]);
 
   // Cargar edición actual (la primera edición pública)
   useEffect(() => {

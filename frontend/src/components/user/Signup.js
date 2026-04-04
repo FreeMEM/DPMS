@@ -17,10 +17,17 @@ const Signup = () => {
   const [errors, setErrors] = useState({});
   const [edition, setEdition] = useState(null);
   const [editionLoaded, setEditionLoaded] = useState(false);
-  const { signup } = useContext(AuthContext);
+  const { signup, isAuthenticated, loading } = useContext(AuthContext);
   const navigate = useNavigate();
   const { t } = useTranslation();
   const theme = useTheme();
+
+  // Si ya está autenticado, redirigir al dashboard
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      navigate("/", { replace: true });
+    }
+  }, [loading, isAuthenticated, navigate]);
 
   // Cargar edición actual (la primera edición pública)
   useEffect(() => {
