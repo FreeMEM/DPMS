@@ -23,6 +23,7 @@ from dpms.users.models import User
 # Permissions
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.throttling import SimpleRateThrottle
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from dpms.users.permissions import IsAccountOwner, IsDPMSAdmin
 
 
@@ -57,10 +58,11 @@ class UserViewSet(
 
     queryset = User.objects.filter(is_active=True)
     serializer_class = UserModelSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     lookup_field = "email"
     lookup_url_kwarg = "email"
-    lookup_value_regex = "[\w@.-_]+"
+    lookup_value_regex = "[\w@.\-_]+"
 
     def get_permissions(self):
         """Assign permissions based on action"""

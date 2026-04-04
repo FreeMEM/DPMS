@@ -39,6 +39,7 @@ const SlidesListPage = lazy(() => import("./pages/admin/stagerunner").then(m => 
 const SlideEditorPage = lazy(() => import("./pages/admin/stagerunner").then(m => ({ default: m.SlideEditorPage })));
 const LiveControlPage = lazy(() => import("./pages/admin/stagerunner").then(m => ({ default: m.LiveControlPage })));
 const StageRunnerViewer = lazy(() => import("./pages/stagerunner/StageRunnerViewer"));
+const ProfilePage = lazy(() => import("./components/user/ProfilePage"));
 const Gallery = lazy(() => import("./components/gallery/Gallery"));
 const RulesPage = lazy(() => import("./pages/RulesPage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
@@ -259,6 +260,14 @@ const AppRoutes = () => {
         />
         {/* StageRunner Visualizer (public for projector laptop) */}
         <Route path="/stagerunner/:editionId" element={<StageRunnerViewer />} />
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <ProfilePage />
+            </PrivateRoute>
+          }
+        />
         <Route path="/compos" element={<ComposList />} />
         <Route path="/rules" element={<RulesPage />} />
         <Route path="/contact" element={<ContactPage />} />

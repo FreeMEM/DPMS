@@ -19,7 +19,7 @@ class Profile(BaseModel):
         "users.User", on_delete=models.CASCADE, blank=True, null=True
     )
 
-    extra_information = models.TextField(max_length=500, blank=True)
+    extra_information = models.TextField(max_length=2000, blank=True)
 
     avatar = models.ImageField(
         "avatar profile",

@@ -46,14 +46,7 @@ export const productionsAPI = {
 export const filesAPI = {
   list: () => getAxios().get('/api/files/'),
   get: (id) => getAxios().get(`/api/files/${id}/`),
-  upload: (formData) => {
-    const client = getAxios();
-    return client.post('/api/files/', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-  },
+  upload: (formData) => getAxios().post('/api/files/', formData),
   update: (id, data) => getAxios().put(`/api/files/${id}/`, data),
   delete: (id) => getAxios().delete(`/api/files/${id}/`),
   download: (id) => getAxios().get(`/api/files/${id}/download/`, { responseType: 'blob' }),
@@ -72,14 +65,7 @@ export const hasComposAPI = {
 export const galleryAPI = {
   list: (params) => getAxios().get('/api/gallery/', { params }),
   get: (id) => getAxios().get(`/api/gallery/${id}/`),
-  upload: (formData) => {
-    const client = getAxios();
-    return client.post('/api/gallery/', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-  },
+  upload: (formData) => getAxios().post('/api/gallery/', formData),
   update: (id, data) => getAxios().put(`/api/gallery/${id}/`, data),
   delete: (id) => getAxios().delete(`/api/gallery/${id}/`),
   myImages: (params) => getAxios().get('/api/gallery/my_images/', { params }),
@@ -91,30 +77,9 @@ export const galleryAPI = {
 export const sponsorsAPI = {
   list: (params) => getAxios().get('/api/sponsors/', { params }),
   get: (id) => getAxios().get(`/api/sponsors/${id}/`),
-  create: (formData) => {
-    const client = getAxios();
-    return client.post('/api/sponsors/', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-  },
-  update: (id, formData) => {
-    const client = getAxios();
-    return client.put(`/api/sponsors/${id}/`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-  },
-  patch: (id, formData) => {
-    const client = getAxios();
-    return client.patch(`/api/sponsors/${id}/`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-  },
+  create: (formData) => getAxios().post('/api/sponsors/', formData),
+  update: (id, formData) => getAxios().put(`/api/sponsors/${id}/`, formData),
+  patch: (id, formData) => getAxios().patch(`/api/sponsors/${id}/`, formData),
   delete: (id) => getAxios().delete(`/api/sponsors/${id}/`),
   byEdition: (editionId) => getAxios().get('/api/sponsors/by_edition/', { params: { edition: editionId } }),
 };

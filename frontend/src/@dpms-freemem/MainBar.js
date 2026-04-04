@@ -238,7 +238,7 @@ const MainBar = () => {
           open={Boolean(anchorEl)}
           onClose={handleClose}
         >
-          <MenuItem onClick={handleClose}>
+          <MenuItem onClick={() => { handleClose(); navigate("/profile"); }}>
             <ListItemIcon>
               <PersonIcon fontSize="small" />
             </ListItemIcon>

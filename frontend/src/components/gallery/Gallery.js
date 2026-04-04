@@ -186,6 +186,7 @@ const Gallery = () => {
       formData.append("image", uploadFile);
       formData.append("title", uploadTitle);
       formData.append("description", uploadDescription);
+      formData.append("public", true);
       if (uploadEdition) {
         formData.append("edition", uploadEdition);
       }
@@ -266,7 +267,7 @@ const Gallery = () => {
   };
 
   const isOwner = (image) => {
-    return user && image.uploaded_by?.id === user.id;
+    return user && image.uploaded_by?.email === user.email;
   };
 
   const ImageCard = ({ image, showActions = false }) => (
