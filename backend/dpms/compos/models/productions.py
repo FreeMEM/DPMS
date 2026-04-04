@@ -47,7 +47,7 @@ def production_screenshot_path(instance, filename):
 class Production(BaseModel):
     title = models.CharField(max_length=255)
     authors = models.CharField(max_length=255)
-    description = models.TextField()
+    description = models.TextField(blank=True, default='')
     uploaded_by = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="productions"
     )

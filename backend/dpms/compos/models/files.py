@@ -25,22 +25,27 @@ def production_file_upload_to(instance, filename):
     filename_slug = slugify(os.path.splitext(filename)[0])
     unique_filename = f"{filename_slug}_{uuid.uuid4().hex}.{ext}"
 
-    # Access the first associated production
-    production = instance.productions.first()
+    # Access the first associated production (only possible if file is already saved)
+    try:
+        if instance.pk:
+            production = instance.productions.first()
+        else:
+            production = None
+    except ValueError:
+        production = None
+
     if production:
         edition_title = slugify(production.edition.title)
         compo_name = slugify(production.compo.name)
         path = os.path.join("files", edition_title, compo_name, unique_filename)
     else:
-        path = os.path.join(
-            "files", "unknown_edition", "unknown_compo", unique_filename
-        )
+        path = os.path.join("files", "uploads", unique_filename)
     return path
 
 
 class File(BaseModel):
     title = models.CharField(max_length=255)
-    description = models.TextField()
+    description = models.TextField(blank=True, default='')
     uploaded_by = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="files"
     )

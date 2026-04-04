@@ -6,6 +6,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 from dpms.compos.models import Production
 from dpms.compos.models.productions import STATUS_CHOICES, REJECTION_REASONS
@@ -35,6 +36,8 @@ class ProductionViewSet(viewsets.ModelViewSet):
     - If edition.productions_public=False: users can only see their own productions
     - Authors always see their own productions regardless of status
     """
+
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     queryset = Production.objects.all().select_related(
         'uploaded_by', 'edition', 'compo', 'reviewed_by'

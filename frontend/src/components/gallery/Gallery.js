@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -50,6 +51,7 @@ import { galleryAPI, editionsAPI } from "../../services/api";
 
 const Gallery = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { isAuthenticated, user } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -127,7 +129,7 @@ const Gallery = () => {
       setError(null);
     } catch (err) {
       console.error("Error fetching gallery data:", err);
-      setError("Error al cargar la galería");
+      setError(t("Error loading gallery"));
     } finally {
       setLoading(false);
     }
@@ -174,7 +176,7 @@ const Gallery = () => {
 
   const handleUpload = async () => {
     if (!uploadFile) {
-      setUploadError("Selecciona una imagen");
+      setUploadError(t("Select an image"));
       return;
     }
 
@@ -198,7 +200,7 @@ const Gallery = () => {
       fetchMyImages();
     } catch (err) {
       console.error("Error uploading image:", err);
-      setUploadError(err.response?.data?.image?.[0] || "Error al subir la imagen");
+      setUploadError(err.response?.data?.image?.[0] || t("Error uploading image"));
     } finally {
       setUploading(false);
     }
@@ -312,12 +314,12 @@ const Gallery = () => {
       </CardContent>
       {showActions && isOwner(image) && (
         <CardActions sx={{ pt: 0 }}>
-          <Tooltip title="Editar">
+          <Tooltip title={t("Edit")}>
             <IconButton size="small" onClick={() => handleEditOpen(image)}>
               <EditIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Eliminar">
+          <Tooltip title={t("Delete")}>
             <IconButton
               size="small"
               color="error"
@@ -361,7 +363,7 @@ const Gallery = () => {
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <GalleryIcon sx={{ fontSize: 40, color: "primary.main" }} />
               <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                Galería
+                {t("Gallery")}
               </Typography>
             </Box>
             {isAuthenticated && (
@@ -370,7 +372,7 @@ const Gallery = () => {
                 startIcon={<AddIcon />}
                 onClick={handleUploadOpen}
               >
-                Subir Imagen
+                {t("Upload Image")}
               </Button>
             )}
           </Box>
@@ -387,8 +389,8 @@ const Gallery = () => {
             onChange={(e, v) => setTabValue(v)}
             sx={{ mb: 3 }}
           >
-            <Tab label="Todas las imágenes" />
-            {isAuthenticated && <Tab label="Mis imágenes" />}
+            <Tab label={t("All images")} />
+            {isAuthenticated && <Tab label={t("My images")} />}
           </Tabs>
 
           {/* Filter by edition */}
@@ -396,13 +398,13 @@ const Gallery = () => {
             <Box sx={{ mb: 3, display: "flex", alignItems: "center", gap: 2 }}>
               <FilterIcon color="action" />
               <FormControl size="small" sx={{ minWidth: 200 }}>
-                <InputLabel>Filtrar por edición</InputLabel>
+                <InputLabel>{t("Filter by edition")}</InputLabel>
                 <Select
                   value={selectedEdition}
-                  label="Filtrar por edición"
+                  label={t("Filter by edition")}
                   onChange={(e) => setSelectedEdition(e.target.value)}
                 >
-                  <MenuItem value="">Todas las ediciones</MenuItem>
+                  <MenuItem value="">{t("All editions")}</MenuItem>
                   {editions.map((edition) => (
                     <MenuItem key={edition.id} value={edition.id}>
                       {edition.title}
@@ -415,7 +417,7 @@ const Gallery = () => {
                   size="small"
                   onClick={() => setSelectedEdition("")}
                 >
-                  Limpiar filtro
+                  {t("Clear filter")}
                 </Button>
               )}
             </Box>
@@ -435,7 +437,7 @@ const Gallery = () => {
                       <Box sx={{ textAlign: "center", py: 8 }}>
                         <GalleryIcon sx={{ fontSize: 80, color: "text.secondary", mb: 2 }} />
                         <Typography variant="h6" color="text.secondary">
-                          No hay imágenes en la galería
+                          {t("No images in the gallery")}
                         </Typography>
                         {isAuthenticated && (
                           <Button
@@ -444,7 +446,7 @@ const Gallery = () => {
                             onClick={handleUploadOpen}
                             sx={{ mt: 2 }}
                           >
-                            Sube la primera imagen
+                            {t("Upload the first image")}
                           </Button>
                         )}
                       </Box>
@@ -467,7 +469,7 @@ const Gallery = () => {
                       <Box sx={{ textAlign: "center", py: 8 }}>
                         <GalleryIcon sx={{ fontSize: 80, color: "text.secondary", mb: 2 }} />
                         <Typography variant="h6" color="text.secondary">
-                          Aún no has subido ninguna imagen
+                          {t("You haven't uploaded any images yet")}
                         </Typography>
                         <Button
                           variant="outlined"
@@ -475,7 +477,7 @@ const Gallery = () => {
                           onClick={handleUploadOpen}
                           sx={{ mt: 2 }}
                         >
-                          Subir mi primera imagen
+                          {t("Upload my first image")}
                         </Button>
                       </Box>
                     </Grid>
@@ -512,7 +514,7 @@ const Gallery = () => {
       {/* Upload Dialog */}
       <Dialog open={uploadOpen} onClose={handleUploadClose} maxWidth="sm" fullWidth>
         <DialogTitle>
-          Subir Imagen
+          {t("Upload Image")}
           <IconButton
             onClick={handleUploadClose}
             sx={{ position: "absolute", right: 8, top: 8 }}
@@ -550,10 +552,10 @@ const Gallery = () => {
               <>
                 <UploadIcon sx={{ fontSize: 48, color: "text.secondary", mb: 1 }} />
                 <Typography color="text.secondary">
-                  Haz click o arrastra una imagen aquí
+                  {t("Click or drag an image here")}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  JPG, PNG, GIF, WebP (máx. 20MB)
+                  {t("JPG, PNG, GIF, WebP (max. 20MB)")}
                 </Typography>
               </>
             )}
@@ -568,7 +570,7 @@ const Gallery = () => {
 
           <TextField
             fullWidth
-            label="Título (opcional)"
+            label={t("Title (optional)")}
             value={uploadTitle}
             onChange={(e) => setUploadTitle(e.target.value)}
             sx={{ mb: 2 }}
@@ -576,7 +578,7 @@ const Gallery = () => {
 
           <TextField
             fullWidth
-            label="Descripción (opcional)"
+            label={t("Description (optional)")}
             value={uploadDescription}
             onChange={(e) => setUploadDescription(e.target.value)}
             multiline
@@ -585,10 +587,10 @@ const Gallery = () => {
           />
 
           <FormControl fullWidth>
-            <InputLabel>Edición</InputLabel>
+            <InputLabel>{t("Edition")}</InputLabel>
             <Select
               value={uploadEdition}
-              label="Edición"
+              label={t("Edition")}
               onChange={(e) => setUploadEdition(e.target.value)}
             >
               {editions.map((edition) => (
@@ -600,21 +602,21 @@ const Gallery = () => {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleUploadClose}>Cancelar</Button>
+          <Button onClick={handleUploadClose}>{t("Cancel")}</Button>
           <Button
             variant="contained"
             onClick={handleUpload}
             disabled={!uploadFile || uploading}
             startIcon={uploading ? <CircularProgress size={20} /> : <UploadIcon />}
           >
-            {uploading ? "Subiendo..." : "Subir"}
+            {uploading ? t("Uploading...") : t("Upload")}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Edit Dialog */}
       <Dialog open={editOpen} onClose={handleEditClose} maxWidth="sm" fullWidth>
-        <DialogTitle>Editar Imagen</DialogTitle>
+        <DialogTitle>{t("Edit Image")}</DialogTitle>
         <DialogContent>
           {editImage && (
             <Box sx={{ mb: 2, textAlign: "center" }}>
@@ -628,7 +630,7 @@ const Gallery = () => {
 
           <TextField
             fullWidth
-            label="Título"
+            label={t("Title")}
             value={editTitle}
             onChange={(e) => setEditTitle(e.target.value)}
             sx={{ mb: 2 }}
@@ -636,7 +638,7 @@ const Gallery = () => {
 
           <TextField
             fullWidth
-            label="Descripción"
+            label={t("Description")}
             value={editDescription}
             onChange={(e) => setEditDescription(e.target.value)}
             multiline
@@ -645,13 +647,13 @@ const Gallery = () => {
           />
 
           <FormControl fullWidth>
-            <InputLabel>Edición</InputLabel>
+            <InputLabel>{t("Edition")}</InputLabel>
             <Select
               value={editEdition}
-              label="Edición"
+              label={t("Edition")}
               onChange={(e) => setEditEdition(e.target.value)}
             >
-              <MenuItem value="">Sin edición</MenuItem>
+              <MenuItem value="">{t("No edition")}</MenuItem>
               {editions.map((edition) => (
                 <MenuItem key={edition.id} value={edition.id}>
                   {edition.title}
@@ -661,26 +663,25 @@ const Gallery = () => {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleEditClose}>Cancelar</Button>
+          <Button onClick={handleEditClose}>{t("Cancel")}</Button>
           <Button variant="contained" onClick={handleEditSave}>
-            Guardar
+            {t("Save")}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Delete Dialog */}
       <Dialog open={deleteOpen} onClose={handleDeleteClose}>
-        <DialogTitle>Eliminar Imagen</DialogTitle>
+        <DialogTitle>{t("Delete Image")}</DialogTitle>
         <DialogContent>
           <Typography>
-            ¿Estás seguro de que quieres eliminar esta imagen? Esta acción no se
-            puede deshacer.
+            {t("Are you sure you want to delete this image? This action cannot be undone.")}
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleDeleteClose}>Cancelar</Button>
+          <Button onClick={handleDeleteClose}>{t("Cancel")}</Button>
           <Button variant="contained" color="error" onClick={handleDeleteConfirm}>
-            Eliminar
+            {t("Delete")}
           </Button>
         </DialogActions>
       </Dialog>

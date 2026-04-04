@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Box,
   Button,
@@ -8,76 +8,66 @@ import {
   ListItemSecondaryAction,
   IconButton,
   Typography,
-  LinearProgress,
   Alert,
   Chip,
 } from '@mui/material';
 import { Delete as DeleteIcon, CloudUpload as UploadIcon } from '@mui/icons-material';
-import { filesAPI } from '../../services/api';
+import { useTranslation } from 'react-i18next';
 
-const FileUpload = ({ onFilesUploaded, initialFiles = [] }) => {
-  const [files, setFiles] = useState(initialFiles);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+const FileUpload = ({ onFilesChanged, initialFiles = [] }) => {
+  const { t } = useTranslation();
+  const fileInputRef = useRef(null);
+  const [pendingFiles, setPendingFiles] = useState([]);
+  const [existingFiles] = useState(initialFiles);
   const [error, setError] = useState(null);
 
-  const handleFileSelect = async (event) => {
+  const handleFileSelect = (event) => {
     const selectedFiles = Array.from(event.target.files);
-
     if (selectedFiles.length === 0) return;
 
-    setUploading(true);
     setError(null);
-    setUploadProgress(0);
 
-    try {
-      const uploadedFiles = [];
-
-      for (let i = 0; i < selectedFiles.length; i++) {
-        const file = selectedFiles[i];
-
-        // Check file size (100MB max)
-        if (file.size > 100 * 1024 * 1024) {
-          throw new Error(`File ${file.name} exceeds 100MB limit`);
-        }
-
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('title', file.name);
-        formData.append('description', '');
-        formData.append('public', 'false');
-
-        const response = await filesAPI.upload(formData);
-        uploadedFiles.push(response.data);
-
-        // Update progress
-        setUploadProgress(((i + 1) / selectedFiles.length) * 100);
+    // Validate file sizes
+    for (const file of selectedFiles) {
+      if (file.size > 100 * 1024 * 1024) {
+        setError(`File ${file.name} exceeds 100MB limit`);
+        return;
       }
+    }
 
-      const newFiles = [...files, ...uploadedFiles];
-      setFiles(newFiles);
+    const newPending = [...pendingFiles, ...selectedFiles];
+    setPendingFiles(newPending);
 
-      // Notify parent component with file IDs
-      if (onFilesUploaded) {
-        onFilesUploaded(newFiles.map(f => f.id));
-      }
+    if (onFilesChanged) {
+      onFilesChanged({
+        existingFileIds: existingFiles.map(f => f.id),
+        newFiles: newPending,
+      });
+    }
 
-      // Reset progress
-      setTimeout(() => setUploadProgress(0), 1000);
-    } catch (err) {
-      console.error('Upload error:', err);
-      setError(err.response?.data?.file?.[0] || err.message || 'Error uploading file');
-    } finally {
-      setUploading(false);
+    // Reset input so selecting the same file again works
+    event.target.value = '';
+  };
+
+  const handleRemovePending = (index) => {
+    const newPending = pendingFiles.filter((_, i) => i !== index);
+    setPendingFiles(newPending);
+
+    if (onFilesChanged) {
+      onFilesChanged({
+        existingFileIds: existingFiles.map(f => f.id),
+        newFiles: newPending,
+      });
     }
   };
 
-  const handleRemoveFile = (fileId) => {
-    const newFiles = files.filter(f => f.id !== fileId);
-    setFiles(newFiles);
-
-    if (onFilesUploaded) {
-      onFilesUploaded(newFiles.map(f => f.id));
+  const handleRemoveExisting = (fileId) => {
+    const newExisting = existingFiles.filter(f => f.id !== fileId);
+    if (onFilesChanged) {
+      onFilesChanged({
+        existingFileIds: newExisting.map(f => f.id),
+        newFiles: pendingFiles,
+      });
     }
   };
 
@@ -89,10 +79,12 @@ const FileUpload = ({ onFilesUploaded, initialFiles = [] }) => {
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
   };
 
+  const totalFiles = existingFiles.length + pendingFiles.length;
+
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
-        Files
+        {t("Files")}
       </Typography>
 
       {error && (
@@ -103,66 +95,48 @@ const FileUpload = ({ onFilesUploaded, initialFiles = [] }) => {
 
       <input
         accept="*/*"
+        ref={fileInputRef}
         style={{ display: 'none' }}
-        id="file-upload-button"
         multiple
         type="file"
         onChange={handleFileSelect}
-        disabled={uploading}
       />
-      <label htmlFor="file-upload-button">
-        <Button
-          variant="contained"
-          component="span"
-          startIcon={<UploadIcon />}
-          disabled={uploading}
-          sx={{ mb: 2 }}
-        >
-          {uploading ? 'Uploading...' : 'Upload Files'}
-        </Button>
-      </label>
+      <Button
+        type="button"
+        variant="contained"
+        startIcon={<UploadIcon />}
+        onClick={() => fileInputRef.current?.click()}
+        sx={{ mb: 2 }}
+      >
+        {t("Upload Files")}
+      </Button>
 
-      {uploading && (
-        <Box sx={{ mb: 2 }}>
-          <LinearProgress variant="determinate" value={uploadProgress} />
-          <Typography variant="caption" sx={{ mt: 0.5 }}>
-            {Math.round(uploadProgress)}% uploaded
-          </Typography>
-        </Box>
-      )}
-
-      {files.length > 0 && (
+      {totalFiles > 0 && (
         <List>
-          {files.map((file) => (
-            <ListItem key={file.id} divider>
+          {/* Existing files (already uploaded, e.g. when editing) */}
+          {existingFiles.map((file) => (
+            <ListItem key={`existing-${file.id}`} divider>
               <ListItemText
                 primary={file.title || file.original_filename}
-                secondary={
-                  <>
-                    {file.original_filename && file.original_filename !== file.title && (
-                      <Typography component="span" variant="body2">
-                        {file.original_filename}
-                        <br />
-                      </Typography>
-                    )}
-                    {file.size && formatFileSize(file.size)}
-                    {file.public && (
-                      <Chip
-                        label="Public"
-                        size="small"
-                        color="primary"
-                        sx={{ ml: 1 }}
-                      />
-                    )}
-                  </>
-                }
+                secondary={file.size ? formatFileSize(file.size) : null}
+                secondaryTypographyProps={{ component: 'div' }}
               />
               <ListItemSecondaryAction>
-                <IconButton
-                  edge="end"
-                  onClick={() => handleRemoveFile(file.id)}
-                  disabled={uploading}
-                >
+                <IconButton edge="end" onClick={() => handleRemoveExisting(file.id)}>
+                  <DeleteIcon />
+                </IconButton>
+              </ListItemSecondaryAction>
+            </ListItem>
+          ))}
+          {/* Pending files (selected but not yet uploaded) */}
+          {pendingFiles.map((file, index) => (
+            <ListItem key={`pending-${index}`} divider>
+              <ListItemText
+                primary={file.name}
+                secondary={formatFileSize(file.size)}
+              />
+              <ListItemSecondaryAction>
+                <IconButton edge="end" onClick={() => handleRemovePending(index)}>
                   <DeleteIcon />
                 </IconButton>
               </ListItemSecondaryAction>
@@ -171,9 +145,9 @@ const FileUpload = ({ onFilesUploaded, initialFiles = [] }) => {
         </List>
       )}
 
-      {files.length === 0 && !uploading && (
+      {totalFiles === 0 && (
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          No files uploaded yet. Max file size: 100MB per file.
+          {t("No files uploaded yet. Max file size: 100MB per file.")}
         </Typography>
       )}
     </Box>

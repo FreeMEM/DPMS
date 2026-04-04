@@ -139,7 +139,11 @@ class ProductionDetailSerializer(serializers.ModelSerializer):
 
 
 class ProductionCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating/updating productions"""
+    """Serializer for creating/updating productions.
+
+    Accepts uploaded files directly via multipart/form-data ('uploaded_files')
+    and also existing file IDs via 'files' for backwards compatibility.
+    """
 
     files = serializers.PrimaryKeyRelatedField(
         many=True,
@@ -195,7 +199,7 @@ class ProductionCreateSerializer(serializers.ModelSerializer):
                 f"The {compo.name} competition is not available in this edition."
             )
 
-        # Validate files belong to the current user
+        # Validate existing file IDs belong to the current user
         files = data.get('files', [])
         request = self.context.get('request')
         if request and files:
@@ -210,6 +214,21 @@ class ProductionCreateSerializer(serializers.ModelSerializer):
 
         return data
 
+    def _create_files_from_upload(self, request):
+        """Create File objects from uploaded files in the request."""
+        uploaded_files = request.FILES.getlist('uploaded_files')
+        file_objects = []
+        for uploaded_file in uploaded_files:
+            file_obj = File.objects.create(
+                title=uploaded_file.name,
+                description='',
+                uploaded_by=request.user,
+                file=uploaded_file,
+                public=False,
+            )
+            file_objects.append(file_obj)
+        return file_objects
+
     def create(self, validated_data):
         """Set uploaded_by to current user and auto-approve if edition allows it"""
         files = validated_data.pop('files', [])
@@ -223,6 +242,12 @@ class ProductionCreateSerializer(serializers.ModelSerializer):
             validated_data['status'] = 'pending'
 
         production = super().create(validated_data)
+
+        # Create File objects from uploaded files
+        request = self.context.get('request')
+        if request:
+            new_files = self._create_files_from_upload(request)
+            files = list(files) + new_files
 
         # Associate files
         if files:
@@ -255,8 +280,17 @@ class ProductionCreateSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
 
-        # Update files if provided
+        # Handle new uploaded files
+        request = self.context.get('request')
+        if request:
+            new_files = self._create_files_from_upload(request)
+            if new_files:
+                for f in new_files:
+                    instance.files.add(f)
+
+        # Update existing file IDs if provided
         if files is not None:
-            instance.files.set(files)
+            existing = list(instance.files.all())
+            instance.files.set(list(files) + [f for f in existing if f not in files])
 
         return instance

@@ -11,12 +11,96 @@ import {
   Alert,
   Paper,
   CircularProgress,
+  Divider,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { editionsAPI, productionsAPI } from '../../services/api';
 import { AuthContext } from '../../AuthContext';
 import FileUpload from './FileUpload';
 import MainBar from '../../@dpms-freemem/MainBar';
+
+/**
+ * Compose the description from structured fields.
+ * Only includes sections that have content.
+ */
+const buildDescription = (fields) => {
+  const sections = [];
+
+  if (fields.freeDescription) {
+    sections.push(fields.freeDescription);
+  }
+  if (fields.minMachine) {
+    sections.push(`[Minimum machine]\n${fields.minMachine}`);
+  }
+  if (fields.toolsUsed) {
+    sections.push(`[Tools used]\n${fields.toolsUsed}`);
+  }
+  if (fields.thirdPartyResources) {
+    sections.push(`[Third-party resources & licenses]\n${fields.thirdPartyResources}`);
+  }
+  if (fields.licenseTexts) {
+    sections.push(`[License texts for distribution]\n${fields.licenseTexts}`);
+  }
+  if (fields.additionalInfo) {
+    sections.push(`[Additional information]\n${fields.additionalInfo}`);
+  }
+  if (fields.aiTools) {
+    sections.push(`[AI tools used]\n${fields.aiTools}`);
+  }
+
+  return sections.join('\n\n');
+};
+
+/**
+ * Parse a structured description back into individual fields.
+ */
+const parseDescription = (description) => {
+  if (!description) return {};
+
+  const fields = {};
+  const tagPattern = /\[(Minimum machine|Tools used|Third-party resources & licenses|License texts for distribution|Additional information|AI tools used)\]\n/g;
+
+  const tags = [];
+  let match;
+  while ((match = tagPattern.exec(description)) !== null) {
+    tags.push({ tag: match[1], index: match.index, end: match.index + match[0].length });
+  }
+
+  if (tags.length === 0) {
+    fields.freeDescription = description;
+    return fields;
+  }
+
+  // Text before first tag is freeDescription
+  const beforeFirst = description.substring(0, tags[0].index).trim();
+  if (beforeFirst) fields.freeDescription = beforeFirst;
+
+  const tagMap = {
+    'Minimum machine': 'minMachine',
+    'Tools used': 'toolsUsed',
+    'Third-party resources & licenses': 'thirdPartyResources',
+    'License texts for distribution': 'licenseTexts',
+    'Additional information': 'additionalInfo',
+    'AI tools used': 'aiTools',
+  };
+
+  for (let i = 0; i < tags.length; i++) {
+    const contentStart = tags[i].end;
+    const contentEnd = i + 1 < tags.length ? tags[i + 1].index : description.length;
+    const content = description.substring(contentStart, contentEnd).trim();
+    const fieldName = tagMap[tags[i].tag];
+    if (fieldName && content) {
+      fields[fieldName] = content;
+    }
+  }
+
+  return fields;
+};
 
 
 const ProductionForm = () => {
@@ -24,26 +108,40 @@ const ProductionForm = () => {
   const [searchParams] = useSearchParams();
   const { id: productionId } = useParams();
   const { user } = useContext(AuthContext);
+  const { t } = useTranslation();
 
-  // Build default author from user profile
+  // Build defaults from user profile
   const defaultAuthor = (() => {
     if (!user?.profile) return '';
     const { nickname, group } = user.profile;
     if (nickname && group) return `${nickname} / ${group}`;
     return nickname || group || '';
   })();
+  const defaultGroup = user?.profile?.group || '';
+  const defaultEmail = user?.email || '';
 
   const [formData, setFormData] = useState({
     title: '',
     authors: productionId ? '' : defaultAuthor,
-    description: '',
+    contactEmail: productionId ? '' : defaultEmail,
+    group: productionId ? '' : defaultGroup,
     edition: searchParams.get('edition') ? parseInt(searchParams.get('edition')) : '',
     compo: searchParams.get('compo') ? parseInt(searchParams.get('compo')) : '',
-    files: [],
+    platform: '',
+    // Description sub-fields
+    freeDescription: '',
+    minMachine: '',
+    toolsUsed: '',
+    thirdPartyResources: '',
+    licenseTexts: '',
+    additionalInfo: '',
+    aiTools: '',
   });
 
+  const [fileData, setFileData] = useState({ existingFileIds: [], newFiles: [] });
   const [editions, setEditions] = useState([]);
   const [compos, setCompos] = useState([]);
+  const [existingFiles, setExistingFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState(null);
@@ -53,14 +151,26 @@ const ProductionForm = () => {
     try {
       const response = await productionsAPI.get(productionId);
       const prod = response.data;
+      const descFields = parseDescription(prod.description || '');
+
       setFormData({
         title: prod.title,
         authors: prod.authors,
-        description: prod.description || '',
+        contactEmail: '',
+        group: '',
         edition: prod.edition,
         compo: prod.compo,
-        files: prod.files || [],
+        platform: prod.platform || '',
+        freeDescription: descFields.freeDescription || '',
+        minMachine: descFields.minMachine || '',
+        toolsUsed: descFields.toolsUsed || '',
+        thirdPartyResources: descFields.thirdPartyResources || '',
+        licenseTexts: descFields.licenseTexts || '',
+        additionalInfo: descFields.additionalInfo || '',
+        aiTools: descFields.aiTools || '',
       });
+      setExistingFiles(prod.files || []);
+      setFileData({ existingFileIds: (prod.files || []).map(f => f.id), newFiles: [] });
     } catch (err) {
       console.error('Error fetching production:', err);
       setError('Error loading production');
@@ -97,7 +207,6 @@ const ProductionForm = () => {
   const fetchCompos = async (editionId) => {
     try {
       const response = await editionsAPI.getCompos(editionId);
-      // Filter only open compos
       const openCompos = response.data.filter(hc => hc.open_to_upload);
       setCompos(openCompos);
     } catch (err) {
@@ -107,22 +216,14 @@ const ProductionForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    // Clear error for this field
+    setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: null }));
     }
   };
 
-  const handleFilesUploaded = (fileIds) => {
-    setFormData(prev => ({
-      ...prev,
-      files: fileIds,
-    }));
+  const handleFilesChanged = (data) => {
+    setFileData(data);
   };
 
   const handleSubmit = async (e) => {
@@ -132,38 +233,65 @@ const ProductionForm = () => {
     setErrors({});
 
     try {
-      const submitData = {
-        ...formData,
-        edition: parseInt(formData.edition),
-        compo: parseInt(formData.compo),
-      };
+      // Compose description from structured fields
+      const description = buildDescription({
+        freeDescription: formData.freeDescription,
+        minMachine: formData.minMachine,
+        toolsUsed: formData.toolsUsed,
+        thirdPartyResources: formData.thirdPartyResources,
+        licenseTexts: formData.licenseTexts,
+        additionalInfo: formData.additionalInfo,
+        aiTools: formData.aiTools,
+      });
+
+      // Compose authors with group and contact email
+      let authors = formData.authors;
+      if (formData.group && !authors.includes(formData.group)) {
+        authors = `${authors} / ${formData.group}`;
+      }
+
+      const payload = new FormData();
+      payload.append('title', formData.title);
+      payload.append('authors', authors);
+      payload.append('description', description);
+      payload.append('edition', formData.edition);
+      payload.append('compo', formData.compo);
+      if (formData.platform) {
+        payload.append('platform', formData.platform);
+      }
+
+      // Append contact email in description if provided and not already there
+      if (formData.contactEmail && !description.includes(formData.contactEmail)) {
+        const contactLine = `[Contact email]\n${formData.contactEmail}`;
+        payload.set('description', description ? `${description}\n\n${contactLine}` : contactLine);
+      }
+
+      for (const file of fileData.newFiles) {
+        payload.append('uploaded_files', file);
+      }
+      for (const id of fileData.existingFileIds) {
+        payload.append('files', id);
+      }
 
       if (productionId) {
-        await productionsAPI.update(productionId, submitData);
+        await productionsAPI.update(productionId, payload);
       } else {
-        await productionsAPI.create(submitData);
+        await productionsAPI.create(payload);
       }
 
       navigate('/my-productions');
     } catch (err) {
       console.error('Error submitting production:', err);
-
       if (err.response?.data) {
-        // Handle field errors
         const fieldErrors = err.response.data;
-
         if (fieldErrors.non_field_errors) {
           setError(fieldErrors.non_field_errors.join('. '));
+        } else if (typeof fieldErrors === 'string') {
+          setError(fieldErrors);
         } else {
           setErrors(fieldErrors);
-
-          // Set general error from first field error
           const firstError = Object.values(fieldErrors)[0];
-          if (Array.isArray(firstError)) {
-            setError(firstError[0]);
-          } else {
-            setError(firstError);
-          }
+          setError(Array.isArray(firstError) ? firstError[0] : String(firstError));
         }
       } else {
         setError('Error submitting production. Please try again.');
@@ -173,6 +301,24 @@ const ProductionForm = () => {
     }
   };
 
+  const PLATFORM_CHOICES = [
+    ['amiga_ocs', 'Amiga OCS'],
+    ['amiga_aga', 'Amiga AGA'],
+    ['pc', 'PC'],
+    ['c64', 'Commodore 64'],
+    ['atari_st', 'Atari ST'],
+    ['zx_spectrum', 'ZX Spectrum'],
+    ['msx', 'MSX'],
+    ['amstrad_cpc', 'Amstrad CPC'],
+    ['snes', 'SNES'],
+    ['megadrive', 'Mega Drive'],
+    ['gameboy', 'Game Boy'],
+    ['arduino', 'Arduino'],
+    ['web', 'Web/Browser'],
+    ['multiplatform', 'Multiplataforma'],
+    ['other', 'Otra'],
+  ];
+
   const pageContent = loadingData ? (
     <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
       <CircularProgress />
@@ -180,7 +326,7 @@ const ProductionForm = () => {
   ) : (
     <Box sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>
       <Typography variant="h4" gutterBottom>
-        {productionId ? 'Edit Production' : 'Submit Production'}
+        {productionId ? t('Edit Production') : t('Submit Production')}
       </Typography>
 
       {error && (
@@ -191,13 +337,14 @@ const ProductionForm = () => {
 
       <Paper sx={{ p: 3 }}>
         <Box component="form" onSubmit={handleSubmit}>
+          {/* Edition & Competition */}
           <FormControl fullWidth margin="normal" error={!!errors.edition}>
-            <InputLabel>Edition</InputLabel>
+            <InputLabel>{t("Edition")}</InputLabel>
             <Select
               name="edition"
-              value={formData.edition}
+              value={editions.length > 0 ? formData.edition : ''}
               onChange={handleChange}
-              label="Edition"
+              label={t("Edition")}
               required
               disabled={!!productionId}
             >
@@ -207,11 +354,6 @@ const ProductionForm = () => {
                 </MenuItem>
               ))}
             </Select>
-            {errors.edition && (
-              <Typography variant="caption" color="error">
-                {errors.edition[0]}
-              </Typography>
-            )}
           </FormControl>
 
           <FormControl
@@ -220,12 +362,12 @@ const ProductionForm = () => {
             error={!!errors.compo}
             disabled={!formData.edition || !!productionId}
           >
-            <InputLabel>Competition</InputLabel>
+            <InputLabel>{t("Competition")}</InputLabel>
             <Select
               name="compo"
-              value={formData.compo}
+              value={compos.length > 0 ? formData.compo : ''}
               onChange={handleChange}
-              label="Competition"
+              label={t("Competition")}
               required
             >
               {compos.map((hasCompo) => (
@@ -234,18 +376,16 @@ const ProductionForm = () => {
                 </MenuItem>
               ))}
             </Select>
-            {errors.compo && (
-              <Typography variant="caption" color="error">
-                {errors.compo[0]}
-              </Typography>
-            )}
           </FormControl>
 
+          <Divider sx={{ my: 2 }} />
+
+          {/* Basic info */}
           <TextField
             fullWidth
             margin="normal"
             name="title"
-            label="Title"
+            label={t("Title")}
             value={formData.title}
             onChange={handleChange}
             error={!!errors.title}
@@ -257,7 +397,7 @@ const ProductionForm = () => {
             fullWidth
             margin="normal"
             name="authors"
-            label="Authors / Group"
+            label={t("Full name of the author(s)")}
             value={formData.authors}
             onChange={handleChange}
             error={!!errors.authors}
@@ -268,26 +408,149 @@ const ProductionForm = () => {
           <TextField
             fullWidth
             margin="normal"
-            name="description"
-            label="Description"
-            value={formData.description}
+            name="group"
+            label={t("Group(s)")}
+            value={formData.group}
             onChange={handleChange}
-            error={!!errors.description}
-            helperText={errors.description?.[0]}
-            multiline
-            rows={4}
+            helperText={t("Group(s) the authors belong to (if applicable)")}
           />
 
-          <Box sx={{ mt: 3 }}>
+          <TextField
+            fullWidth
+            margin="normal"
+            name="contactEmail"
+            label={t("Contact email")}
+            type="email"
+            value={formData.contactEmail}
+            onChange={handleChange}
+          />
+
+          <FormControl fullWidth margin="normal">
+            <InputLabel>{t("Platform")}</InputLabel>
+            <Select
+              name="platform"
+              value={formData.platform}
+              onChange={handleChange}
+              label={t("Platform")}
+            >
+              <MenuItem value=""><em>{t("Not specified")}</em></MenuItem>
+              {PLATFORM_CHOICES.map(([value, label]) => (
+                <MenuItem key={value} value={value}>{label}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <TextField
+            fullWidth
+            margin="normal"
+            name="minMachine"
+            label={t("Minimum machine required")}
+            value={formData.minMachine}
+            onChange={handleChange}
+            helperText={t("Minimum hardware/software required to run the production")}
+          />
+
+          <Divider sx={{ my: 2 }} />
+
+          {/* Description */}
+          <TextField
+            fullWidth
+            margin="normal"
+            name="freeDescription"
+            label={t("Description")}
+            value={formData.freeDescription}
+            onChange={handleChange}
+            multiline
+            rows={3}
+          />
+
+          {/* Technical details - collapsible */}
+          <Accordion
+            sx={{
+              mt: 2,
+              border: '1px solid',
+              borderColor: 'primary.main',
+              borderRadius: 1,
+              '&:before': { display: 'none' },
+            }}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon sx={{ color: 'primary.main' }} />}
+              sx={{ bgcolor: 'rgba(255, 165, 0, 0.08)' }}
+            >
+              <Typography fontWeight={600} color="primary">{t("Technical details & Licensing")}</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <TextField
+                fullWidth
+                margin="normal"
+                name="toolsUsed"
+                label={t("Tools used for development")}
+                value={formData.toolsUsed}
+                onChange={handleChange}
+                multiline
+                rows={2}
+                helperText={t("List all tools used (compilers, editors, frameworks, etc.)")}
+              />
+
+              <TextField
+                fullWidth
+                margin="normal"
+                name="thirdPartyResources"
+                label={t("Third-party resources")}
+                value={formData.thirdPartyResources}
+                onChange={handleChange}
+                multiline
+                rows={2}
+                helperText={t("List third-party resources included with links to their licenses")}
+              />
+
+              <TextField
+                fullWidth
+                margin="normal"
+                name="licenseTexts"
+                label={t("License texts for distribution")}
+                value={formData.licenseTexts}
+                onChange={handleChange}
+                multiline
+                rows={2}
+                helperText={t("License texts that need to be included in the distribution")}
+              />
+
+              <TextField
+                fullWidth
+                margin="normal"
+                name="aiTools"
+                label={t("AI tools used")}
+                value={formData.aiTools}
+                onChange={handleChange}
+                multiline
+                rows={2}
+                helperText={t("If AI tools were used (even partially), specify which tools and in which parts")}
+              />
+
+              <TextField
+                fullWidth
+                margin="normal"
+                name="additionalInfo"
+                label={t("Additional information")}
+                value={formData.additionalInfo}
+                onChange={handleChange}
+                multiline
+                rows={2}
+                helperText={t("Development process, custom tools, or any other relevant info")}
+              />
+            </AccordionDetails>
+          </Accordion>
+
+          <Divider sx={{ my: 2 }} />
+
+          {/* File upload */}
+          <Box sx={{ mt: 2 }}>
             <FileUpload
-              onFilesUploaded={handleFilesUploaded}
-              initialFiles={formData.files}
+              onFilesChanged={handleFilesChanged}
+              initialFiles={existingFiles}
             />
-            {errors.files && (
-              <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
-                {errors.files[0]}
-              </Typography>
-            )}
           </Box>
 
           <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
@@ -297,14 +560,14 @@ const ProductionForm = () => {
               color="primary"
               disabled={loading}
             >
-              {loading ? 'Submitting...' : productionId ? 'Update' : 'Submit'}
+              {loading ? t('Submitting...') : productionId ? t('Update') : t('Submit')}
             </Button>
             <Button
               variant="outlined"
               onClick={() => navigate('/my-productions')}
               disabled={loading}
             >
-              Cancel
+              {t('Cancel')}
             </Button>
           </Box>
         </Box>

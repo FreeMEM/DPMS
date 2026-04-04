@@ -21,12 +21,14 @@ import {
   InsertDriveFile as FileIcon,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { productionsAPI, filesAPI } from '../../services/api';
 import { AuthContext } from '../../AuthContext';
 import MainBar from '../../@dpms-freemem/MainBar';
 
 
 const ProductionDetail = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams();
   const { user } = useContext(AuthContext);
@@ -43,7 +45,7 @@ const ProductionDetail = () => {
       setProduction(response.data);
     } catch (err) {
       console.error('Error fetching production:', err);
-      setError('Error loading production details');
+      setError(t('Error loading production details'));
     } finally {
       setLoading(false);
     }
@@ -103,14 +105,14 @@ const ProductionDetail = () => {
   ) : (error || !production) ? (
     <Box sx={{ p: 3 }}>
       <Alert severity="error" sx={{ mb: 3 }}>
-        {error || 'Production not found'}
+        {error || t('Production not found')}
       </Alert>
       <Button
         variant="outlined"
         startIcon={<BackIcon />}
         onClick={() => navigate(-1)}
       >
-        Go Back
+        {t("Go Back")}
       </Button>
     </Box>
   ) : (
@@ -121,7 +123,7 @@ const ProductionDetail = () => {
           startIcon={<BackIcon />}
           onClick={() => navigate(-1)}
         >
-          Back
+          {t("Back")}
         </Button>
         {isOwner && (
           <Button
@@ -129,7 +131,7 @@ const ProductionDetail = () => {
             startIcon={<EditIcon />}
             onClick={() => navigate(`/productions/edit/${production.id}`)}
           >
-            Edit
+            {t("Edit")}
           </Button>
         )}
       </Box>
@@ -161,7 +163,7 @@ const ProductionDetail = () => {
         {production.description && (
           <>
             <Typography variant="h6" gutterBottom>
-              Description
+              {t("Description")}
             </Typography>
             <Typography
               variant="body1"
@@ -175,7 +177,7 @@ const ProductionDetail = () => {
         )}
 
         <Typography variant="h6" gutterBottom>
-          Files
+          {t("Files")}
         </Typography>
 
         {production.files && production.files.length > 0 ? (
@@ -228,7 +230,7 @@ const ProductionDetail = () => {
           </List>
         ) : (
           <Typography variant="body2" color="text.secondary">
-            No files attached to this production.
+            {t("No files attached to this production.")}
           </Typography>
         )}
 
@@ -237,17 +239,17 @@ const ProductionDetail = () => {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>
             <Typography variant="caption" color="text.secondary" display="block">
-              Submitted: {formatDate(production.created)}
+              {t("Submitted:")} {formatDate(production.created)}
             </Typography>
             {production.modified !== production.created && (
               <Typography variant="caption" color="text.secondary" display="block">
-                Last modified: {formatDate(production.modified)}
+                {t("Last modified:")} {formatDate(production.modified)}
               </Typography>
             )}
           </Box>
           {production.uploaded_by && (
             <Typography variant="caption" color="text.secondary">
-              By: {production.uploaded_by}
+              {t("By:")} {production.uploaded_by}
             </Typography>
           )}
         </Box>

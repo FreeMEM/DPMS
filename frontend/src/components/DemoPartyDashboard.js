@@ -7,6 +7,7 @@ import StatsCard from "./admin/common/StatsCard";
 import { AuthContext } from "../AuthContext";
 import axiosWrapper from "../utils/AxiosWrapper";
 import { sponsorsAPI } from "../services/api";
+import { useTranslation } from "react-i18next";
 import {
   Box,
   Container,
@@ -39,6 +40,7 @@ import {
 
 const DemoPartyDashboard = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   useContext(AuthContext); // Keep context for future use
   const [value, setValue] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -123,7 +125,7 @@ const DemoPartyDashboard = () => {
       setError(null);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
-      setError('Error al cargar los datos del dashboard');
+      setError(t('Error loading dashboard data'));
     } finally {
       setLoading(false);
     }
@@ -206,7 +208,7 @@ const DemoPartyDashboard = () => {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                           <CelebrationIcon sx={{ fontSize: 40, color: 'primary.main' }} />
                           <Chip
-                            label="Próximo Evento"
+                            label={t("Next Event")}
                             color="primary"
                             size="small"
                             sx={{ fontWeight: 600 }}
@@ -255,7 +257,7 @@ const DemoPartyDashboard = () => {
                           onClick={() => navigate('/compos')}
                           sx={{ mt: 2 }}
                         >
-                          Ver Competiciones
+                          {t("View Competitions")}
                         </Button>
                       </Grid>
                       <Grid item xs={12} md={5}>
@@ -272,16 +274,16 @@ const DemoPartyDashboard = () => {
                             color="text.secondary"
                             sx={{ textAlign: 'center', mb: 2, textTransform: 'uppercase', letterSpacing: 2 }}
                           >
-                            Cuenta Atrás
+                            {t("Countdown")}
                           </Typography>
                           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', flexWrap: 'nowrap' }}>
-                            <CountdownBox value={countdown.days} label="Días" />
+                            <CountdownBox value={countdown.days} label={t("Days")} />
                             <Typography sx={{ color: 'primary.main', mt: 0.5, fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' } }}>:</Typography>
-                            <CountdownBox value={countdown.hours} label="Horas" />
+                            <CountdownBox value={countdown.hours} label={t("Hours")} />
                             <Typography sx={{ color: 'primary.main', mt: 0.5, fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' } }}>:</Typography>
-                            <CountdownBox value={countdown.minutes} label="Min" />
+                            <CountdownBox value={countdown.minutes} label={t("Min")} />
                             <Typography sx={{ color: 'primary.main', mt: 0.5, fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' } }}>:</Typography>
-                            <CountdownBox value={countdown.seconds} label="Seg" />
+                            <CountdownBox value={countdown.seconds} label={t("Sec")} />
                           </Box>
                         </Box>
                       </Grid>
@@ -294,7 +296,7 @@ const DemoPartyDashboard = () => {
               <Grid container spacing={3} sx={{ mb: 4 }}>
                 <Grid item xs={12} sm={6} md={3}>
                   <StatsCard
-                    title="Mis Producciones"
+                    title={t("My Productions")}
                     value={myProductions.length}
                     icon={<FolderIcon />}
                     color="primary"
@@ -302,7 +304,7 @@ const DemoPartyDashboard = () => {
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
                   <StatsCard
-                    title="Compos Abiertas"
+                    title={t("Open Competitions")}
                     value={openCompos.length}
                     icon={<CategoryIcon />}
                     color="success"
@@ -310,7 +312,7 @@ const DemoPartyDashboard = () => {
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
                   <StatsCard
-                    title="Días Restantes"
+                    title={t("Days Remaining")}
                     value={countdown.days}
                     icon={<TimerIcon />}
                     color="info"
@@ -318,7 +320,7 @@ const DemoPartyDashboard = () => {
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
                   <StatsCard
-                    title="Edición Actual"
+                    title={t("Current Edition")}
                     value={activeEdition?.name?.split(' ')[0] || '-'}
                     icon={<TrophyIcon />}
                     color="warning"
@@ -334,10 +336,10 @@ const DemoPartyDashboard = () => {
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                           <UploadIcon color="primary" sx={{ fontSize: 32 }} />
-                          <Typography variant="h6">Competiciones Abiertas</Typography>
+                          <Typography variant="h6">{t("Open Competitions")}</Typography>
                         </Box>
                         <Chip
-                          label={`${openCompos.length} abiertas`}
+                          label={`${openCompos.length} ${t("open")}`}
                           color="success"
                           size="small"
                         />
@@ -346,7 +348,7 @@ const DemoPartyDashboard = () => {
                       {openCompos.length === 0 ? (
                         <Box sx={{ py: 4, textAlign: 'center' }}>
                           <Typography color="text.secondary">
-                            No hay competiciones abiertas en este momento
+                            {t("No open competitions at this time")}
                           </Typography>
                         </Box>
                       ) : (
@@ -374,7 +376,7 @@ const DemoPartyDashboard = () => {
                                   </Typography>
                                   {compo.upload_deadline && (
                                     <Typography variant="caption" color="text.secondary">
-                                      Cierre: {new Date(compo.upload_deadline).toLocaleDateString('es-ES')}
+                                      {t("Closes:")} {new Date(compo.upload_deadline).toLocaleDateString('es-ES')}
                                     </Typography>
                                   )}
                                 </Box>
@@ -386,7 +388,7 @@ const DemoPartyDashboard = () => {
                                     navigate(`/productions/new?compo=${compo.compo || compo.id}`);
                                   }}
                                 >
-                                  Participar
+                                  {t("Participate")}
                                 </Button>
                               </Box>
                             </Box>
@@ -401,7 +403,7 @@ const DemoPartyDashboard = () => {
                         onClick={() => navigate('/compos')}
                         endIcon={<ArrowForwardIcon />}
                       >
-                        Ver Todas las Competiciones
+                        {t("View All Competitions")}
                       </Button>
                     </CardActions>
                   </Card>
@@ -414,7 +416,7 @@ const DemoPartyDashboard = () => {
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                           <FolderIcon color="primary" sx={{ fontSize: 32 }} />
-                          <Typography variant="h6">Mis Producciones</Typography>
+                          <Typography variant="h6">{t("My Productions")}</Typography>
                         </Box>
                         <Chip
                           label={`${myProductions.length} total`}
@@ -427,14 +429,14 @@ const DemoPartyDashboard = () => {
                       {myProductions.length === 0 ? (
                         <Box sx={{ py: 4, textAlign: 'center' }}>
                           <Typography color="text.secondary" sx={{ mb: 2 }}>
-                            Aún no has subido ninguna producción
+                            {t("You haven't uploaded any productions yet")}
                           </Typography>
                           <Button
                             variant="outlined"
                             onClick={() => navigate('/compos')}
                             startIcon={<UploadIcon />}
                           >
-                            Subir mi primera producción
+                            {t("Upload my first production")}
                           </Button>
                         </Box>
                       ) : (
@@ -501,7 +503,7 @@ const DemoPartyDashboard = () => {
 
               {/* Quick Actions */}
               <Typography variant="h6" sx={{ mt: 4, mb: 2 }}>
-                Acciones Rápidas
+                {t("Quick Actions")}
               </Typography>
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={6} md={3}>
@@ -519,10 +521,10 @@ const DemoPartyDashboard = () => {
                     <CardContent sx={{ textAlign: 'center', py: 3 }}>
                       <TrophyIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
                       <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                        Competiciones
+                        {t("Competitions")}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Ver todas las compos
+                        {t("View all competitions")}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -542,10 +544,10 @@ const DemoPartyDashboard = () => {
                     <CardContent sx={{ textAlign: 'center', py: 3 }}>
                       <FolderIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
                       <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                        Mis Producciones
+                        {t("My Productions")}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Gestionar mis obras
+                        {t("Manage my works")}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -565,10 +567,10 @@ const DemoPartyDashboard = () => {
                     <CardContent sx={{ textAlign: 'center', py: 3 }}>
                       <UploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
                       <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                        Nueva Producción
+                        {t("New Production")}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Subir una obra
+                        {t("Upload a work")}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -588,10 +590,10 @@ const DemoPartyDashboard = () => {
                     <CardContent sx={{ textAlign: 'center', py: 3 }}>
                       <CelebrationIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
                       <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                        Mi Perfil
+                        {t("My Profile")}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Configurar cuenta
+                        {t("Configure account")}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -611,7 +613,7 @@ const DemoPartyDashboard = () => {
                       letterSpacing: 2,
                     }}
                   >
-                    Patrocinadores
+                    {t("Sponsors")}
                   </Typography>
                   <Box
                     sx={{

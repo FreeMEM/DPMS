@@ -22,12 +22,14 @@ import {
   Visibility as ViewIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { productionsAPI } from '../../services/api';
 import MainBar from '../../@dpms-freemem/MainBar';
 import ThreeBackground from '../common/ThreeBackground';
 import BackgroundToggle from '../common/BackgroundToggle';
 
 const MyProductions = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [productions, setProductions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +49,7 @@ const MyProductions = () => {
       setProductions(response.data);
     } catch (err) {
       console.error('Error fetching productions:', err);
-      setError('Error loading your productions');
+      setError(t('Error loading your productions'));
     } finally {
       setLoading(false);
     }
@@ -107,14 +109,14 @@ const MyProductions = () => {
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4">
-          My Productions
+          {t("My Productions")}
         </Typography>
         <Button
           variant="contained"
           color="primary"
           onClick={() => navigate('/compos')}
         >
-          Submit New Production
+          {t("Submit New Production")}
         </Button>
       </Box>
 
@@ -127,17 +129,17 @@ const MyProductions = () => {
       {productions.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography variant="h6" color="text.secondary" gutterBottom>
-            No productions yet
+            {t("No productions yet")}
           </Typography>
           <Typography variant="body2" color="text.secondary" paragraph>
-            You haven't submitted any productions yet. Start by choosing a competition!
+            {t("You haven't submitted any productions yet. Start by choosing a competition!")}
           </Typography>
           <Button
             variant="contained"
             color="primary"
             onClick={() => navigate('/compos')}
           >
-            Browse Competitions
+            {t("Browse Competitions")}
           </Button>
         </Box>
       ) : (
@@ -169,7 +171,7 @@ const MyProductions = () => {
                     />
                     {production.status && (
                       <Chip
-                        label={production.status === 'approved' ? 'Aprobada' : production.status === 'rejected' ? 'Rechazada' : 'Pendiente'}
+                        label={production.status === 'approved' ? t('Approved') : production.status === 'rejected' ? t('Rejected') : t('Pending')}
                         size="small"
                         color={production.status === 'approved' ? 'success' : production.status === 'rejected' ? 'error' : 'warning'}
                         sx={{ mb: 1 }}
@@ -207,10 +209,10 @@ const MyProductions = () => {
 
                   <Box sx={{ mt: 2 }}>
                     <Typography variant="caption" color="text.secondary">
-                      Files: {production.files_count || 0}
+                      {t("Files:")} {production.files_count || 0}
                     </Typography>
                     <Typography variant="caption" color="text.secondary" display="block">
-                      Submitted: {formatDate(production.created)}
+                      {t("Submitted:")} {formatDate(production.created)}
                     </Typography>
                   </Box>
                 </CardContent>
@@ -220,7 +222,7 @@ const MyProductions = () => {
                     size="small"
                     color="primary"
                     onClick={() => handleView(production.id)}
-                    title="View details"
+                    title={t("View details")}
                   >
                     <ViewIcon />
                   </IconButton>
@@ -228,7 +230,7 @@ const MyProductions = () => {
                     size="small"
                     color="primary"
                     onClick={() => handleEdit(production.id)}
-                    title="Edit production"
+                    title={t("Edit production")}
                   >
                     <EditIcon />
                   </IconButton>
@@ -236,7 +238,7 @@ const MyProductions = () => {
                     size="small"
                     color="error"
                     onClick={() => handleDeleteClick(production)}
-                    title="Delete production"
+                    title={t("Delete production")}
                   >
                     <DeleteIcon />
                   </IconButton>
@@ -254,17 +256,16 @@ const MyProductions = () => {
         aria-labelledby="delete-dialog-title"
       >
         <DialogTitle id="delete-dialog-title">
-          Confirm Delete
+          {t("Confirm Delete")}
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete "{productionToDelete?.title}"?
-            This action cannot be undone.
+            {t("Are you sure you want to delete this production? This action cannot be undone.")}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDeleteCancel} disabled={deleting}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button
             onClick={handleDeleteConfirm}
@@ -272,7 +273,7 @@ const MyProductions = () => {
             disabled={deleting}
             autoFocus
           >
-            {deleting ? 'Deleting...' : 'Delete'}
+            {deleting ? t('Deleting...') : t('Delete')}
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,9 +1,11 @@
 import React, { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AuthContext } from '../../AuthContext';
 import { Box, CircularProgress, Typography } from '@mui/material';
 
 const AdminRoute = ({ children }) => {
+  const { t } = useTranslation();
   const { isAuthenticated, groups, loading } = useContext(AuthContext);
 
   if (loading) {
@@ -20,7 +22,7 @@ const AdminRoute = ({ children }) => {
       >
         <CircularProgress />
         <Typography variant="body2" color="text.secondary">
-          Cargando...
+          {t("Loading...")}
         </Typography>
       </Box>
     );
