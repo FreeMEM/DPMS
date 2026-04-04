@@ -16,7 +16,7 @@ class ContactRateThrottle(SimpleRateThrottle):
             'scope': 'contact',
             'ident': self.get_ident(request),
         }
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.conf import settings
 
 from dpms.compos.models import Edition
@@ -168,14 +168,14 @@ class EditionViewSet(viewsets.ModelViewSet):
         )
 
         try:
-            send_mail(
+            email = EmailMessage(
                 subject=subject,
-                message=body,
+                body=body,
                 from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[edition.contact_email],
+                to=[edition.contact_email],
                 reply_to=[data['email']],
-                fail_silently=False,
             )
+            email.send(fail_silently=False)
         except Exception:
             return Response(
                 {"error": "Failed to send message. Please try again later."},
