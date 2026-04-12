@@ -74,8 +74,8 @@ const AuthProvider = ({ children }) => {
     setToken(null);
     setUser(null);
     setGroups([]);
-    // Redirect to Django index (backend server)
-    window.location.href = process.env.REACT_APP_BACKEND_ADDRESS || "http://localhost:8000";
+    // Redirect to landing page
+    window.location.href = window.location.origin;
   };
 
   const verifyAccount = async (token) => {
