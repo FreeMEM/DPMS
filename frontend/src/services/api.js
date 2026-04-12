@@ -84,6 +84,16 @@ export const sponsorsAPI = {
   byEdition: (editionId) => getAxios().get('/api/sponsors/by_edition/', { params: { edition: editionId } }),
 };
 
+// Voting API
+export const votingAPI = {
+  myVotes: (editionId) => getAxios().get('/api/votes/my_votes/', { params: { edition: editionId } }),
+  vote: (data) => getAxios().post('/api/votes/', data),
+  updateVote: (id, data) => getAxios().patch(`/api/votes/${id}/`, data),
+  deleteVote: (id) => getAxios().delete(`/api/votes/${id}/`),
+  currentPeriods: () => getAxios().get('/api/voting-periods/current/'),
+  getConfig: (editionId) => getAxios().get('/api/voting-config/', { params: { edition: editionId } }),
+};
+
 // Voting Results API
 export const votingResultsAPI = {
   editionResults: (editionId) => getAxios().get('/api/voting-results/edition_results/', { params: { edition: editionId } }),

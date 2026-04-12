@@ -33,6 +33,7 @@ class VotingConfigurationSerializer(serializers.ModelSerializer):
             "results_published",
             "results_published_at",
             "show_partial_results",
+            "show_score_breakdown",
             "created",
             "modified",
         ]
@@ -252,15 +253,17 @@ class VoteSerializer(serializers.ModelSerializer):
 
 
 class VoteCreateSerializer(serializers.ModelSerializer):
-    """Simplified serializer for creating votes"""
+    """Simplified serializer for creating and updating votes"""
 
     class Meta:
         model = Vote
         fields = [
+            "id",
             "production",
             "score",
             "comment",
         ]
+        read_only_fields = ["id"]
 
     def create(self, validated_data):
         """Set user to current user"""
@@ -268,10 +271,11 @@ class VoteCreateSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
     def validate(self, data):
-        """Run model clean validation"""
-        instance = Vote(**data)
-        instance.user = self.context["request"].user
-        instance.clean()
+        """Run model clean validation only on creation"""
+        if not self.instance:
+            instance = Vote(**data)
+            instance.user = self.context["request"].user
+            instance.clean()
         return data
 
 

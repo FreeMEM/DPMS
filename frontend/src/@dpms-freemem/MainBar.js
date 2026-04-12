@@ -18,6 +18,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import HomeIcon from "@mui/icons-material/Home";
+import HowToVoteIcon from "@mui/icons-material/HowToVote";
 import GavelIcon from "@mui/icons-material/Gavel";
 import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import ContactMailIcon from "@mui/icons-material/ContactMail";
@@ -26,6 +27,7 @@ import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import SettingsIcon from "@mui/icons-material/Settings";
+import ScheduleIcon from "@mui/icons-material/Schedule";
 import PeopleIcon from "@mui/icons-material/People";
 import CelebrationIcon from "@mui/icons-material/Celebration";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
@@ -325,6 +327,12 @@ const MainBar = () => {
                 </ListItemIcon>
                 {open && <ListItemText primary={t("Competitions")} />}
               </ListItemButton>
+              <ListItemButton selected={isActive("/voting")} onClick={() => navigate("/voting")} sx={listItemButtonSx}>
+                <ListItemIcon sx={listItemIconSx}>
+                  <HowToVoteIcon />
+                </ListItemIcon>
+                {open && <ListItemText primary={t("Vote")} />}
+              </ListItemButton>
               <ListItemButton selected={isActive("/my-productions")} onClick={() => navigate("/my-productions")} sx={listItemButtonSx}>
                 <ListItemIcon sx={listItemIconSx}>
                   <FolderIcon />
@@ -400,6 +408,16 @@ const MainBar = () => {
                   <SettingsIcon />
                 </ListItemIcon>
                 {open && <ListItemText primary={t("Voting Config")} />}
+              </ListItemButton>
+              <ListItemButton
+                selected={location.pathname.startsWith("/admin/voting-periods")}
+                onClick={() => navigate("/admin/voting-periods")}
+                sx={listItemButtonSx}
+              >
+                <ListItemIcon sx={listItemIconSx}>
+                  <ScheduleIcon />
+                </ListItemIcon>
+                {open && <ListItemText primary={t("Voting Periods")} />}
               </ListItemButton>
               <ListItemButton
                 selected={location.pathname.startsWith("/admin/jury")}

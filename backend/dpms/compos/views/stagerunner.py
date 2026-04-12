@@ -764,52 +764,55 @@ class StagePresentationViewSet(viewsets.ModelViewSet):
         PresentationSlide.objects.create(presentation=presentation, slide=slide2, display_order=1)
 
     def _create_compo_template(self, presentation, config, has_compo):
-        """Create slides for compo presentation"""
+        """Create slides for compo presentation with individual production slides"""
+        order = 0
+
         # Slide 1: Compo intro
-        slide1 = StageSlide.objects.create(
+        slide_intro = StageSlide.objects.create(
             config=config,
             name="Compo Intro",
             slide_type='compo_intro',
             has_compo=has_compo,
             background_effect='inherit',
             is_active=True,
-            display_order=0
+            display_order=order
         )
         SlideElement.objects.create(
-            slide=slide1,
+            slide=slide_intro,
             element_type='compo_name',
             x=10, y=30, width=80, height=20,
             styles={'fontSize': 72, 'color': '#ffffff', 'textAlign': 'center'},
             z_index=10
         )
         SlideElement.objects.create(
-            slide=slide1,
+            slide=slide_intro,
             element_type='compo_description',
             x=10, y=55, width=80, height=20,
             styles={'fontSize': 24, 'color': '#cccccc', 'textAlign': 'center'},
             z_index=10
         )
-        PresentationSlide.objects.create(presentation=presentation, slide=slide1, display_order=0)
+        PresentationSlide.objects.create(presentation=presentation, slide=slide_intro, display_order=order)
+        order += 1
 
         # Slide 2: Production list
-        slide2 = StageSlide.objects.create(
+        slide_list = StageSlide.objects.create(
             config=config,
             name="Production List",
             slide_type='production_list',
             has_compo=has_compo,
             background_effect='inherit',
             is_active=True,
-            display_order=1
+            display_order=order
         )
         SlideElement.objects.create(
-            slide=slide2,
+            slide=slide_list,
             element_type='compo_name',
             x=10, y=5, width=80, height=10,
             styles={'fontSize': 48, 'color': '#ffffff', 'textAlign': 'center'},
             z_index=10
         )
         SlideElement.objects.create(
-            slide=slide2,
+            slide=slide_list,
             element_type='production_list',
             x=10, y=20, width=80, height=75,
             list_max_items=15,
@@ -817,126 +820,208 @@ class StagePresentationViewSet(viewsets.ModelViewSet):
             styles={'fontSize': 28, 'color': '#ffffff'},
             z_index=10
         )
-        PresentationSlide.objects.create(presentation=presentation, slide=slide2, display_order=1)
+        PresentationSlide.objects.create(presentation=presentation, slide=slide_list, display_order=order)
+        order += 1
 
-        # Slide 3: Production show (template)
-        slide3 = StageSlide.objects.create(
-            config=config,
-            name="Production Show",
-            slide_type='production_show',
-            has_compo=has_compo,
-            background_effect='inherit',
-            auto_advance_productions=False,
-            production_display_time=10000,
-            is_active=True,
-            display_order=2
-        )
-        SlideElement.objects.create(
-            slide=slide3,
-            element_type='production_number',
-            x=10, y=5, width=80, height=10,
-            styles={'fontSize': 36, 'color': '#888888', 'textAlign': 'center'},
-            z_index=10
-        )
-        SlideElement.objects.create(
-            slide=slide3,
-            element_type='production_title',
-            x=10, y=30, width=80, height=15,
-            styles={'fontSize': 64, 'color': '#ffffff', 'textAlign': 'center'},
-            z_index=10
-        )
-        SlideElement.objects.create(
-            slide=slide3,
-            element_type='production_authors',
-            x=10, y=50, width=80, height=10,
-            styles={'fontSize': 36, 'color': '#cccccc', 'textAlign': 'center'},
-            z_index=10
-        )
-        PresentationSlide.objects.create(presentation=presentation, slide=slide3, display_order=2)
+        # Individual slides per production
+        productions = Production.objects.filter(
+            edition=has_compo.edition,
+            compo=has_compo.compo
+        ).order_by('created')
+
+        for idx, prod in enumerate(productions, start=1):
+            has_screenshot = bool(prod.screenshot)
+            has_video = self._production_has_video(prod)
+
+            slide = StageSlide.objects.create(
+                config=config,
+                name=f"#{idx} - {prod.title}",
+                slide_type='production_show',
+                has_compo=has_compo,
+                production=prod,
+                background_effect='inherit',
+                is_active=True,
+                display_order=order
+            )
+
+            # Production number
+            SlideElement.objects.create(
+                slide=slide,
+                element_type='production_number',
+                x=10, y=5, width=80, height=8,
+                content=str(idx),
+                styles={'fontSize': 36, 'color': '#888888', 'textAlign': 'center'},
+                z_index=10
+            )
+
+            if has_screenshot or has_video:
+                # Layout with media: text left, media right
+                SlideElement.objects.create(
+                    slide=slide,
+                    element_type='production_title',
+                    x=5, y=25, width=45, height=15,
+                    styles={'fontSize': 48, 'color': '#ffffff', 'textAlign': 'center'},
+                    z_index=10
+                )
+                SlideElement.objects.create(
+                    slide=slide,
+                    element_type='production_authors',
+                    x=5, y=45, width=45, height=10,
+                    styles={'fontSize': 32, 'color': '#cccccc', 'textAlign': 'center'},
+                    z_index=10
+                )
+
+                if has_screenshot:
+                    SlideElement.objects.create(
+                        slide=slide,
+                        element_type='image',
+                        x=55, y=15, width=40, height=65,
+                        image=prod.screenshot,
+                        styles={'objectFit': 'contain'},
+                        z_index=10
+                    )
+                elif has_video:
+                    SlideElement.objects.create(
+                        slide=slide,
+                        element_type='production_video',
+                        x=55, y=15, width=40, height=65,
+                        video_mode='inline',
+                        z_index=10
+                    )
+            else:
+                # Layout without media: centered text
+                SlideElement.objects.create(
+                    slide=slide,
+                    element_type='production_title',
+                    x=10, y=30, width=80, height=15,
+                    styles={'fontSize': 64, 'color': '#ffffff', 'textAlign': 'center'},
+                    z_index=10
+                )
+                SlideElement.objects.create(
+                    slide=slide,
+                    element_type='production_authors',
+                    x=10, y=50, width=80, height=10,
+                    styles={'fontSize': 36, 'color': '#cccccc', 'textAlign': 'center'},
+                    z_index=10
+                )
+
+            PresentationSlide.objects.create(presentation=presentation, slide=slide, display_order=order)
+            order += 1
+
+    @staticmethod
+    def _production_has_video(production):
+        """Check if a production has a video file attached"""
+        video_extensions = {'.mp4', '.webm', '.mov', '.avi', '.mkv'}
+        for f in production.files.filter(is_active=True, is_deleted=False):
+            ext = f.original_filename.lower().rsplit('.', 1)
+            if len(ext) > 1 and f'.{ext[1]}' in video_extensions:
+                return True
+        return False
 
     def _create_awards_template(self, presentation, config, has_compo):
-        """Create slides for awards ceremony"""
-        # Slide 1: Compo intro
-        slide1 = StageSlide.objects.create(
-            config=config,
-            name="Awards Intro",
-            slide_type='compo_intro',
-            has_compo=has_compo,
-            background_effect='inherit',
-            is_active=True,
-            display_order=0
-        )
-        SlideElement.objects.create(
-            slide=slide1,
-            element_type='text',
-            content='Results',
-            x=10, y=20, width=80, height=15,
-            styles={'fontSize': 48, 'color': '#ffd700', 'textAlign': 'center'},
-            z_index=10
-        )
-        SlideElement.objects.create(
-            slide=slide1,
-            element_type='compo_name',
-            x=10, y=40, width=80, height=20,
-            styles={'fontSize': 72, 'color': '#ffffff', 'textAlign': 'center'},
-            z_index=10
-        )
-        PresentationSlide.objects.create(presentation=presentation, slide=slide1, display_order=0)
+        """
+        Create slides for awards ceremony.
+        If has_compo is provided, generates slides for that single compo.
+        If has_compo is None, generates slides for ALL compos of the edition.
+        """
+        if has_compo:
+            compos_list = [has_compo]
+        else:
+            compos_list = list(
+                HasCompo.objects.filter(edition=config.edition)
+                .select_related('compo')
+                .order_by('start')
+            )
 
-        # Slide 2: Results table
-        slide2 = StageSlide.objects.create(
-            config=config,
-            name="Final Results",
-            slide_type='results_final',
-            has_compo=has_compo,
-            background_effect='inherit',
-            is_active=True,
-            display_order=1
-        )
-        SlideElement.objects.create(
-            slide=slide2,
-            element_type='compo_name',
-            x=10, y=5, width=80, height=10,
-            styles={'fontSize': 36, 'color': '#ffd700', 'textAlign': 'center'},
-            z_index=10
-        )
-        SlideElement.objects.create(
-            slide=slide2,
-            element_type='results_table',
-            x=10, y=18, width=80, height=77,
-            list_max_items=10,
-            list_show_position=True,
-            list_show_score=True,
-            styles={'fontSize': 28, 'color': '#ffffff'},
-            z_index=10
-        )
-        PresentationSlide.objects.create(presentation=presentation, slide=slide2, display_order=1)
+        order = 0
 
-        # Slide 3: Podium
-        slide3 = StageSlide.objects.create(
-            config=config,
-            name="Podium",
-            slide_type='podium',
-            has_compo=has_compo,
-            background_effect='inherit',
-            is_active=True,
-            display_order=2
-        )
-        SlideElement.objects.create(
-            slide=slide3,
-            element_type='compo_name',
-            x=10, y=5, width=80, height=10,
-            styles={'fontSize': 36, 'color': '#ffd700', 'textAlign': 'center'},
-            z_index=10
-        )
-        SlideElement.objects.create(
-            slide=slide3,
-            element_type='podium',
-            x=10, y=20, width=80, height=75,
-            podium_show_points=True,
-            z_index=10
-        )
-        PresentationSlide.objects.create(presentation=presentation, slide=slide3, display_order=2)
+        for hc in compos_list:
+            compo_name = hc.compo.name
+
+            # Intro slide
+            slide_intro = StageSlide.objects.create(
+                config=config,
+                name=f"Awards - {compo_name}",
+                slide_type='compo_intro',
+                has_compo=hc,
+                background_effect='inherit',
+                is_active=True,
+                display_order=order
+            )
+            SlideElement.objects.create(
+                slide=slide_intro,
+                element_type='text',
+                content='Results',
+                x=10, y=20, width=80, height=15,
+                styles={'fontSize': 48, 'color': '#ffd700', 'textAlign': 'center'},
+                z_index=10
+            )
+            SlideElement.objects.create(
+                slide=slide_intro,
+                element_type='compo_name',
+                x=10, y=40, width=80, height=20,
+                styles={'fontSize': 72, 'color': '#ffffff', 'textAlign': 'center'},
+                z_index=10
+            )
+            PresentationSlide.objects.create(presentation=presentation, slide=slide_intro, display_order=order)
+            order += 1
+
+            # Results table slide
+            slide_results = StageSlide.objects.create(
+                config=config,
+                name=f"Results - {compo_name}",
+                slide_type='results_final',
+                has_compo=hc,
+                background_effect='inherit',
+                is_active=True,
+                display_order=order
+            )
+            SlideElement.objects.create(
+                slide=slide_results,
+                element_type='compo_name',
+                x=10, y=5, width=80, height=10,
+                styles={'fontSize': 36, 'color': '#ffd700', 'textAlign': 'center'},
+                z_index=10
+            )
+            SlideElement.objects.create(
+                slide=slide_results,
+                element_type='results_table',
+                x=10, y=18, width=80, height=77,
+                list_max_items=10,
+                list_show_position=True,
+                list_show_score=True,
+                styles={'fontSize': 28, 'color': '#ffffff'},
+                z_index=10
+            )
+            PresentationSlide.objects.create(presentation=presentation, slide=slide_results, display_order=order)
+            order += 1
+
+            # Podium slide
+            slide_podium = StageSlide.objects.create(
+                config=config,
+                name=f"Podium - {compo_name}",
+                slide_type='podium',
+                has_compo=hc,
+                background_effect='inherit',
+                is_active=True,
+                display_order=order
+            )
+            SlideElement.objects.create(
+                slide=slide_podium,
+                element_type='compo_name',
+                x=10, y=5, width=80, height=10,
+                styles={'fontSize': 36, 'color': '#ffd700', 'textAlign': 'center'},
+                z_index=10
+            )
+            SlideElement.objects.create(
+                slide=slide_podium,
+                element_type='podium',
+                x=10, y=20, width=80, height=75,
+                podium_show_points=True,
+                z_index=10
+            )
+            PresentationSlide.objects.create(presentation=presentation, slide=slide_podium, display_order=order)
+            order += 1
 
 
 class StageRunnerDataViewSet(viewsets.ViewSet):

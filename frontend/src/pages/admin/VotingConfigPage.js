@@ -18,13 +18,14 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
   FormControl,
+  FormControlLabel,
   InputLabel,
   Select,
   MenuItem,
   Grid,
   Slider,
+  Switch,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -38,7 +39,6 @@ import axiosWrapper from '../../utils/AxiosWrapper';
 const VotingConfigPage = () => {
   const [configs, setConfigs] = useState([]);
   const [editions, setEditions] = useState([]);
-  const [compos, setCompos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [formDialog, setFormDialog] = useState({ open: false, config: null });
@@ -47,14 +47,12 @@ const VotingConfigPage = () => {
 
   const [formData, setFormData] = useState({
     edition: '',
-    compo: '',
     voting_mode: 'public',
-    public_weight: 50,
-    jury_weight: 50,
-    access_method: 'open',
-    min_score: 1,
-    max_score: 5,
-    allow_ties: true,
+    public_weight: 100,
+    jury_weight: 0,
+    access_mode: 'open',
+    show_partial_results: false,
+    show_score_breakdown: false,
   });
 
   useEffect(() => {
@@ -65,14 +63,12 @@ const VotingConfigPage = () => {
     try {
       setLoading(true);
       const client = axiosWrapper();
-      const [configsRes, editionsRes, composRes] = await Promise.all([
+      const [configsRes, editionsRes] = await Promise.all([
         client.get('/api/voting-config/'),
         client.get('/api/editions/'),
-        client.get('/api/compos/'),
       ]);
       setConfigs(configsRes.data);
       setEditions(editionsRes.data);
-      setCompos(composRes.data);
       setError(null);
     } catch (err) {
       console.error('Error fetching data:', err);
@@ -86,26 +82,22 @@ const VotingConfigPage = () => {
     if (config) {
       setFormData({
         edition: config.edition,
-        compo: config.compo,
         voting_mode: config.voting_mode,
         public_weight: config.public_weight,
         jury_weight: config.jury_weight,
-        access_method: config.access_method,
-        min_score: config.min_score,
-        max_score: config.max_score,
-        allow_ties: config.allow_ties,
+        access_mode: config.access_mode,
+        show_partial_results: config.show_partial_results,
+        show_score_breakdown: config.show_score_breakdown,
       });
     } else {
       setFormData({
         edition: '',
-        compo: '',
         voting_mode: 'public',
-        public_weight: 50,
-        jury_weight: 50,
-        access_method: 'open',
-        min_score: 1,
-        max_score: 5,
-        allow_ties: true,
+        public_weight: 100,
+        jury_weight: 0,
+        access_mode: 'open',
+        show_partial_results: false,
+    show_score_breakdown: false,
       });
     }
     setFormDialog({ open: true, config });
@@ -158,14 +150,14 @@ const VotingConfigPage = () => {
     return <Chip label={config.label} color={config.color} size="small" />;
   };
 
-  const getAccessMethodChip = (method) => {
-    const methods = {
+  const getAccessModeChip = (mode) => {
+    const modes = {
       open: { label: 'Abierto', color: 'success' },
-      attendance_code: { label: 'Código Asistencia', color: 'warning' },
-      manual_verification: { label: 'Verificación Manual', color: 'info' },
-      qr_checkin: { label: 'QR Check-in', color: 'secondary' },
+      code: { label: 'Código Asistencia', color: 'warning' },
+      manual: { label: 'Verificación Manual', color: 'info' },
+      checkin: { label: 'QR Check-in', color: 'secondary' },
     };
-    const config = methods[method] || methods.open;
+    const config = modes[mode] || modes.open;
     return <Chip label={config.label} color={config.color} size="small" />;
   };
 
@@ -206,18 +198,17 @@ const VotingConfigPage = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Edición</TableCell>
-                <TableCell>Competición</TableCell>
                 <TableCell>Modo Votación</TableCell>
                 <TableCell>Pesos</TableCell>
                 <TableCell>Método Acceso</TableCell>
-                <TableCell>Rango</TableCell>
+                <TableCell>Resultados Parciales</TableCell>
                 <TableCell align="right">Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {configs.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} align="center">
+                  <TableCell colSpan={6} align="center">
                     <Typography variant="body2" color="text.secondary" sx={{ py: 4 }}>
                       No hay configuraciones. Crea una nueva para comenzar.
                     </Typography>
@@ -228,12 +219,7 @@ const VotingConfigPage = () => {
                   <TableRow key={config.id} hover>
                     <TableCell>
                       <Typography variant="body2">
-                        {editions.find((e) => e.id === config.edition)?.title || '-'}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">
-                        {compos.find((c) => c.id === config.compo)?.name || '-'}
+                        {config.edition_detail?.title || editions.find((e) => e.id === config.edition)?.title || '-'}
                       </Typography>
                     </TableCell>
                     <TableCell>{getVotingModeChip(config.voting_mode)}</TableCell>
@@ -250,11 +236,13 @@ const VotingConfigPage = () => {
                         </Typography>
                       )}
                     </TableCell>
-                    <TableCell>{getAccessMethodChip(config.access_method)}</TableCell>
+                    <TableCell>{getAccessModeChip(config.access_mode)}</TableCell>
                     <TableCell>
-                      <Typography variant="body2" color="text.secondary">
-                        {config.min_score} - {config.max_score}
-                      </Typography>
+                      <Chip
+                        label={config.show_partial_results ? 'Sí' : 'No'}
+                        color={config.show_partial_results ? 'success' : 'default'}
+                        size="small"
+                      />
                     </TableCell>
                     <TableCell align="right">
                       <IconButton
@@ -288,34 +276,18 @@ const VotingConfigPage = () => {
         </DialogTitle>
         <DialogContent>
           <Grid container spacing={3} sx={{ mt: 0.5 }}>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12}>
               <FormControl fullWidth>
                 <InputLabel>Edición</InputLabel>
                 <Select
                   value={formData.edition}
                   onChange={(e) => setFormData({ ...formData, edition: e.target.value })}
                   label="Edición"
+                  disabled={!!formDialog.config}
                 >
                   {editions.map((edition) => (
                     <MenuItem key={edition.id} value={edition.id}>
                       {edition.title}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Competición</InputLabel>
-                <Select
-                  value={formData.compo}
-                  onChange={(e) => setFormData({ ...formData, compo: e.target.value })}
-                  label="Competición"
-                >
-                  {compos.map((compo) => (
-                    <MenuItem key={compo.id} value={compo.id}>
-                      {compo.name}
                     </MenuItem>
                   ))}
                 </Select>
@@ -327,7 +299,15 @@ const VotingConfigPage = () => {
                 <InputLabel>Modo de Votación</InputLabel>
                 <Select
                   value={formData.voting_mode}
-                  onChange={(e) => setFormData({ ...formData, voting_mode: e.target.value })}
+                  onChange={(e) => {
+                    const mode = e.target.value;
+                    const weights = mode === 'public'
+                      ? { public_weight: 100, jury_weight: 0 }
+                      : mode === 'jury'
+                        ? { public_weight: 0, jury_weight: 100 }
+                        : { public_weight: formData.public_weight, jury_weight: formData.jury_weight };
+                    setFormData({ ...formData, voting_mode: mode, ...weights });
+                  }}
                   label="Modo de Votación"
                 >
                   <MenuItem value="public">100% Público</MenuItem>
@@ -365,58 +345,42 @@ const VotingConfigPage = () => {
 
             <Grid item xs={12}>
               <FormControl fullWidth>
-                <InputLabel>Método de Acceso</InputLabel>
+                <InputLabel>Modo de Acceso</InputLabel>
                 <Select
-                  value={formData.access_method}
-                  onChange={(e) => setFormData({ ...formData, access_method: e.target.value })}
-                  label="Método de Acceso"
+                  value={formData.access_mode}
+                  onChange={(e) => setFormData({ ...formData, access_mode: e.target.value })}
+                  label="Modo de Acceso"
                 >
                   <MenuItem value="open">Abierto (cualquiera puede votar)</MenuItem>
-                  <MenuItem value="attendance_code">Código de Asistencia</MenuItem>
-                  <MenuItem value="manual_verification">Verificación Manual</MenuItem>
-                  <MenuItem value="qr_checkin">QR Check-in</MenuItem>
+                  <MenuItem value="code">Código de Asistencia</MenuItem>
+                  <MenuItem value="manual">Verificación Manual</MenuItem>
+                  <MenuItem value="checkin">QR Check-in</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
 
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                type="number"
-                label="Puntuación Mínima"
-                value={formData.min_score}
-                onChange={(e) =>
-                  setFormData({ ...formData, min_score: parseInt(e.target.value, 10) })
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={formData.show_partial_results}
+                    onChange={(e) => setFormData({ ...formData, show_partial_results: e.target.checked })}
+                  />
                 }
-                inputProps={{ min: 1 }}
-              />
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                type="number"
-                label="Puntuación Máxima"
-                value={formData.max_score}
-                onChange={(e) =>
-                  setFormData({ ...formData, max_score: parseInt(e.target.value, 10) })
-                }
-                inputProps={{ min: 1 }}
+                label="Mostrar resultados parciales durante la votación"
               />
             </Grid>
 
             <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>Permitir Empates</InputLabel>
-                <Select
-                  value={formData.allow_ties}
-                  onChange={(e) => setFormData({ ...formData, allow_ties: e.target.value })}
-                  label="Permitir Empates"
-                >
-                  <MenuItem value={true}>Sí</MenuItem>
-                  <MenuItem value={false}>No</MenuItem>
-                </Select>
-              </FormControl>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={formData.show_score_breakdown}
+                    onChange={(e) => setFormData({ ...formData, show_score_breakdown: e.target.checked })}
+                  />
+                }
+                label="Mostrar desglose de puntuación (público vs jurado)"
+              />
             </Grid>
           </Grid>
         </DialogContent>

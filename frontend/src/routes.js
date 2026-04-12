@@ -30,6 +30,7 @@ const CompoDetailPage = lazy(() => import("./pages/admin/CompoDetailPage"));
 const ProductionsPage = lazy(() => import("./pages/admin/ProductionsPage"));
 const ProductionDetailPage = lazy(() => import("./pages/admin/ProductionDetailPage"));
 const VotingConfigPage = lazy(() => import("./pages/admin/VotingConfigPage"));
+const VotingPeriodsPage = lazy(() => import("./pages/admin/VotingPeriodsPage"));
 const AttendanceCodesPage = lazy(() => import("./pages/admin/AttendanceCodesPage"));
 const JuryManagementPage = lazy(() => import("./pages/admin/JuryManagementPage"));
 const SponsorsPage = lazy(() => import("./pages/admin/SponsorsPage"));
@@ -39,6 +40,7 @@ const SlidesListPage = lazy(() => import("./pages/admin/stagerunner").then(m => 
 const SlideEditorPage = lazy(() => import("./pages/admin/stagerunner").then(m => ({ default: m.SlideEditorPage })));
 const LiveControlPage = lazy(() => import("./pages/admin/stagerunner").then(m => ({ default: m.LiveControlPage })));
 const StageRunnerViewer = lazy(() => import("./pages/stagerunner/StageRunnerViewer"));
+const VotingPage = lazy(() => import("./pages/VotingPage"));
 const ProfilePage = lazy(() => import("./components/user/ProfilePage"));
 const Gallery = lazy(() => import("./components/gallery/Gallery"));
 const RulesPage = lazy(() => import("./pages/RulesPage"));
@@ -178,6 +180,14 @@ const AppRoutes = () => {
           }
         />
         <Route
+          path="/admin/voting-periods"
+          element={
+            <AdminRoute>
+              <VotingPeriodsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
           path="/admin/attendance-codes"
           element={
             <AdminRoute>
@@ -265,6 +275,14 @@ const AppRoutes = () => {
           element={
             <PrivateRoute>
               <ProfilePage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/voting"
+          element={
+            <PrivateRoute>
+              <VotingPage />
             </PrivateRoute>
           }
         />

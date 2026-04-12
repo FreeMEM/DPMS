@@ -4,6 +4,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from django.db import transaction
 from django.db.models import Q, Avg, Count
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
@@ -183,21 +184,22 @@ class AttendanceCodeViewSet(viewsets.ModelViewSet):
         code_string = serializer.validated_data["code"]
 
         try:
-            code = AttendanceCode.objects.get(code=code_string)
+            with transaction.atomic():
+                code = AttendanceCode.objects.select_for_update().get(
+                    code=code_string
+                )
+
+                if code.is_used:
+                    return Response(
+                        {"error": "Code already used"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+                code.use_code(request.user)
         except AttendanceCode.DoesNotExist:
             return Response(
                 {"error": "Invalid code"}, status=status.HTTP_404_NOT_FOUND
             )
-
-        # Check if code is already used
-        if code.is_used:
-            return Response(
-                {"error": "Code already used"}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Use the code
-        try:
-            code.use_code(request.user)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -384,17 +386,17 @@ class VoteViewSet(viewsets.ModelViewSet):
     retrieve: Get vote details
     create: Create vote
     update: Update vote (within voting period)
-    destroy: Delete vote (admin only)
     my_votes: Get current user's votes
     production_votes: Get votes for a production
     """
 
     queryset = Vote.objects.all().select_related("user", "production", "production__edition", "production__compo")
     permission_classes = [IsAuthenticated]
+    http_method_names = ["get", "post", "put", "patch", "head", "options"]
 
     def get_serializer_class(self):
         """Return appropriate serializer"""
-        if self.action == "create":
+        if self.action in ("create", "update", "partial_update"):
             return VoteCreateSerializer
         return VoteSerializer
 
@@ -573,29 +575,82 @@ class VotingResultsViewSet(viewsets.ReadOnlyModelViewSet):
 
         try:
             edition = Edition.objects.get(pk=edition_id)
-            config = edition.voting_config
         except Edition.DoesNotExist:
             return Response(
                 {"error": "Edition not found"}, status=status.HTTP_404_NOT_FOUND
             )
-        except VotingConfiguration.DoesNotExist:
+
+        config = getattr(edition, "voting_config", None)
+
+        # Check if this edition has historical ranking data
+        has_historical = Production.objects.filter(
+            edition=edition, ranking_position__isnull=False
+        ).exists()
+
+        if not config and not has_historical:
             return Response(
-                {"error": "Voting not configured for this edition"},
+                {"error": "No results available for this edition"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # Check if results are published (unless admin)
+        # For editions with VotingConfiguration, check permissions
         is_admin = request.user.is_authenticated and request.user.groups.filter(
             name="DPMS Admins"
         ).exists()
 
-        if not is_admin and not config.results_published:
+        if config and not is_admin and not config.results_published:
             return Response(
                 {"error": "Results not yet published"},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        # Get all productions with their votes
+        # Historical results (from Demozoo imports)
+        if has_historical and not config:
+            productions = Production.objects.filter(
+                edition=edition
+            ).select_related("compo").order_by("compo__name", "ranking_position")
+
+            results_by_compo = {}
+            for prod in productions:
+                compo_name = prod.compo.name
+                if compo_name not in results_by_compo:
+                    results_by_compo[compo_name] = []
+
+                score_str = prod.ranking_score or ""
+                try:
+                    final_score = float(score_str) if score_str else 0
+                except (ValueError, TypeError):
+                    final_score = 0
+
+                results_by_compo[compo_name].append({
+                    "production_id": prod.id,
+                    "production_title": prod.title,
+                    "production_authors": prod.authors,
+                    "compo_name": compo_name,
+                    "total_votes": 0,
+                    "public_votes": 0,
+                    "jury_votes": 0,
+                    "public_avg_score": 0,
+                    "jury_avg_score": 0,
+                    "final_score": final_score,
+                    "ranking": prod.ranking_position or 0,
+                })
+
+            return Response({
+                "edition": edition.title,
+                "voting_mode": "historical",
+                "public_weight": 0,
+                "jury_weight": 0,
+                "show_score_breakdown": False,
+                "results_published_at": edition.created.isoformat(),
+                "results_by_compo": results_by_compo,
+                "all_results": [
+                    r for compo_results in results_by_compo.values()
+                    for r in compo_results
+                ],
+            })
+
+        # Live voting results
         productions = Production.objects.filter(edition=edition).prefetch_related(
             "votes"
         )
@@ -643,6 +698,9 @@ class VotingResultsViewSet(viewsets.ReadOnlyModelViewSet):
         return Response({
             "edition": edition.title,
             "voting_mode": config.voting_mode,
+            "public_weight": config.public_weight,
+            "jury_weight": config.jury_weight,
+            "show_score_breakdown": config.show_score_breakdown,
             "results_published_at": config.results_published_at,
             "results_by_compo": results_by_compo,
             "all_results": results,

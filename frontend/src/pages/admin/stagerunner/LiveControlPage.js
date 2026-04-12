@@ -144,17 +144,6 @@ const LiveControlPage = () => {
     return () => clearInterval(interval);
   }, [configId]);
 
-  // Auto-advance slides when playing
-  useEffect(() => {
-    if (!isPlaying || !control?.id || slides.length <= 1) return;
-
-    const timer = setInterval(() => {
-      sendCommand('next');
-    }, autoAdvanceInterval * 1000);
-
-    return () => clearInterval(timer);
-  }, [isPlaying, autoAdvanceInterval, control?.id, slides.length, sendCommand]);
-
   // Send command to API
   const sendCommand = useCallback(async (action, data = {}) => {
     if (!control?.id) return;
@@ -170,6 +159,17 @@ const LiveControlPage = () => {
       setSyncing(false);
     }
   }, [control?.id]);
+
+  // Auto-advance slides when playing
+  useEffect(() => {
+    if (!isPlaying || !control?.id || slides.length <= 1) return;
+
+    const timer = setInterval(() => {
+      sendCommand('next');
+    }, autoAdvanceInterval * 1000);
+
+    return () => clearInterval(timer);
+  }, [isPlaying, autoAdvanceInterval, control?.id, slides.length, sendCommand]);
 
   // Update auto-advance interval on the server
   const updateAutoAdvanceInterval = async (seconds) => {

@@ -16,6 +16,7 @@ import {
   HowToVote as VoteIcon,
   Settings as SettingsIcon,
   Category as CategoryIcon,
+  Schedule as ScheduleIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -168,9 +169,18 @@ const AdminDashboard = () => {
               <Button
                 variant="contained"
                 fullWidth
-                onClick={() => navigate('/admin/voting')}
+                onClick={() => navigate('/admin/voting-config')}
+                sx={{ mb: 1 }}
               >
                 {t("Configure Voting")}
+              </Button>
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={() => navigate('/admin/voting-periods')}
+                startIcon={<ScheduleIcon />}
+              >
+                {t("Voting Periods")}
               </Button>
             </CardContent>
           </Card>

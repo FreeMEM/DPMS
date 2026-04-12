@@ -430,6 +430,7 @@ class ProductionForStageSerializer(serializers.ModelSerializer):
             'id',
             'title',
             'authors',
+            'screenshot',
             'video_url',
             'created',
         ]

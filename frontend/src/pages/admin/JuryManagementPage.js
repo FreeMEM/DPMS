@@ -111,7 +111,7 @@ const JuryManagementPage = () => {
         edition: member.edition,
         compos: member.compos || [],
       });
-      setSelectedUser({ id: member.user, email: member.user_email });
+      setSelectedUser({ id: member.user, email: member.user_detail?.email || '' });
     } else {
       setFormData({
         user: '',
@@ -290,7 +290,7 @@ const JuryManagementPage = () => {
         <Grid item xs={12} md={4}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="success.main">
-              {juryMembers.reduce((sum, m) => sum + (m.voting_progress?.completed || 0), 0)}
+              {juryMembers.reduce((sum, m) => sum + (m.voting_progress?.votes_cast || 0), 0)}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Votaciones Completadas
@@ -331,7 +331,7 @@ const JuryManagementPage = () => {
                         <PersonIcon fontSize="small" color="action" />
                         <Box>
                           <Typography variant="body2" fontWeight={600}>
-                            {member.user_email}
+                            {member.user_detail?.email || `ID: ${member.user}`}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
                             ID: {member.user}
@@ -370,15 +370,15 @@ const JuryManagementPage = () => {
                         <Box>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                             <Typography variant="caption" color="text.secondary">
-                              {member.voting_progress.completed} / {member.voting_progress.total}
+                              {member.voting_progress.votes_cast} / {member.voting_progress.total_productions}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
-                              {member.voting_progress.percentage}%
+                              {Math.round(member.voting_progress.progress_percentage)}%
                             </Typography>
                           </Box>
                           <LinearProgress
                             variant="determinate"
-                            value={member.voting_progress.percentage || 0}
+                            value={member.voting_progress.progress_percentage || 0}
                             sx={{ height: 6, borderRadius: 1 }}
                           />
                         </Box>
@@ -545,7 +545,7 @@ const JuryManagementPage = () => {
         onClose={() => setDeleteDialog({ open: false, member: null })}
         onConfirm={handleDelete}
         title="Eliminar Miembro del Jurado"
-        message={`¿Estás seguro de que deseas eliminar a ${deleteDialog.member?.user_email || 'este miembro'} del jurado? Esta acción no se puede deshacer.`}
+        message={`¿Estás seguro de que deseas eliminar a ${deleteDialog.member?.user_detail?.email || 'este miembro'} del jurado? Esta acción no se puede deshacer.`}
       />
     </AdminLayout>
   );

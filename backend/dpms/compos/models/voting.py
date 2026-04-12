@@ -88,6 +88,11 @@ class VotingConfiguration(BaseModel):
         verbose_name="Mostrar resultados parciales",
         help_text="Permitir ver resultados antes del cierre de votación",
     )
+    show_score_breakdown = models.BooleanField(
+        default=False,
+        verbose_name="Mostrar desglose de puntuación",
+        help_text="Mostrar el detalle de votos públicos y de jurado por separado",
+    )
 
     class Meta:
         verbose_name = "Configuración de Votación"

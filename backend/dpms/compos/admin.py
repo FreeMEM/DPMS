@@ -2365,7 +2365,7 @@ class StagePresentationAdmin(admin.ModelAdmin):
 
     def slides_count(self, obj):
         """Count of slides"""
-        count = obj.slides.count()
+        count = obj.presentation_slides.count()
         return format_html('<strong>{}</strong> slides', count)
     slides_count.short_description = "Slides"
 

@@ -94,6 +94,25 @@ const resources = {
       "Configure Voting": "Configure Voting",
       Voting: "Voting",
 
+      // Voting page
+      "Vote": "Vote",
+      "Vote saved": "Vote saved",
+      "Error saving vote": "Error saving vote",
+      "Error loading voting data": "Error loading voting data",
+      "No open voting periods at this time.": "No open voting periods at this time.",
+      "No productions available for voting.": "No productions available for voting.",
+      "Your vote": "Your vote",
+      "Rate this production": "Rate this production",
+      "Time remaining": "Time remaining",
+      "voted": "voted",
+      "Voting ended": "Voting ended",
+      "Jury voting only": "Jury voting only",
+      "Mixed voting (public + jury)": "Mixed voting (public + jury)",
+      "Public voting": "Public voting",
+      "Voting Periods": "Voting Periods",
+      "Breakdown": "Breakdown",
+      "Jury": "Jury",
+
       // Table Headers
       Title: "Title",
       Description: "Description",
@@ -499,6 +518,25 @@ const resources = {
       "Manage Compos": "Gestionar Compos",
       "Configure Voting": "Configurar Votación",
       Voting: "Votaciones",
+
+      // Voting page
+      "Vote": "Votar",
+      "Vote saved": "Voto guardado",
+      "Error saving vote": "Error al guardar el voto",
+      "Error loading voting data": "Error al cargar datos de votación",
+      "No open voting periods at this time.": "No hay períodos de votación abiertos en este momento.",
+      "No productions available for voting.": "No hay producciones disponibles para votar.",
+      "Your vote": "Tu voto",
+      "Rate this production": "Puntúa esta producción",
+      "Time remaining": "Tiempo restante",
+      "voted": "votadas",
+      "Voting ended": "Votación finalizada",
+      "Jury voting only": "Solo votación de jurado",
+      "Mixed voting (public + jury)": "Votación mixta (público + jurado)",
+      "Public voting": "Votación pública",
+      "Voting Periods": "Períodos de Votación",
+      "Breakdown": "Desglose",
+      "Jury": "Jurado",
 
       // Table Headers
       Title: "Título",

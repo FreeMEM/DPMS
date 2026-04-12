@@ -81,3 +81,12 @@ class Production(BaseModel):
         related_name="reviewed_productions"
     )
     reviewed_at = models.DateTimeField(null=True, blank=True)
+    # Historical ranking data (from Demozoo imports)
+    ranking_position = models.PositiveIntegerField(
+        null=True, blank=True,
+        help_text="Position in competition results (from historical data)",
+    )
+    ranking_score = models.CharField(
+        max_length=50, blank=True, default='',
+        help_text="Score in competition results (from historical data)",
+    )

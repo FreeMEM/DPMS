@@ -167,7 +167,10 @@ const StageRunnerPage = () => {
   const handleOpenTemplateDialog = (template) => {
     setSelectedTemplate(template);
     setSelectedCompo('');
-    setPresentationName(template === 'idle' ? t('Idle Presentation') : '');
+    setPresentationName(
+      template === 'idle' ? t('Idle Presentation') :
+      template === 'awards_ceremony' ? t('Awards Ceremony') : ''
+    );
     setTemplateDialogOpen(true);
   };
 
@@ -180,7 +183,7 @@ const StageRunnerPage = () => {
 
   const handleCreateFromTemplate = async () => {
     if (!config?.id || !presentationName) return;
-    if ((selectedTemplate === 'compo_presentation' || selectedTemplate === 'awards_ceremony') && !selectedCompo) return;
+    if (selectedTemplate === 'compo_presentation' && !selectedCompo) return;
 
     setCreatingPresentation(true);
     try {
@@ -681,7 +684,7 @@ const StageRunnerPage = () => {
 
           {(selectedTemplate === 'compo_presentation' || selectedTemplate === 'awards_ceremony') && (
             <FormControl fullWidth sx={{ mt: 1 }}>
-              <InputLabel>{t('Competition')}</InputLabel>
+              <InputLabel>{selectedTemplate === 'awards_ceremony' ? t('Competition (optional, all if empty)') : t('Competition')}</InputLabel>
               <Select
                 value={selectedCompo}
                 onChange={(e) => {
@@ -691,8 +694,13 @@ const StageRunnerPage = () => {
                     setPresentationName(compo.compo_name + (selectedTemplate === 'awards_ceremony' ? ' - Results' : ''));
                   }
                 }}
-                label={t('Competition')}
+                label={selectedTemplate === 'awards_ceremony' ? t('Competition (optional, all if empty)') : t('Competition')}
               >
+                {selectedTemplate === 'awards_ceremony' && (
+                  <MenuItem value="">
+                    <em>{t('All competitions')}</em>
+                  </MenuItem>
+                )}
                 {compos.map((hc) => (
                   <MenuItem key={hc.id} value={hc.id}>
                     {hc.compo_name || hc.compo?.name}
@@ -704,8 +712,8 @@ const StageRunnerPage = () => {
 
           <Typography variant="body2" color="text.secondary" sx={{ mt: 3 }}>
             {selectedTemplate === 'idle' && t('Creates a presentation with logo, clock, and sponsors slides.')}
-            {selectedTemplate === 'compo_presentation' && t('Creates an intro slide, production list, and production show template.')}
-            {selectedTemplate === 'awards_ceremony' && t('Creates an intro slide, results table with reveal, and podium.')}
+            {selectedTemplate === 'compo_presentation' && t('Creates an intro slide, production list, and one slide per production with screenshots/videos.')}
+            {selectedTemplate === 'awards_ceremony' && t('Creates intro, results table, and podium slides. If no competition is selected, generates for all competitions.')}
           </Typography>
         </DialogContent>
         <DialogActions>
@@ -715,7 +723,7 @@ const StageRunnerPage = () => {
           <Button
             variant="contained"
             onClick={handleCreateFromTemplate}
-            disabled={!presentationName || creatingPresentation || ((selectedTemplate === 'compo_presentation' || selectedTemplate === 'awards_ceremony') && !selectedCompo)}
+            disabled={!presentationName || creatingPresentation || (selectedTemplate === 'compo_presentation' && !selectedCompo)}
           >
             {creatingPresentation ? t('Creating...') : t('Create')}
           </Button>

@@ -80,7 +80,7 @@ const ExternalLinkButton = ({ href, label, icon, color }) => {
 };
 
 // Modal for production detail
-const ProductionDetailDialog = ({ open, onClose, productionId, result, t }) => {
+const ProductionDetailDialog = ({ open, onClose, productionId, result, showBreakdown, votingMeta, t }) => {
   const [production, setProduction] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -251,21 +251,38 @@ const ProductionDetailDialog = ({ open, onClose, productionId, result, t }) => {
                   <TableCell>{new Date(production.created).toLocaleString()}</TableCell>
                 </TableRow>
                 {result && (
-                  <TableRow>
-                    <TableCell sx={{ pl: 0 }}>
-                      <TrophyIcon fontSize="small" color="action" />
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 500 }}>{t("Score")}</TableCell>
-                    <TableCell>
-                      <Typography component="span" fontWeight={600} color="primary.main">
-                        {Number(result.final_score).toFixed(1)} pts
-                      </Typography>
-                      {' '}
-                      <Typography component="span" variant="caption" color="text.secondary">
-                        ({result.total_votes} {result.total_votes === 1 ? t('vote') : t('votes')})
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
+                  <>
+                    <TableRow>
+                      <TableCell sx={{ pl: 0 }}>
+                        <TrophyIcon fontSize="small" color="action" />
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 500 }}>{t("Score")}</TableCell>
+                      <TableCell>
+                        <Typography component="span" fontWeight={600} color="primary.main">
+                          {Number(result.final_score).toFixed(1)} pts
+                        </Typography>
+                        {' '}
+                        <Typography component="span" variant="caption" color="text.secondary">
+                          ({result.total_votes} {result.total_votes === 1 ? t('vote') : t('votes')})
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                    {showBreakdown && votingMeta?.voting_mode === 'mixed' && (
+                      <TableRow>
+                        <TableCell sx={{ pl: 0 }} />
+                        <TableCell sx={{ fontWeight: 500 }}>{t("Breakdown")}</TableCell>
+                        <TableCell>
+                          <Typography variant="caption" color="text.secondary">
+                            {t("Public")}: {Number(result.public_avg_score).toFixed(1)} pts ({result.public_votes} {result.public_votes === 1 ? t('vote') : t('votes')}) &times; {votingMeta.public_weight}%
+                          </Typography>
+                          <br />
+                          <Typography variant="caption" color="text.secondary">
+                            {t("Jury")}: {Number(result.jury_avg_score).toFixed(1)} pts ({result.jury_votes} {result.jury_votes === 1 ? t('vote') : t('votes')}) &times; {votingMeta.jury_weight}%
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </>
                 )}
               </TableBody>
             </Table>
@@ -363,7 +380,7 @@ const ProductionDetailDialog = ({ open, onClose, productionId, result, t }) => {
   );
 };
 
-const CompoCard = ({ hasCompo, results, resultsPublished, onProductionClick, t }) => {
+const CompoCard = ({ hasCompo, results, resultsPublished, onProductionClick, showBreakdown, votingMeta, t }) => {
   const hasResults = resultsPublished && results && results.length > 0;
   const navigate = useNavigate();
 
@@ -455,14 +472,21 @@ const CompoCard = ({ hasCompo, results, resultsPublished, onProductionClick, t }
                       secondaryTypographyProps={{ variant: 'caption' }}
                     />
                     {result.final_score != null && (
-                      <Typography
-                        variant="caption"
-                        color="primary.main"
-                        fontWeight={600}
-                        sx={{ ml: 1, whiteSpace: 'nowrap' }}
-                      >
-                        {Number(result.final_score).toFixed(1)} pts
-                      </Typography>
+                      <Box sx={{ ml: 1, textAlign: 'right', flexShrink: 0 }}>
+                        <Typography
+                          variant="caption"
+                          color="primary.main"
+                          fontWeight={600}
+                          sx={{ whiteSpace: 'nowrap' }}
+                        >
+                          {Number(result.final_score).toFixed(1)} pts
+                        </Typography>
+                        {showBreakdown && votingMeta?.voting_mode === 'mixed' && (
+                          <Typography variant="caption" display="block" color="text.secondary" sx={{ whiteSpace: 'nowrap', fontSize: '0.65rem' }}>
+                            {t("Public")}: {Number(result.public_avg_score).toFixed(1)} ({votingMeta.public_weight}%) / {t("Jury")}: {Number(result.jury_avg_score).toFixed(1)} ({votingMeta.jury_weight}%)
+                          </Typography>
+                        )}
+                      </Box>
                     )}
                   </ListItemButton>
                 </React.Fragment>
@@ -630,6 +654,8 @@ const ComposList = () => {
                 results={getResultsForCompo(hasCompo.compo_name)}
                 resultsPublished={resultsPublished}
                 onProductionClick={handleProductionClick}
+                showBreakdown={votingResults?.show_score_breakdown}
+                votingMeta={votingResults}
                 t={t}
               />
             </Grid>
@@ -659,6 +685,8 @@ const ComposList = () => {
         onClose={handleCloseDetail}
         productionId={detailDialog.productionId}
         result={detailDialog.result}
+        showBreakdown={votingResults?.show_score_breakdown}
+        votingMeta={votingResults}
         t={t}
       />
     </Box>

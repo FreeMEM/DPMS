@@ -67,9 +67,7 @@ class EditionViewSet(viewsets.ModelViewSet):
         if open_to_upload is not None:
             queryset = queryset.filter(open_to_upload=open_to_upload.lower() == 'true')
 
-        # TODO: Add date filtering for upcoming editions when date fields are added
-
-        return queryset.order_by('-created')
+        return queryset.order_by('-start_date')
 
     def get_serializer_class(self):
         """Return appropriate serializer based on action"""
