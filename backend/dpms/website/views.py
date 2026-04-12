@@ -13,7 +13,7 @@ def index(request):
     # Get current/upcoming edition (public only, most recent first)
     current_edition = Edition.objects.filter(
         public=True
-    ).order_by('-created').first()
+    ).order_by('-start_date').first()
 
     # Get open compos for current edition
     open_compos = []
