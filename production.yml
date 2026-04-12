@@ -10,7 +10,6 @@ services:
     build:
       context: .
       dockerfile: ./docker/backend/production.Dockerfile
-    image: dpms_production_django
     working_dir: /app/backend
     entrypoint: /app/docker/backend/wsgi-entrypoint-prod.sh
     depends_on:
@@ -20,6 +19,8 @@ services:
       - ./.envs/.production/.postgres
     volumes:
       - production_staticfiles:/app/backend/staticfiles
+      - ./backend:/app/backend
+      - ./docker:/app/docker
     networks:
       - backend
 
@@ -31,7 +32,6 @@ services:
       args:
         REACT_APP_BACKEND_ADDRESS: https://api.dpms.freemem.space
         PUBLIC_URL: /app
-    image: dpms_production_frontend
     depends_on:
       - backend_party
     networks:
@@ -80,7 +80,6 @@ services:
     build:
       context: .
       dockerfile: ./docker/postgres/Dockerfile
-    image: dpms_production_postgres
     restart: unless-stopped
     volumes:
       - production_postgres_data:/var/lib/postgresql/data
