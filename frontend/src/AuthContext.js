@@ -80,7 +80,7 @@ const AuthProvider = ({ children }) => {
 
   const verifyAccount = async (token) => {
     try {
-      const response = await axiosWrapper().get(`/api/users/verify?token=${token}`);
+      const response = await axiosWrapper().post(`/api/users/verify/`, { token });
       return response; // Devuelve la respuesta con el status 200 o 400
     } catch (error) {
       throw error; // Maneja el error

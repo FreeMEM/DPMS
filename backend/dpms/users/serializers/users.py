@@ -88,8 +88,8 @@ class UserSignUpSerializer(serializers.Serializer):
     )
 
     # Password
-    password = serializers.CharField(min_length=5, max_length=64)
-    password_confirmation = serializers.CharField(min_length=5, max_length=64)
+    password = serializers.CharField(min_length=8, max_length=64)
+    password_confirmation = serializers.CharField(min_length=8, max_length=64)
 
     # Name
     first_name = serializers.CharField(min_length=2, max_length=50)
@@ -178,7 +178,7 @@ class UserLoginSerializer(serializers.Serializer):
     """
 
     email = serializers.EmailField()
-    password = serializers.CharField(min_length=5, max_length=64)
+    password = serializers.CharField(min_length=8, max_length=64)
 
     def validate(self, data):
         """Check credentials."""
@@ -192,10 +192,16 @@ class UserLoginSerializer(serializers.Serializer):
     def create(self, data):
         """Generate or retrieve a new token"""
         user = self.context["user"]
-        try:
-            Token.objects.get(user=user).delete()
-        except Token.DoesNotExist:
-            pass  # Si el token no existe, simplemente pasamos
+
+        if not user.allow_concurrence:
+            # Single session: revoke all existing tokens
+            Token.objects.filter(user=user).delete()
+        else:
+            # Concurrence allowed: reuse existing token if available
+            existing = Token.objects.filter(user=user).first()
+            if existing:
+                jwt_access_token = self.generate_jwt_token(user)
+                return user, existing.key, jwt_access_token
 
         token = Token.objects.create(user=user)
         jwt_access_token = self.generate_jwt_token(user)
@@ -286,8 +292,8 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 
     uid = serializers.CharField()
     token = serializers.CharField()
-    password = serializers.CharField(min_length=5, max_length=64)
-    password_confirmation = serializers.CharField(min_length=5, max_length=64)
+    password = serializers.CharField(min_length=8, max_length=64)
+    password_confirmation = serializers.CharField(min_length=8, max_length=64)
 
     def validate(self, data):
         # Decode uid and find user

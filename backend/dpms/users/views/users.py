@@ -156,22 +156,10 @@ class UserViewSet(
         data = UserModelSerializer(user).data
         return Response(data, status=status.HTTP_201_CREATED)
 
-    @action(detail=False, methods=["get"], permission_classes=[AllowAny])
+    @action(detail=False, methods=["post"], permission_classes=[AllowAny], throttle_classes=[AuthRateThrottle])
     def verify(self, request):
-        # """Account verification"""
-        # serializer = AccountVerificationSerializer(data=request.data)
-        # serializer.is_valid(raise_exception=True)
-        # serializer.save()
-        # data = {"message": "Congratulations and welcome to Capacitor Party community"}
-        # return Response(data, status=status.HTTP_200_OK)
-        """Account verification"""
-        token = request.query_params.get("token")
-        if not token:
-            return Response(
-                {"error": "Token is required."}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        serializer = AccountVerificationSerializer(data={"token": token})
+        """Account verification via POST body (token not exposed in URL/logs)"""
+        serializer = AccountVerificationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
@@ -209,7 +197,7 @@ class UserViewSet(
 
         return response
 
-    @action(detail=False, methods=["post"], url_path="password-reset")
+    @action(detail=False, methods=["post"], url_path="password-reset", throttle_classes=[AuthRateThrottle])
     def password_reset_request(self, request):
         """Request a password reset email."""
         serializer = PasswordResetRequestSerializer(data=request.data)
@@ -220,7 +208,7 @@ class UserViewSet(
             status=status.HTTP_200_OK,
         )
 
-    @action(detail=False, methods=["post"], url_path="password-reset-confirm")
+    @action(detail=False, methods=["post"], url_path="password-reset-confirm", throttle_classes=[AuthRateThrottle])
     def password_reset_confirm(self, request):
         """Confirm password reset with token and new password."""
         serializer = PasswordResetConfirmSerializer(data=request.data)
