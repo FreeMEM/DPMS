@@ -561,6 +561,76 @@ section, .info-section, .compos-section, .editions-section, .cta-final {
     color: var(--text-secondary);
 }
 
+/* Detail Feature Cards (event info) */
+.feature.feature--detail {
+    text-align: left;
+    padding: 2rem;
+}
+
+.feature.feature--detail .feature-icon {
+    margin: 0 0 1.5rem 0;
+}
+
+.feature.feature--detail h3 {
+    text-align: left;
+}
+
+.feature--detail .detail-content {
+    color: var(--text-secondary);
+    line-height: 1.8;
+    font-size: 0.9rem;
+}
+
+.markdown-content h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-top: 1.2rem;
+    margin-bottom: 0.4rem;
+}
+
+.markdown-content h2:first-child {
+    margin-top: 0;
+}
+
+.markdown-content p {
+    margin: 0.3rem 0;
+}
+
+.markdown-content a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.markdown-content a:hover {
+    text-decoration: underline;
+}
+
+.markdown-content ul {
+    padding-left: 1rem;
+    margin: 0.4rem 0;
+    list-style-type: none;
+}
+
+.markdown-content li {
+    margin-bottom: 0.25rem;
+    position: relative;
+    padding-left: 0.8rem;
+}
+
+.markdown-content li::before {
+    content: "›";
+    position: absolute;
+    left: 0;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.markdown-content strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
 /* Sponsors Section */
 .sponsors-section {
     padding: 5rem 0;

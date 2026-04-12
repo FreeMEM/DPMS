@@ -60,7 +60,7 @@
                 {% if open_compos_count > 0 %}
                     <div class="open-compos-badge">
                         <span class="compos-count">{{ open_compos_count }}</span>
-                        competicion{{ open_compos_count|pluralize:"es" }} abierta{{ open_compos_count|pluralize:"s" }}
+                        competición{{ open_compos_count|pluralize:"es" }} abierta{{ open_compos_count|pluralize:"s" }}
                     </div>
                 {% endif %}
 
@@ -92,7 +92,7 @@
         <h2>Demo Party</h2>
         <p class="section-description">
             Una demo party es un encuentro de artistas digitales, programadores y creativos
-            de la escena demoscene donde se compite en distintas categorias.
+            de la escena demoscene donde se compite en distintas categorías.
         </p>
 
         <div class="features">
@@ -113,7 +113,7 @@
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                     </svg>
                 </div>
-                <h3>Votacion</h3>
+                <h3>Votación</h3>
                 <p>Vota por tus producciones favoritas.</p>
             </div>
             <div class="feature">
@@ -135,6 +135,42 @@
         </div>
     </div>
 </div>
+
+<!-- Event Details Section -->
+{% if current_edition.travel_info or current_edition.contact_info %}
+<div class="info-section">
+    <div class="container">
+        <h2>Información del Evento</h2>
+        <p class="section-description">Todo lo que necesitas saber sobre {{ current_edition.title }}</p>
+        <div class="features">
+            {% if current_edition.travel_info %}
+            <div class="feature feature--detail">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                </div>
+                <h3>Cómo Llegar</h3>
+                <div class="detail-content markdown-content">{{ current_edition.travel_info }}</div>
+            </div>
+            {% endif %}
+            {% if current_edition.contact_info %}
+            <div class="feature feature--detail">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                </div>
+                <h3>Contacto</h3>
+                <div class="detail-content markdown-content">{{ current_edition.contact_info }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
 
 <!-- Sponsors Section -->
 {% if sponsors %}
@@ -169,6 +205,25 @@
 
 {% block extra_js %}
 <script>
+// Simple markdown to HTML for detail sections
+document.querySelectorAll('.markdown-content').forEach(function(el) {
+    var text = el.textContent;
+    var html = text
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+        .replace(/^- (.+)$/gm, '<li>$1</li>')
+        .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
+        .replace(/\n{2,}/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+    html = '<p>' + html + '</p>';
+    html = html.replace(/<p>\s*<(h[23]|ul)/g, '<$1');
+    html = html.replace(/<\/(h[23]|ul)>\s*<\/p>/g, '</$1>');
+    html = html.replace(/<p>\s*<\/p>/g, '');
+    el.innerHTML = html;
+});
+
 // Countdown Timer
 (function() {
     const countdownEl = document.getElementById('countdown');
