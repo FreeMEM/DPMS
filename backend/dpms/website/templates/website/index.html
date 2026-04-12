@@ -96,37 +96,46 @@
         </p>
 
         <div class="features">
-            <div class="feature">
-                <div class="feature-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-                        <path d="M2 17l10 5 10-5"></path>
-                        <path d="M2 12l10 5 10-5"></path>
-                    </svg>
+            <div class="feature feature--slideshow" data-slideshow="0">
+                <div class="feature-slideshow"></div>
+                <div class="feature-content">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                            <path d="M2 17l10 5 10-5"></path>
+                            <path d="M2 12l10 5 10-5"></path>
+                        </svg>
+                    </div>
+                    <h3>Competiciones</h3>
+                    <p>Demos, intros, musica, graficos, wild...</p>
                 </div>
-                <h3>Competiciones</h3>
-                <p>Demos, intros, musica, graficos, wild...</p>
             </div>
-            <div class="feature">
-                <div class="feature-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                    </svg>
+            <div class="feature feature--slideshow" data-slideshow="1">
+                <div class="feature-slideshow"></div>
+                <div class="feature-content">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                    </div>
+                    <h3>Votación</h3>
+                    <p>Vota por tus producciones favoritas.</p>
                 </div>
-                <h3>Votación</h3>
-                <p>Vota por tus producciones favoritas.</p>
             </div>
-            <div class="feature">
-                <div class="feature-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
+            <div class="feature feature--slideshow" data-slideshow="2">
+                <div class="feature-slideshow"></div>
+                <div class="feature-content">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <h3>Comunidad</h3>
+                    <p>Conecta con la escena demoscene.</p>
                 </div>
-                <h3>Comunidad</h3>
-                <p>Conecta con la escena demoscene.</p>
             </div>
         </div>
 
@@ -137,7 +146,7 @@
 </div>
 
 <!-- Event Details Section -->
-{% if current_edition.travel_info or current_edition.contact_info %}
+{% if current_edition.travel_info or current_edition.contact_info or current_edition.what_to_bring %}
 <div class="info-section">
     <div class="container">
         <h2>Información del Evento</h2>
@@ -153,6 +162,18 @@
                 </div>
                 <h3>Cómo Llegar</h3>
                 <div class="detail-content markdown-content">{{ current_edition.travel_info }}</div>
+            </div>
+            {% endif %}
+            {% if current_edition.what_to_bring %}
+            <div class="feature feature--detail">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 11l3 3L22 4"></path>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                </div>
+                <h3>Info Práctica</h3>
+                <div class="detail-content markdown-content">{{ current_edition.what_to_bring }}</div>
             </div>
             {% endif %}
             {% if current_edition.contact_info %}
@@ -205,6 +226,58 @@
 
 {% block extra_js %}
 <script>
+// Slideshow on feature cards
+(function() {
+    var MEDIA_URL = '{{ MEDIA_URL|default:"/media/" }}';
+    var allScreenshots = [
+        {% for s in screenshots %}'{{ s }}'{% if not forloop.last %},{% endif %}{% endfor %}
+    ];
+
+    if (allScreenshots.length === 0) return;
+
+    // Shuffle and split into 3 groups
+    for (var i = allScreenshots.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = allScreenshots[i];
+        allScreenshots[i] = allScreenshots[j];
+        allScreenshots[j] = tmp;
+    }
+
+    var groups = [[], [], []];
+    allScreenshots.forEach(function(s, i) { groups[i % 3].push(s); });
+
+    document.querySelectorAll('.feature--slideshow').forEach(function(card) {
+        var idx = parseInt(card.dataset.slideshow);
+        var images = groups[idx];
+        if (!images || images.length === 0) return;
+
+        var slideEl = card.querySelector('.feature-slideshow');
+        var current = 0;
+        var interval = null;
+
+        // Preload images
+        images.forEach(function(src) {
+            var img = new Image();
+            img.src = MEDIA_URL + src;
+        });
+
+        function showNext() {
+            slideEl.style.backgroundImage = 'url(' + MEDIA_URL + images[current] + ')';
+            current = (current + 1) % images.length;
+        }
+
+        card.addEventListener('mouseenter', function() {
+            showNext();
+            interval = setInterval(showNext, 800);
+        });
+
+        card.addEventListener('mouseleave', function() {
+            clearInterval(interval);
+            interval = null;
+        });
+    });
+})();
+
 // Simple markdown to HTML for detail sections
 document.querySelectorAll('.markdown-content').forEach(function(el) {
     var text = el.textContent;

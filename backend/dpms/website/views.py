@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.utils import timezone
-from dpms.compos.models import Edition, HasCompo, Sponsor
+from dpms.compos.models import Edition, HasCompo, Sponsor, Production
 
 
 def index(request):
@@ -58,6 +58,13 @@ def index(request):
             editions=current_edition
         ).order_by('display_order', 'name')
 
+    # Get production screenshots for feature card slideshows
+    screenshots = list(
+        Production.objects.exclude(screenshot='').exclude(screenshot__isnull=True)
+        .order_by('?')
+        .values_list('screenshot', flat=True)[:30]
+    )
+
     context = {
         'site_title': 'DPMS - Demo Party Management System',
         'current_edition': current_edition,
@@ -65,6 +72,7 @@ def index(request):
         'open_compos_count': open_compos_count,
         'countdown_data': countdown_data,
         'sponsors': sponsors,
+        'screenshots': screenshots,
         'is_authenticated': request.user.is_authenticated,
     }
     return render(request, 'website/index.html', context)

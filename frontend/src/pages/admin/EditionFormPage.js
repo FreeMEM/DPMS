@@ -79,6 +79,8 @@ const EditionFormPage = () => {
     contact_info_en: '',
     travel_info_es: '',
     travel_info_en: '',
+    schedule: '',
+    what_to_bring: '',
     contact_form_enabled: false,
     contact_email: '',
   });
@@ -126,6 +128,8 @@ const EditionFormPage = () => {
         contact_info_en: d.contact_info_en || '',
         travel_info_es: d.travel_info_es || d.travel_info || '',
         travel_info_en: d.travel_info_en || '',
+        schedule: d.schedule || '',
+        what_to_bring: d.what_to_bring || '',
         contact_form_enabled: d.contact_form_enabled || false,
         contact_email: d.contact_email || '',
       });
@@ -235,6 +239,8 @@ const EditionFormPage = () => {
       submitData.append('travel_info', formData.travel_info_es);
       submitData.append('travel_info_es', formData.travel_info_es);
       submitData.append('travel_info_en', formData.travel_info_en);
+      submitData.append('schedule', formData.schedule);
+      submitData.append('what_to_bring', formData.what_to_bring);
       submitData.append('contact_form_enabled', formData.contact_form_enabled);
       submitData.append('contact_email', formData.contact_email);
 
@@ -626,6 +632,30 @@ const EditionFormPage = () => {
               onChange={(lang, val) => setFormData(prev => ({ ...prev, [`travel_info_${lang}`]: val }))}
               rows={6}
               helperText="Dirección, aeropuertos, trenes, parking, alojamiento (markdown soportado)"
+            />
+
+            <TextField
+              label="Programa / Horario"
+              name="schedule"
+              value={formData.schedule}
+              onChange={handleChange}
+              multiline
+              rows={6}
+              fullWidth
+              helperText="Horario del evento (markdown soportado)"
+              sx={{ mb: 2 }}
+            />
+
+            <TextField
+              label="Info Práctica (qué traer, normas, etc.)"
+              name="what_to_bring"
+              value={formData.what_to_bring}
+              onChange={handleChange}
+              multiline
+              rows={6}
+              fullWidth
+              helperText="Entrada, qué traer, normas de convivencia, registro (markdown soportado)"
+              sx={{ mb: 2 }}
             />
 
             <Box sx={{ display: 'flex', gap: 3, alignItems: 'center' }}>

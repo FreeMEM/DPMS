@@ -484,6 +484,42 @@ section, .info-section, .compos-section, .editions-section, .cta-final {
     line-height: 1.7;
 }
 
+/* Feature Slideshow */
+.feature--slideshow {
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-slideshow {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    background-size: cover;
+    background-position: center;
+}
+
+.feature-slideshow::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.5) 0%,
+        rgba(0, 0, 0, 0.3) 40%,
+        rgba(0, 0, 0, 0.7) 100%
+    );
+}
+
+.feature--slideshow:hover .feature-slideshow {
+    opacity: 1;
+}
+
+.feature-content {
+    position: relative;
+    z-index: 1;
+}
+
 /* Compos Section */
 .compos-section {
     background: transparent;

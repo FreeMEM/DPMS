@@ -101,6 +101,16 @@ class Edition(BaseModel):
         blank=True, default='',
         help_text="How to get there: venue address, airports, trains, buses, parking, accommodation (markdown)"
     )
+    schedule = models.TextField(
+        "Schedule",
+        blank=True, default='',
+        help_text="Event schedule/programme in markdown format"
+    )
+    what_to_bring = models.TextField(
+        "What to Bring",
+        blank=True, default='',
+        help_text="What attendees should bring and basic conduct rules (markdown)"
+    )
     contact_form_enabled = models.BooleanField(
         "Contact Form Enabled",
         default=False,

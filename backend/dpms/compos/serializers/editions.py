@@ -12,6 +12,8 @@ EDITION_CONTACT_FIELDS = [
     'travel_info',
     'travel_info_es',
     'travel_info_en',
+    'schedule',
+    'what_to_bring',
     'contact_form_enabled',
     'contact_email',
 ]
