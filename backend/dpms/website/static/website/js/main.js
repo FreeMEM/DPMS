@@ -26,6 +26,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const nextBtn = document.getElementById('hero-next');
         const dotsContainer = document.getElementById('hero-dots');
         const AUTOPLAY_MS = 7000;
+        // Expose duration to CSS so the progress bar in the active dot
+        // stays in sync with the JS timer.
+        slider.style.setProperty('--slider-duration', AUTOPLAY_MS + 'ms');
         let current = 0;
         let timer = null;
         let paused = false;
@@ -64,22 +67,29 @@ document.addEventListener('DOMContentLoaded', function() {
         if (prevBtn) prevBtn.addEventListener('click', prev);
         if (nextBtn) nextBtn.addEventListener('click', () => go(current + 1, true));
 
-        // Pause autoplay only when hovering meaningful areas, not the whole slider
+        // Pause autoplay only when hovering interactive controls. The hero
+        // text area is big enough that blanket-pausing made the rotation feel
+        // broken.
         let hoverCount = 0;
         const scope = slider.parentElement || document;
         const pauseTargets = scope.querySelectorAll(
-            '.hero-content, .hero-poster, .hero-nav, .hero-dots button'
+            '.hero-nav, .hero-dots button, .cta-buttons a, .cta-buttons button, ' +
+            '.perk, .poster-thumb, .hero-poster img'
         );
+        function setPaused(state) {
+            paused = state;
+            dotsContainer.classList.toggle('is-paused', state);
+        }
         pauseTargets.forEach(el => {
             el.addEventListener('mouseenter', () => {
                 hoverCount++;
-                paused = true;
+                setPaused(true);
                 stop();
             });
             el.addEventListener('mouseleave', () => {
                 hoverCount = Math.max(0, hoverCount - 1);
                 if (hoverCount === 0) {
-                    paused = false;
+                    setPaused(false);
                     start();
                 }
             });
