@@ -119,6 +119,12 @@ msgstr "Liity sceneen"
 msgid "Get access to the Telegram channel and the community behind the party."
 msgstr "Pääset käsiksi Telegram-kanavalle ja partyn järjestävään yhteisöön."
 
+msgid "Your place in the scene"
+msgstr "Sinun paikkasi scenessä"
+
+msgid "Create your profile with nickname and group. Discover other people's work and follow what's brewing in every edition."
+msgstr "Luo profiilisi nimimerkillä ja ryhmällä. Tutustu muiden töihin ja seuraa, mitä jokaisessa tapahtumassa on tekeillä."
+
 msgid "Historical archive"
 msgstr "Historia-arkisto"
 

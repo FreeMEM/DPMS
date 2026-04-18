@@ -119,6 +119,12 @@ msgstr "Liga-te à scene"
 msgid "Get access to the Telegram channel and the community behind the party."
 msgstr "Acede ao canal de Telegram e à comunidade que organiza a party."
 
+msgid "Your place in the scene"
+msgstr "O teu lugar na scene"
+
+msgid "Create your profile with nickname and group. Discover other people's work and follow what's brewing in every edition."
+msgstr "Cria o teu perfil com nickname e grupo. Descobre os trabalhos dos outros e acompanha o que se prepara em cada edição."
+
 msgid "Historical archive"
 msgstr "Arquivo histórico"
 
