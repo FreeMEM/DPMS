@@ -4,81 +4,228 @@
 {% block title %}{% if current_edition %}{{ current_edition.title }} - {% endif %}DPMS Demo Party{% endblock %}
 
 {% block content %}
-<!-- Hero Section - Full Screen Landing -->
+<!-- Hero Section - Full Screen Landing with Slider -->
 <div class="hero-section">
-    <div class="hero-wrapper">
-        {% if current_edition and current_edition.poster %}
-        <!-- Poster destacado -->
-        <div class="hero-poster">
-            <img src="{{ current_edition.poster.url }}" alt="{{ current_edition.title }} - Cartel"
-                 class="poster-image"
-                 {% if current_edition.logo_border_width > 0 %}
-                 style="box-shadow: 0 0 {{ current_edition.logo_border_width|add:20 }}px {{ current_edition.logo_border_color }};"
-                 {% endif %}
-            >
+    <div class="hero-slider" id="hero-slider">
+
+        <!-- Slide 1: Edición actual -->
+        <div class="hero-slide is-active" data-slide="0">
+            <div class="hero-wrapper">
+                {% if current_edition and current_edition.poster %}
+                <div class="hero-poster">
+                    <img src="{{ current_edition.poster.url }}" alt="{{ current_edition.title }} - Cartel"
+                         class="poster-image"
+                         {% if current_edition.logo_border_width > 0 %}
+                         style="box-shadow: 0 0 {{ current_edition.logo_border_width|add:20 }}px {{ current_edition.logo_border_color }};"
+                         {% endif %}
+                    >
+                </div>
+                {% endif %}
+
+                <div class="hero-content {% if current_edition and current_edition.poster %}with-poster{% endif %}">
+                    {% if current_edition %}
+                        <div class="edition-badge">{{ event_date_range|default:"Demo Party" }}</div>
+                        <h1 class="hero-title">{{ current_edition.title }}</h1>
+                        {% if current_edition.description %}
+                            <p class="hero-subtitle">{{ current_edition.description }}</p>
+                        {% endif %}
+
+                        {% if countdown_data %}
+                        <div class="countdown-container">
+                            <div class="countdown-label">Comienza en</div>
+                            <div class="countdown-timer" id="countdown"
+                                 data-target="{{ countdown_data.target_date }}">
+                                <div class="countdown-item">
+                                    <span class="countdown-value" id="days">{{ countdown_data.days }}</span>
+                                    <span class="countdown-unit">Días</span>
+                                </div>
+                                <div class="countdown-separator">:</div>
+                                <div class="countdown-item">
+                                    <span class="countdown-value" id="hours">{{ countdown_data.hours|stringformat:"02d" }}</span>
+                                    <span class="countdown-unit">Horas</span>
+                                </div>
+                                <div class="countdown-separator">:</div>
+                                <div class="countdown-item">
+                                    <span class="countdown-value" id="minutes">{{ countdown_data.minutes|stringformat:"02d" }}</span>
+                                    <span class="countdown-unit">Min</span>
+                                </div>
+                                <div class="countdown-separator">:</div>
+                                <div class="countdown-item">
+                                    <span class="countdown-value" id="seconds">{{ countdown_data.seconds|stringformat:"02d" }}</span>
+                                    <span class="countdown-unit">Seg</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <h1 class="hero-title">DPMS</h1>
+                        <p class="hero-subtitle">Demo Party Management System</p>
+                    {% endif %}
+
+                    <div class="cta-buttons">
+                        <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">Registrarse</a>
+                        <a href="{{ FRONTEND_URL }}/login" class="btn btn-secondary">Acceder</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Compos abiertas -->
+        {% if open_compos_count > 0 %}
+        <div class="hero-slide" data-slide="1">
+            <div class="hero-wrapper hero-wrapper--centered">
+                <div class="hero-content hero-content--centered">
+                    <div class="edition-badge">Compos abiertas</div>
+                    <h2 class="hero-title hero-title--large-number">
+                        <span class="hero-big-number">{{ open_compos_count }}</span>
+                        <span class="hero-big-label">competici{{ open_compos_count|pluralize:"ón,ones" }} esperando tu producción</span>
+                    </h2>
+                    {% if open_compos %}
+                    <div class="compos-chips">
+                        {% for compo in open_compos %}
+                        <span class="compo-chip">{{ compo.name }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <p class="hero-subtitle">Sube tu demo, intro, gráfico, música o wild. Hay una categoría para lo que estés creando.</p>
+                    <div class="cta-buttons">
+                        <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">Subir producción</a>
+                        <a href="{{ FRONTEND_URL }}/login" class="btn btn-secondary">Ya tengo cuenta</a>
+                    </div>
+                </div>
+            </div>
         </div>
         {% endif %}
 
-        <div class="hero-content {% if current_edition and current_edition.poster %}with-poster{% endif %}">
-            {% if current_edition %}
-                <div class="edition-badge">Demo Party</div>
-                <h1 class="hero-title">{{ current_edition.title }}</h1>
-                {% if current_edition.description %}
-                    <p class="hero-subtitle">{{ current_edition.description|truncatewords:15 }}</p>
-                {% endif %}
-
-                <!-- Countdown Timer -->
-                {% if countdown_data %}
-                    <div class="countdown-container">
-                        <div class="countdown-label">Comienza en</div>
-                        <div class="countdown-timer" id="countdown"
-                             data-target="{{ countdown_data.target_date }}">
-                            <div class="countdown-item">
-                                <span class="countdown-value" id="days">{{ countdown_data.days }}</span>
-                                <span class="countdown-unit">Dias</span>
+        <!-- Slide 3: Por qué registrarse -->
+        <div class="hero-slide" data-slide="2">
+            <div class="hero-wrapper hero-wrapper--centered">
+                <div class="hero-content hero-content--centered">
+                    <div class="edition-badge">Únete a la escena</div>
+                    <h2 class="hero-title hero-title--medium">¿Por qué registrarse?</h2>
+                    <div class="perks-grid">
+                        <div class="perk">
+                            <div class="perk-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="17 8 12 3 7 8"/>
+                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                </svg>
                             </div>
-                            <div class="countdown-separator">:</div>
-                            <div class="countdown-item">
-                                <span class="countdown-value" id="hours">{{ countdown_data.hours|stringformat:"02d" }}</span>
-                                <span class="countdown-unit">Horas</span>
+                            <h3>Sube tus producciones</h3>
+                            <p>Demos, intros, gráficos, música... compite en cualquier categoría abierta.</p>
+                        </div>
+                        <div class="perk">
+                            <div class="perk-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                </svg>
                             </div>
-                            <div class="countdown-separator">:</div>
-                            <div class="countdown-item">
-                                <span class="countdown-value" id="minutes">{{ countdown_data.minutes|stringformat:"02d" }}</span>
-                                <span class="countdown-unit">Min</span>
+                            <h3>Vota en directo</h3>
+                            <p>Decide qué obras ganan durante la party con tu voto del público.</p>
+                        </div>
+                        <div class="perk">
+                            <div class="perk-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
                             </div>
-                            <div class="countdown-separator">:</div>
-                            <div class="countdown-item">
-                                <span class="countdown-value" id="seconds">{{ countdown_data.seconds|stringformat:"02d" }}</span>
-                                <span class="countdown-unit">Seg</span>
+                            <h3>Conecta con la scene</h3>
+                            <p>Accede al canal de Telegram y a la comunidad que organiza la party.</p>
+                        </div>
+                        <div class="perk">
+                            <div class="perk-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                                    <polyline points="21 15 16 10 5 21"/>
+                                </svg>
                             </div>
+                            <h3>Archivo histórico</h3>
+                            <p>Descarga y disfruta de las producciones de ediciones anteriores.</p>
                         </div>
                     </div>
-                {% endif %}
-
-                <!-- Open Compos -->
-                {% if open_compos_count > 0 %}
-                    <div class="open-compos-badge">
-                        <span class="compos-count">{{ open_compos_count }}</span>
-                        competición{{ open_compos_count|pluralize:"es" }} abierta{{ open_compos_count|pluralize:"s" }}
+                    <div class="cta-buttons">
+                        <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">Crear cuenta gratis</a>
                     </div>
-                {% endif %}
-
-            {% else %}
-                <h1 class="hero-title">DPMS</h1>
-                <p class="hero-subtitle">Demo Party Management System</p>
-            {% endif %}
-
-            <!-- CTA Buttons -->
-            <div class="cta-buttons">
-                <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">Registrarse</a>
-                <a href="{{ FRONTEND_URL }}/login" class="btn btn-secondary">Acceder</a>
+                </div>
             </div>
-
         </div>
+
+        <!-- Slide 4: Historia / Retrospectiva -->
+        {% if stats.editions > 0 %}
+        <div class="hero-slide" data-slide="3">
+            <div class="hero-wrapper hero-wrapper--centered">
+                <div class="hero-content hero-content--centered">
+                    <div class="edition-badge">Más de 30 años de scene</div>
+                    <h2 class="hero-title hero-title--medium">Una historia que empezó en {{ stats.first_year }}</h2>
+                    <div class="stats-grid">
+                        <div class="stat">
+                            <div class="stat-value">{{ stats.editions }}</div>
+                            <div class="stat-label">Ediciones{{ stats.editions|pluralize:",s" }}</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">{{ stats.productions }}</div>
+                            <div class="stat-label">Producciones</div>
+                        </div>
+                        {% if stats.years_of_history %}
+                        <div class="stat">
+                            <div class="stat-value">{{ stats.years_of_history }}</div>
+                            <div class="stat-label">Años de historia</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% if past_posters %}
+                    <div class="poster-strip">
+                        {% for poster in past_posters %}
+                        <img src="{{ MEDIA_URL|default:'/media/' }}{{ poster }}" alt="Cartel edición anterior" class="poster-thumb">
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <p class="hero-subtitle">Amiga Party Posadas lleva décadas siendo punto de encuentro de la demoscene española.</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Slide 5: Cultura demoscene -->
+        <div class="hero-slide" data-slide="4">
+            <div class="hero-wrapper hero-wrapper--centered">
+                <div class="hero-content hero-content--centered">
+                    <div class="edition-badge">¿Primera vez aquí?</div>
+                    <h2 class="hero-title hero-title--medium">Esto es una demo party</h2>
+                    <p class="hero-subtitle hero-subtitle--large">
+                        Un encuentro donde programadores, artistas y músicos compiten creando
+                        obras audiovisuales en tiempo real. Código, arte y comunidad alrededor
+                        de un mismo proyector.
+                    </p>
+                    <p class="hero-tagline">Trae tu ordenador. Trae tus ideas. Vive la scene.</p>
+                    <div class="cta-buttons">
+                        <a href="#que-es" class="btn btn-secondary">Saber más</a>
+                        <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">Apuntarme</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Scroll indicator - outside hero-content for proper positioning -->
+    <!-- Navigation arrows -->
+    <button class="hero-nav hero-nav--prev" id="hero-prev" aria-label="Slide anterior">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+        </svg>
+    </button>
+    <button class="hero-nav hero-nav--next" id="hero-next" aria-label="Slide siguiente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"/>
+        </svg>
+    </button>
+
+    <!-- Dots indicator -->
+    <div class="hero-dots" id="hero-dots"></div>
+
+    <!-- Scroll indicator -->
     <div class="scroll-indicator">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 5v14M19 12l-7 7-7-7"/>
@@ -87,7 +234,7 @@
 </div>
 
 <!-- Info Section -->
-<div class="info-section">
+<div class="info-section" id="que-es">
     <div class="container">
         <h2>Demo Party</h2>
         <p class="section-description">
@@ -147,11 +294,11 @@
 
 <!-- Event Details Section -->
 {% if current_edition.travel_info or current_edition.contact_info or current_edition.what_to_bring %}
-<div class="info-section">
+<div class="info-section" id="info-evento">
     <div class="container">
         <h2>Información del Evento</h2>
         <p class="section-description">Todo lo que necesitas saber sobre {{ current_edition.title }}</p>
-        <div class="features">
+        <div class="features features--stacked">
             {% if current_edition.travel_info %}
             <div class="feature feature--detail">
                 <div class="feature-icon">
@@ -195,7 +342,7 @@
 
 <!-- Sponsors Section -->
 {% if sponsors %}
-<div class="sponsors-section">
+<div class="sponsors-section" id="patrocinadores">
     <div class="container">
         <h2>Patrocinadores</h2>
         <p class="section-description">

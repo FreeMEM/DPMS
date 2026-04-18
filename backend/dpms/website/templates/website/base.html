@@ -54,8 +54,14 @@
                 </div>
                 <div class="navbar-menu">
                     <a href="/">Inicio</a>
+                    <a href="/#que-es">Qué es</a>
+                    {% if current_edition.travel_info or current_edition.contact_info or current_edition.what_to_bring %}
+                    <a href="/#info-evento">Info del Evento</a>
+                    {% endif %}
+                    {% if sponsors %}
+                    <a href="/#patrocinadores">Patrocinadores</a>
+                    {% endif %}
                     <a href="{{ FRONTEND_URL }}/login">Acceder</a>
-                    <a href="{{ FRONTEND_URL }}/signup">Registrarse</a>
                 </div>
             </div>
         </nav>
