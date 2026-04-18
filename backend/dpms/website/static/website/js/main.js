@@ -1,19 +1,71 @@
 // Main JavaScript for DPMS Landing Page
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Smooth scroll para enlaces internos
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    // Smooth scroll for any link whose href contains a hash (both "#id" and
+    // "/#id" are covered — the latter is emitted by navbar items that also
+    // serve as the "Home" route).
+    document.querySelectorAll('a[href*="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href') || '';
+            const hashIdx = href.indexOf('#');
+            if (hashIdx < 0) return;
+            const id = href.slice(hashIdx + 1);
+            if (!id) return;
+            const target = document.getElementById(id);
+            if (!target) return;
             e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
     });
+
+    // Scroll spy: light up the navbar link matching the section in view.
+    (function initScrollSpy() {
+        const navLinks = Array.from(
+            document.querySelectorAll('.navbar-menu a[href]')
+        ).filter(a => {
+            const h = a.getAttribute('href') || '';
+            return h === '/' || h.includes('#');
+        });
+        if (!navLinks.length) return;
+
+        const sections = [
+            { key: '',             selector: '.hero-section' },
+            { key: 'que-es',       selector: '#que-es' },
+            { key: 'info-evento',  selector: '#info-evento' },
+            { key: 'patrocinadores', selector: '#patrocinadores' },
+        ]
+        .map(s => ({ key: s.key, el: document.querySelector(s.selector) }))
+        .filter(s => s.el);
+
+        function linkKey(link) {
+            const href = link.getAttribute('href') || '';
+            const idx = href.indexOf('#');
+            if (idx < 0) return href === '/' ? '' : null;
+            return href.slice(idx + 1);
+        }
+
+        function update() {
+            const offset = 140; // approx navbar height + padding
+            const pos = window.scrollY + offset;
+            let current = sections[0].key;
+            for (const s of sections) {
+                if (s.el.offsetTop <= pos) current = s.key;
+            }
+            navLinks.forEach(link => {
+                const key = linkKey(link);
+                link.classList.toggle('is-active', key === current);
+            });
+        }
+
+        let ticking = false;
+        window.addEventListener('scroll', () => {
+            if (ticking) return;
+            ticking = true;
+            requestAnimationFrame(() => { update(); ticking = false; });
+        }, { passive: true });
+        window.addEventListener('resize', update);
+        update();
+    })();
 
     // Hero Slider
     (function initHeroSlider() {

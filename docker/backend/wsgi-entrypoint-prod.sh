@@ -37,6 +37,9 @@ done
 
 ./manage.py migrate --noinput
 ./manage.py collectstatic --noinput
+# The ./backend volume mount in production.yml overrides the .mo files baked
+# into the image, so we must compile translations at container start.
+./manage.py compilemessages
 
 gunicorn config.wsgi:application \
     --bind 0.0.0.0:8000 \

@@ -243,3 +243,45 @@ msgstr "Kiitos sponsoreillemme tämän tapahtuman mahdollistamisesta."
 
 msgid "Event in progress!"
 msgstr "Tapahtuma käynnissä!"
+
+msgid "A demo party is a gathering where coders, graphics artists and musicians compete creating real-time audiovisual works: demos, intros, chiptunes and pixel art shown live on the big screen."
+msgstr "Demoparty on tapahtuma, jossa koodarit, graafikot ja muusikot kilpailevat luomalla reaaliaikaisia audiovisuaalisia teoksia: demoja, introja, chiptuneja ja pikseligrafiikkaa, jotka näytetään suoraan isolta valkokankaalta."
+
+msgid "The demoscene was recognised by UNESCO as intangible cultural heritage in 2021 — a decades-old underground art form where the limits of the machine are part of the canvas."
+msgstr "UNESCO tunnusti demoscenen aineettomaksi kulttuuriperinnöksi vuonna 2021 — kyseessä on vuosikymmeniä vanha undergroundin taidemuoto, jossa koneen rajat ovat osa maalausalustaa."
+
+msgid "Demos, intros, tracked and executable music, pixel graphics, wild compos and more. Each category has its own rules and technical limits that push creativity to the edge."
+msgstr "Demot, introt, musiikki (tracked ja executable), pikseligrafiikka, wild-kilpailut ja paljon muuta. Jokaisella kategorialla on omat sääntönsä ja tekniset rajoituksensa, jotka vievät luovuuden äärirajoille."
+
+msgid "The audience decides the winners. Voting happens live during the screening session, creating a unique atmosphere of cheers, surprises and reveals."
+msgstr "Yleisö päättää voittajista. Äänestys tapahtuu livenä näytöksen aikana, mikä luo ainutlaatuisen tunnelman täynnä hurraahuutoja, yllätyksiä ja paljastuksia."
+
+msgid "Sceners, coders and collectors get together to share code, tricks, hardware and friendship around a single projector."
+msgstr "Scenerit, koodarit ja keräilijät kokoontuvat jakamaan koodia, kikkoja, rautaa ja ystävyyttä saman projektorin ääreen."
+
+msgid "Posadas Party, since 1995"
+msgstr "Posadas Party, vuodesta 1995"
+
+msgid "The first Posadas Amiga Party was held in July 1995 to celebrate the tenth anniversary of the Commodore Amiga. Legendary Spanish scene groups like Batman Group, Nivel7, Frame or Necropolis showed up, and the winning demo \"Batman Vuelve\" is still quoted as one of the finest Amiga 500 demos ever made."
+msgstr "Ensimmäinen Posadas Amiga Party järjestettiin heinäkuussa 1995 juhlistamaan Commodore Amigan kymmenvuotisjuhlaa. Legendaariset espanjalaiset scene-ryhmät kuten Batman Group, Nivel7, Frame ja Necropolis olivat paikalla, ja voittanut demo \"Batman Vuelve\" siteerataan yhä yhtenä kaikkien aikojen parhaista Amiga 500 -demoista."
+
+msgid "After a 22-year hiatus, the event came back in 2017 as Posadas Party 2 — Megablast and has been running every year since. Today it's the only active demoscene gathering in Spain with a dedicated focus on Amiga OCS and AGA, while welcoming wild compos from every platform."
+msgstr "22 vuoden tauon jälkeen tapahtuma palasi vuonna 2017 nimellä Posadas Party 2 — Megablast ja on järjestetty vuosittain siitä lähtien. Se on nykyään Espanjan ainoa aktiivinen demoscene-tapahtuma, joka keskittyy Amiga OCS:ään ja AGA:han, mutta ottaa vastaan wild-kilpailuja kaikilta alustoilta."
+
+msgid "First edition"
+msgstr "Ensimmäinen tapahtuma"
+
+msgid "OCS &amp; AGA focus"
+msgstr "Painopisteenä OCS ja AGA"
+
+msgid "Free entry with registration"
+msgstr "Ilmainen sisäänpääsy ilmoittautumalla"
+
+msgid "Demoscene cultural heritage"
+msgstr "Demoscene, kulttuuriperintö"
+
+msgid "What Posadas Party is"
+msgstr "Mikä Posadas Party on"
+
+msgid "Posadas Party is a demo party: a gathering where coders, graphics artists and musicians compete creating real-time audiovisual works. Demos, intros, chiptunes and pixel art are projected live on the big screen while the audience decides who walks away with the applause."
+msgstr "Posadas Party on demoparty: tapahtuma, jossa koodarit, graafikot ja muusikot kilpailevat luomalla reaaliaikaisia audiovisuaalisia teoksia. Demot, introt, chiptunet ja pixel art näytetään suoraan isolta valkokankaalta, ja yleisö päättää, kuka ansaitsee aplodit."

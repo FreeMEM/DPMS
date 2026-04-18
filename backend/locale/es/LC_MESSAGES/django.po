@@ -243,3 +243,45 @@ msgstr "Gracias a nuestros patrocinadores por hacer posible este evento."
 
 msgid "Event in progress!"
 msgstr "¡Evento en curso!"
+
+msgid "A demo party is a gathering where coders, graphics artists and musicians compete creating real-time audiovisual works: demos, intros, chiptunes and pixel art shown live on the big screen."
+msgstr "Una demo party es un encuentro donde coders, grafistas y músicos compiten creando obras audiovisuales en tiempo real: demos, intros, chiptunes y pixel art proyectadas en directo en la pantalla grande."
+
+msgid "The demoscene was recognised by UNESCO as intangible cultural heritage in 2021 — a decades-old underground art form where the limits of the machine are part of the canvas."
+msgstr "La demoscene fue reconocida por la UNESCO como patrimonio cultural inmaterial en 2021: una forma de arte underground con décadas de historia donde los límites de la máquina forman parte del lienzo."
+
+msgid "Demos, intros, tracked and executable music, pixel graphics, wild compos and more. Each category has its own rules and technical limits that push creativity to the edge."
+msgstr "Demos, intros, música (tracked y ejecutable), gráficos pixel, wild compos y más. Cada categoría tiene sus reglas y límites técnicos que llevan la creatividad al extremo."
+
+msgid "The audience decides the winners. Voting happens live during the screening session, creating a unique atmosphere of cheers, surprises and reveals."
+msgstr "El público decide los ganadores. Se vota en directo durante la sesión de proyección y se arma un ambiente único de aplausos, sorpresas y revelaciones."
+
+msgid "Sceners, coders and collectors get together to share code, tricks, hardware and friendship around a single projector."
+msgstr "Sceners, coders y coleccionistas se reúnen para compartir código, trucos, hardware y amistad alrededor de un mismo proyector."
+
+msgid "Posadas Party, since 1995"
+msgstr "Posadas Party, desde 1995"
+
+msgid "The first Posadas Amiga Party was held in July 1995 to celebrate the tenth anniversary of the Commodore Amiga. Legendary Spanish scene groups like Batman Group, Nivel7, Frame or Necropolis showed up, and the winning demo \"Batman Vuelve\" is still quoted as one of the finest Amiga 500 demos ever made."
+msgstr "La primera Posadas Amiga Party se celebró en julio de 1995 para festejar el décimo aniversario del Commodore Amiga. Grupos legendarios de la scene española como Batman Group, Nivel7, Frame o Necropolis pasaron por aquella edición, y la demo ganadora «Batman Vuelve» sigue citándose como una de las mejores demos de Amiga 500 jamás creadas."
+
+msgid "After a 22-year hiatus, the event came back in 2017 as Posadas Party 2 — Megablast and has been running every year since. Today it's the only active demoscene gathering in Spain with a dedicated focus on Amiga OCS and AGA, while welcoming wild compos from every platform."
+msgstr "Tras 22 años de pausa, el evento volvió en 2017 como Posadas Party 2 — Megablast y se celebra cada año desde entonces. Hoy es la única party de demoscene activa en España centrada en Amiga OCS y AGA, y mantiene las puertas abiertas a wild compos de cualquier plataforma."
+
+msgid "First edition"
+msgstr "Primera edición"
+
+msgid "OCS &amp; AGA focus"
+msgstr "Foco en OCS y AGA"
+
+msgid "Free entry with registration"
+msgstr "Entrada gratuita con registro"
+
+msgid "Demoscene cultural heritage"
+msgstr "Demoscene, patrimonio cultural"
+
+msgid "What Posadas Party is"
+msgstr "Qué es la Posadas Party"
+
+msgid "Posadas Party is a demo party: a gathering where coders, graphics artists and musicians compete creating real-time audiovisual works. Demos, intros, chiptunes and pixel art are projected live on the big screen while the audience decides who walks away with the applause."
+msgstr "La Posadas Party es una demo party: un encuentro donde coders, grafistas y músicos compiten creando obras audiovisuales en tiempo real. Demos, intros, chiptunes y pixel art se proyectan en directo en la pantalla grande mientras el público decide quién se lleva los aplausos."

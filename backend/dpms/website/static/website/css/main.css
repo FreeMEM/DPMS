@@ -118,6 +118,12 @@ main {
     color: var(--primary-color);
 }
 
+.navbar-menu a.is-active {
+    background: rgba(255, 165, 0, 0.18);
+    color: var(--primary-color);
+    box-shadow: inset 0 -2px 0 var(--primary-color);
+}
+
 /* Language switcher */
 .lang-switcher {
     position: relative;
@@ -926,6 +932,83 @@ section, .info-section, .compos-section, .editions-section, .cta-final {
     margin: 0 auto 3rem;
     color: var(--text-secondary);
     line-height: 1.8;
+}
+
+.section-description--small {
+    font-size: 1rem;
+    max-width: 760px;
+    margin-top: -1.5rem;
+    color: var(--text-secondary);
+    opacity: 0.85;
+}
+
+/* Posadas Party story block */
+.story-block {
+    margin: 5rem auto 3rem;
+    max-width: 900px;
+    padding: 2.5rem 2rem;
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(255, 165, 0, 0.04), rgba(255, 255, 255, 0.02));
+    backdrop-filter: blur(10px);
+}
+
+.story-title {
+    text-align: center;
+    color: var(--primary-color);
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    margin: 0 0 1.5rem;
+}
+
+.story-lead {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    line-height: 1.75;
+    margin: 0 0 1rem;
+}
+
+.story-lead:last-of-type {
+    margin-bottom: 2rem;
+}
+
+.story-highlights {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+}
+
+.story-highlight {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.25);
+    transition: all 0.25s ease;
+}
+
+.story-highlight:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-3px);
+}
+
+.story-highlight-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    line-height: 1;
+    margin-bottom: 0.35rem;
+    letter-spacing: 0.02em;
+}
+
+.story-highlight-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
 
 /* Features Grid */

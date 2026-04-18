@@ -243,3 +243,45 @@ msgstr "Merci à nos sponsors qui rendent cet événement possible."
 
 msgid "Event in progress!"
 msgstr "Événement en cours !"
+
+msgid "A demo party is a gathering where coders, graphics artists and musicians compete creating real-time audiovisual works: demos, intros, chiptunes and pixel art shown live on the big screen."
+msgstr "Une demo party est un rassemblement où codeurs, graphistes et musiciens s'affrontent en créant des œuvres audiovisuelles en temps réel : demos, intros, chiptunes et pixel art diffusés en direct sur grand écran."
+
+msgid "The demoscene was recognised by UNESCO as intangible cultural heritage in 2021 — a decades-old underground art form where the limits of the machine are part of the canvas."
+msgstr "La demoscene a été reconnue par l'UNESCO comme patrimoine culturel immatériel en 2021 — une forme d'art underground vieille de plusieurs décennies où les limites de la machine font partie de la toile."
+
+msgid "Demos, intros, tracked and executable music, pixel graphics, wild compos and more. Each category has its own rules and technical limits that push creativity to the edge."
+msgstr "Demos, intros, musique (tracked et exécutable), graphismes pixel, wild compos et plus encore. Chaque catégorie a ses propres règles et limites techniques qui poussent la créativité à l'extrême."
+
+msgid "The audience decides the winners. Voting happens live during the screening session, creating a unique atmosphere of cheers, surprises and reveals."
+msgstr "Le public décide des gagnants. Le vote se fait en direct pendant la projection et crée une ambiance unique faite d'acclamations, de surprises et de révélations."
+
+msgid "Sceners, coders and collectors get together to share code, tricks, hardware and friendship around a single projector."
+msgstr "Sceners, codeurs et collectionneurs se retrouvent pour partager code, astuces, matériel et amitié autour d'un même projecteur."
+
+msgid "Posadas Party, since 1995"
+msgstr "Posadas Party, depuis 1995"
+
+msgid "The first Posadas Amiga Party was held in July 1995 to celebrate the tenth anniversary of the Commodore Amiga. Legendary Spanish scene groups like Batman Group, Nivel7, Frame or Necropolis showed up, and the winning demo \"Batman Vuelve\" is still quoted as one of the finest Amiga 500 demos ever made."
+msgstr "La première Posadas Amiga Party a eu lieu en juillet 1995 pour célébrer le dixième anniversaire du Commodore Amiga. Des groupes légendaires de la scène espagnole comme Batman Group, Nivel7, Frame ou Necropolis y ont participé, et la demo gagnante « Batman Vuelve » est encore citée comme l'une des plus belles demos Amiga 500 jamais réalisées."
+
+msgid "After a 22-year hiatus, the event came back in 2017 as Posadas Party 2 — Megablast and has been running every year since. Today it's the only active demoscene gathering in Spain with a dedicated focus on Amiga OCS and AGA, while welcoming wild compos from every platform."
+msgstr "Après 22 ans d'interruption, l'événement est revenu en 2017 sous le nom de Posadas Party 2 — Megablast et se tient chaque année depuis. C'est aujourd'hui la seule demoparty active en Espagne dédiée à l'Amiga OCS et AGA, tout en accueillant des wild compos de toutes plateformes."
+
+msgid "First edition"
+msgstr "Première édition"
+
+msgid "OCS &amp; AGA focus"
+msgstr "Axée sur OCS et AGA"
+
+msgid "Free entry with registration"
+msgstr "Entrée gratuite avec inscription"
+
+msgid "Demoscene cultural heritage"
+msgstr "Demoscene, patrimoine culturel"
+
+msgid "What Posadas Party is"
+msgstr "Qu'est-ce que la Posadas Party"
+
+msgid "Posadas Party is a demo party: a gathering where coders, graphics artists and musicians compete creating real-time audiovisual works. Demos, intros, chiptunes and pixel art are projected live on the big screen while the audience decides who walks away with the applause."
+msgstr "La Posadas Party est une demo party : un rassemblement où codeurs, graphistes et musiciens s'affrontent en créant des œuvres audiovisuelles en temps réel. Demos, intros, chiptunes et pixel art sont projetés en direct sur grand écran pendant que le public décide qui repart avec les applaudissements."

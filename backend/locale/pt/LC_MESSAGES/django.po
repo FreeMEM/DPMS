@@ -243,3 +243,45 @@ msgstr "Obrigado aos nossos patrocinadores por tornarem este evento possível."
 
 msgid "Event in progress!"
 msgstr "Evento em curso!"
+
+msgid "A demo party is a gathering where coders, graphics artists and musicians compete creating real-time audiovisual works: demos, intros, chiptunes and pixel art shown live on the big screen."
+msgstr "Uma demo party é um encontro onde coders, grafistas e músicos competem criando obras audiovisuais em tempo real: demos, intros, chiptunes e pixel art mostrados ao vivo no ecrã grande."
+
+msgid "The demoscene was recognised by UNESCO as intangible cultural heritage in 2021 — a decades-old underground art form where the limits of the machine are part of the canvas."
+msgstr "A demoscene foi reconhecida pela UNESCO como património cultural imaterial em 2021 — uma forma de arte underground com décadas de história em que os limites da máquina fazem parte da tela."
+
+msgid "Demos, intros, tracked and executable music, pixel graphics, wild compos and more. Each category has its own rules and technical limits that push creativity to the edge."
+msgstr "Demos, intros, música (tracked e executável), gráficos pixel, wild compos e mais. Cada categoria tem as suas regras e limites técnicos que levam a criatividade ao extremo."
+
+msgid "The audience decides the winners. Voting happens live during the screening session, creating a unique atmosphere of cheers, surprises and reveals."
+msgstr "O público decide os vencedores. A votação acontece ao vivo durante a sessão de projeção, criando um ambiente único feito de aplausos, surpresas e revelações."
+
+msgid "Sceners, coders and collectors get together to share code, tricks, hardware and friendship around a single projector."
+msgstr "Sceners, coders e colecionadores juntam-se para partilhar código, truques, hardware e amizade à volta de um mesmo projetor."
+
+msgid "Posadas Party, since 1995"
+msgstr "Posadas Party, desde 1995"
+
+msgid "The first Posadas Amiga Party was held in July 1995 to celebrate the tenth anniversary of the Commodore Amiga. Legendary Spanish scene groups like Batman Group, Nivel7, Frame or Necropolis showed up, and the winning demo \"Batman Vuelve\" is still quoted as one of the finest Amiga 500 demos ever made."
+msgstr "A primeira Posadas Amiga Party realizou-se em julho de 1995 para celebrar o décimo aniversário do Commodore Amiga. Grupos lendários da scene espanhola como Batman Group, Nivel7, Frame ou Necropolis passaram por aquela edição e a demo vencedora \"Batman Vuelve\" continua a ser citada como uma das melhores demos de Amiga 500 alguma vez criadas."
+
+msgid "After a 22-year hiatus, the event came back in 2017 as Posadas Party 2 — Megablast and has been running every year since. Today it's the only active demoscene gathering in Spain with a dedicated focus on Amiga OCS and AGA, while welcoming wild compos from every platform."
+msgstr "Após 22 anos de pausa, o evento voltou em 2017 como Posadas Party 2 — Megablast e realiza-se anualmente desde então. Hoje é o único encontro de demoscene ativo em Espanha dedicado a Amiga OCS e AGA, mantendo as portas abertas a wild compos de qualquer plataforma."
+
+msgid "First edition"
+msgstr "Primeira edição"
+
+msgid "OCS &amp; AGA focus"
+msgstr "Foco em OCS e AGA"
+
+msgid "Free entry with registration"
+msgstr "Entrada gratuita com inscrição"
+
+msgid "Demoscene cultural heritage"
+msgstr "Demoscene, património cultural"
+
+msgid "What Posadas Party is"
+msgstr "O que é a Posadas Party"
+
+msgid "Posadas Party is a demo party: a gathering where coders, graphics artists and musicians compete creating real-time audiovisual works. Demos, intros, chiptunes and pixel art are projected live on the big screen while the audience decides who walks away with the applause."
+msgstr "A Posadas Party é uma demo party: um encontro onde coders, grafistas e músicos competem criando obras audiovisuais em tempo real. Demos, intros, chiptunes e pixel art são projetados ao vivo no ecrã grande enquanto o público decide quem leva os aplausos."
