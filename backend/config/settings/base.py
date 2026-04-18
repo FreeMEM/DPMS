@@ -21,6 +21,10 @@ LANGUAGE_CODE = "es"
 LANGUAGES = [
     ("es", "Español"),
     ("en", "English"),
+    ("fr", "Français"),
+    ("pt", "Português"),
+    ("de", "Deutsch"),
+    ("fi", "Suomi"),
 ]
 MODELTRANSLATION_DEFAULT_LANGUAGE = "es"
 MODELTRANSLATION_FALLBACK_LANGUAGES = ("es", "en")
@@ -29,6 +33,9 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 BASE_DIR = Path(__file__).resolve().parent.parent
+LOCALE_PATHS = [
+    str(ROOT_DIR.path("locale")),
+]
 
 ALLOWED_HOSTS = env.list(
     "DJANGO_ALLOWED_HOSTS",

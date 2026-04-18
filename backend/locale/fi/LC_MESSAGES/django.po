@@ -1,0 +1,239 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: DPMS\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-18 09:00+0000\n"
+"PO-Revision-Date: 2026-04-18 09:00+0000\n"
+"Language: fi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "email address"
+msgstr "sähköpostiosoite"
+
+msgid "A user with that email already exists."
+msgstr "Tällä sähköpostilla on jo käyttäjä."
+
+msgid "Verified"
+msgstr "Vahvistettu"
+
+msgid "Set to true when the user has verified their email address"
+msgstr "Asetetaan todeksi, kun käyttäjä on vahvistanut sähköpostiosoitteensa"
+
+msgid "Concurrencia permitida"
+msgstr "Samanaikaiset istunnot sallittu"
+
+msgid ""
+"Allows you to be logged in on several devices at the same time with the same "
+"user"
+msgstr ""
+"Mahdollistaa kirjautumisen useille laitteille samanaikaisesti samalla "
+"käyttäjällä"
+
+msgid "Demo party management system"
+msgstr "Demopartyjen hallintajärjestelmä"
+
+msgid "Home"
+msgstr "Etusivu"
+
+msgid "What is it"
+msgstr "Mikä se on"
+
+msgid "Event info"
+msgstr "Tapahtumatiedot"
+
+msgid "Sponsors"
+msgstr "Sponsorit"
+
+msgid "Sign in"
+msgstr "Kirjaudu sisään"
+
+msgid "Language selector"
+msgstr "Kielivalinta"
+
+msgid "Poster"
+msgstr "Juliste"
+
+msgid "Starts in"
+msgstr "Alkaa"
+
+msgid "Days"
+msgstr "Päivää"
+
+msgid "Hours"
+msgstr "Tuntia"
+
+msgid "Min"
+msgstr "Min"
+
+msgid "Sec"
+msgstr "Sek"
+
+msgid "Register"
+msgstr "Rekisteröidy"
+
+msgid "Open compos"
+msgstr "Avoimet kilpailut"
+
+msgid "competition waiting for your production"
+msgid_plural "competitions waiting for your production"
+msgstr[0] "kilpailu odottaa tuotantoasi"
+msgstr[1] "kilpailua odottaa tuotantoasi"
+
+msgid ""
+"Upload your demo, intro, graphic, music or wild. There's a category for "
+"whatever you're creating."
+msgstr ""
+"Lataa demosi, introsi, grafiikkasi, musiikkisi tai wildisi. Luomallesi "
+"löytyy kategoria."
+
+msgid "Upload a production"
+msgstr "Lataa tuotanto"
+
+msgid "I already have an account"
+msgstr "Minulla on jo tili"
+
+msgid "Join the scene"
+msgstr "Liity sceneen"
+
+msgid "Why register?"
+msgstr "Miksi rekisteröityä?"
+
+msgid "Upload your work"
+msgstr "Lataa teoksesi"
+
+msgid "Demos, intros, graphics, music... compete in any open category."
+msgstr "Demot, introt, grafiikat, musiikki... kilpaile missä tahansa avoimessa kategoriassa."
+
+msgid "Vote live"
+msgstr "Äänestä livenä"
+
+msgid "Decide which works win during the party with your audience vote."
+msgstr "Päätä yleisöäänelläsi, mitkä teokset voittavat partyn aikana."
+
+msgid "Connect with the scene"
+msgstr "Liity sceneen"
+
+msgid "Get access to the Telegram channel and the community behind the party."
+msgstr "Pääset käsiksi Telegram-kanavalle ja partyn järjestävään yhteisöön."
+
+msgid "Historical archive"
+msgstr "Historia-arkisto"
+
+msgid "Download and enjoy productions from previous editions."
+msgstr "Lataa ja nauti aiempien vuosien tuotannoista."
+
+msgid "Create a free account"
+msgstr "Luo ilmainen tili"
+
+msgid "More than 30 years of scene"
+msgstr "Yli 30 vuotta sceneä"
+
+#, python-format
+msgid "A story that began in %(year)s"
+msgstr "Tarina, joka alkoi vuonna %(year)s"
+
+msgid "Edition"
+msgid_plural "Editions"
+msgstr[0] "Tapahtuma"
+msgstr[1] "Tapahtumaa"
+
+msgid "Productions"
+msgstr "Tuotantoja"
+
+msgid "Years of history"
+msgstr "Vuotta historiaa"
+
+msgid "Previous edition poster"
+msgstr "Aiemman tapahtuman juliste"
+
+msgid ""
+"Amiga Party Posadas has been a meeting point for the Spanish demoscene for "
+"decades."
+msgstr ""
+"Amiga Party Posadas on ollut Espanjan demoscenen kohtaamispaikka jo "
+"vuosikymmenten ajan."
+
+msgid "First time here?"
+msgstr "Ensimmäistä kertaa täällä?"
+
+msgid "This is a demo party"
+msgstr "Tämä on demoparty"
+
+msgid ""
+"A gathering where programmers, artists and musicians compete creating real-"
+"time audiovisual works. Code, art and community around a single projector."
+msgstr ""
+"Tapahtuma, jossa ohjelmoijat, taiteilijat ja muusikot kilpailevat luomalla "
+"reaaliaikaisia audiovisuaalisia teoksia. Koodia, taidetta ja yhteisöä saman "
+"projektorin ympärillä."
+
+msgid "Bring your computer. Bring your ideas. Live the scene."
+msgstr "Tuo tietokoneesi. Tuo ideasi. Elä sceneä."
+
+msgid "Learn more"
+msgstr "Lue lisää"
+
+msgid "Sign me up"
+msgstr "Ilmoittaudu"
+
+msgid "Previous slide"
+msgstr "Edellinen dia"
+
+msgid "Next slide"
+msgstr "Seuraava dia"
+
+msgid "Demo Party"
+msgstr "Demoparty"
+
+msgid ""
+"A demo party is a gathering of digital artists, programmers and creators "
+"from the demoscene who compete in different categories."
+msgstr ""
+"Demoparty on digitaalisten taiteilijoiden, ohjelmoijien ja demoscenen "
+"tekijöiden tapaaminen, jossa kilpaillaan eri kategorioissa."
+
+msgid "Competitions"
+msgstr "Kilpailut"
+
+msgid "Demos, intros, music, graphics, wild..."
+msgstr "Demot, introt, musiikki, grafiikat, wild..."
+
+msgid "Voting"
+msgstr "Äänestys"
+
+msgid "Vote for your favourite productions."
+msgstr "Äänestä suosikkituotantojasi."
+
+msgid "Community"
+msgstr "Yhteisö"
+
+msgid "Connect with the demoscene."
+msgstr "Liity demosceneen."
+
+msgid "Join now"
+msgstr "Liity nyt"
+
+msgid "Event information"
+msgstr "Tapahtumatiedot"
+
+#, python-format
+msgid "Everything you need to know about %(title)s"
+msgstr "Kaikki mitä sinun tulee tietää tapahtumasta %(title)s"
+
+msgid "Getting there"
+msgstr "Saapuminen"
+
+msgid "Practical info"
+msgstr "Käytännön tiedot"
+
+msgid "Contact"
+msgstr "Yhteystiedot"
+
+msgid "Thanks to our sponsors for making this event possible."
+msgstr "Kiitos sponsoreillemme tämän tapahtuman mahdollistamisesta."
+
+msgid "Event in progress!"
+msgstr "Tapahtuma käynnissä!"

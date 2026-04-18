@@ -30,6 +30,8 @@ schema_view = get_schema_view(
 urlpatterns = [
     # Django Admin
     path(settings.ADMIN_URL, admin.site.urls),
+    # i18n (language switcher endpoint: /i18n/setlang/)
+    path("i18n/", include("django.conf.urls.i18n")),
     # API Routes
     path("api/", include(("dpms.users.urls", "users"), namespace="users")),
     path("api/", include(("dpms.compos.urls", "compos"), namespace="compos")),

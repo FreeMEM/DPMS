@@ -1,5 +1,5 @@
 {% extends 'website/base.html' %}
-{% load static %}
+{% load static i18n %}
 
 {% block title %}{% if current_edition %}{{ current_edition.title }} - {% endif %}DPMS Demo Party{% endblock %}
 
@@ -13,7 +13,7 @@
             <div class="hero-wrapper">
                 {% if current_edition and current_edition.poster %}
                 <div class="hero-poster">
-                    <img src="{{ current_edition.poster.url }}" alt="{{ current_edition.title }} - Cartel"
+                    <img src="{{ current_edition.poster.url }}" alt="{{ current_edition.title }} - {% trans 'Poster' %}"
                          class="poster-image"
                          {% if current_edition.logo_border_width > 0 %}
                          style="box-shadow: 0 0 {{ current_edition.logo_border_width|add:20 }}px {{ current_edition.logo_border_color }};"
@@ -32,27 +32,27 @@
 
                         {% if countdown_data %}
                         <div class="countdown-container">
-                            <div class="countdown-label">Comienza en</div>
+                            <div class="countdown-label">{% trans "Starts in" %}</div>
                             <div class="countdown-timer" id="countdown"
                                  data-target="{{ countdown_data.target_date }}">
                                 <div class="countdown-item">
                                     <span class="countdown-value" id="days">{{ countdown_data.days }}</span>
-                                    <span class="countdown-unit">Días</span>
+                                    <span class="countdown-unit">{% trans "Days" %}</span>
                                 </div>
                                 <div class="countdown-separator">:</div>
                                 <div class="countdown-item">
                                     <span class="countdown-value" id="hours">{{ countdown_data.hours|stringformat:"02d" }}</span>
-                                    <span class="countdown-unit">Horas</span>
+                                    <span class="countdown-unit">{% trans "Hours" %}</span>
                                 </div>
                                 <div class="countdown-separator">:</div>
                                 <div class="countdown-item">
                                     <span class="countdown-value" id="minutes">{{ countdown_data.minutes|stringformat:"02d" }}</span>
-                                    <span class="countdown-unit">Min</span>
+                                    <span class="countdown-unit">{% trans "Min" %}</span>
                                 </div>
                                 <div class="countdown-separator">:</div>
                                 <div class="countdown-item">
                                     <span class="countdown-value" id="seconds">{{ countdown_data.seconds|stringformat:"02d" }}</span>
-                                    <span class="countdown-unit">Seg</span>
+                                    <span class="countdown-unit">{% trans "Sec" %}</span>
                                 </div>
                             </div>
                         </div>
@@ -63,8 +63,8 @@
                     {% endif %}
 
                     <div class="cta-buttons">
-                        <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">Registrarse</a>
-                        <a href="{{ FRONTEND_URL }}/login" class="btn btn-secondary">Acceder</a>
+                        <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">{% trans "Register" %}</a>
+                        <a href="{{ FRONTEND_URL }}/login" class="btn btn-secondary">{% trans "Sign in" %}</a>
                     </div>
                 </div>
             </div>
@@ -75,10 +75,10 @@
         <div class="hero-slide" data-slide="1">
             <div class="hero-wrapper hero-wrapper--centered">
                 <div class="hero-content hero-content--centered">
-                    <div class="edition-badge">Compos abiertas</div>
+                    <div class="edition-badge">{% trans "Open compos" %}</div>
                     <h2 class="hero-title hero-title--large-number">
                         <span class="hero-big-number">{{ open_compos_count }}</span>
-                        <span class="hero-big-label">competici{{ open_compos_count|pluralize:"ón,ones" }} esperando tu producción</span>
+                        <span class="hero-big-label">{% blocktrans count counter=open_compos_count %}competition waiting for your production{% plural %}competitions waiting for your production{% endblocktrans %}</span>
                     </h2>
                     {% if open_compos %}
                     <div class="compos-chips">
@@ -87,10 +87,10 @@
                         {% endfor %}
                     </div>
                     {% endif %}
-                    <p class="hero-subtitle">Sube tu demo, intro, gráfico, música o wild. Hay una categoría para lo que estés creando.</p>
+                    <p class="hero-subtitle">{% trans "Upload your demo, intro, graphic, music or wild. There's a category for whatever you're creating." %}</p>
                     <div class="cta-buttons">
-                        <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">Subir producción</a>
-                        <a href="{{ FRONTEND_URL }}/login" class="btn btn-secondary">Ya tengo cuenta</a>
+                        <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">{% trans "Upload a production" %}</a>
+                        <a href="{{ FRONTEND_URL }}/login" class="btn btn-secondary">{% trans "I already have an account" %}</a>
                     </div>
                 </div>
             </div>
@@ -101,8 +101,8 @@
         <div class="hero-slide" data-slide="2">
             <div class="hero-wrapper hero-wrapper--centered">
                 <div class="hero-content hero-content--centered">
-                    <div class="edition-badge">Únete a la escena</div>
-                    <h2 class="hero-title hero-title--medium">¿Por qué registrarse?</h2>
+                    <div class="edition-badge">{% trans "Join the scene" %}</div>
+                    <h2 class="hero-title hero-title--medium">{% trans "Why register?" %}</h2>
                     <div class="perks-grid">
                         <div class="perk">
                             <div class="perk-icon">
@@ -112,8 +112,8 @@
                                     <line x1="12" y1="3" x2="12" y2="15"/>
                                 </svg>
                             </div>
-                            <h3>Sube tus producciones</h3>
-                            <p>Demos, intros, gráficos, música... compite en cualquier categoría abierta.</p>
+                            <h3>{% trans "Upload your work" %}</h3>
+                            <p>{% trans "Demos, intros, graphics, music... compete in any open category." %}</p>
                         </div>
                         <div class="perk">
                             <div class="perk-icon">
@@ -121,8 +121,8 @@
                                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                                 </svg>
                             </div>
-                            <h3>Vota en directo</h3>
-                            <p>Decide qué obras ganan durante la party con tu voto del público.</p>
+                            <h3>{% trans "Vote live" %}</h3>
+                            <p>{% trans "Decide which works win during the party with your audience vote." %}</p>
                         </div>
                         <div class="perk">
                             <div class="perk-icon">
@@ -130,8 +130,8 @@
                                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                                 </svg>
                             </div>
-                            <h3>Conecta con la scene</h3>
-                            <p>Accede al canal de Telegram y a la comunidad que organiza la party.</p>
+                            <h3>{% trans "Connect with the scene" %}</h3>
+                            <p>{% trans "Get access to the Telegram channel and the community behind the party." %}</p>
                         </div>
                         <div class="perk">
                             <div class="perk-icon">
@@ -141,12 +141,12 @@
                                     <polyline points="21 15 16 10 5 21"/>
                                 </svg>
                             </div>
-                            <h3>Archivo histórico</h3>
-                            <p>Descarga y disfruta de las producciones de ediciones anteriores.</p>
+                            <h3>{% trans "Historical archive" %}</h3>
+                            <p>{% trans "Download and enjoy productions from previous editions." %}</p>
                         </div>
                     </div>
                     <div class="cta-buttons">
-                        <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">Crear cuenta gratis</a>
+                        <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">{% trans "Create a free account" %}</a>
                     </div>
                 </div>
             </div>
@@ -157,32 +157,32 @@
         <div class="hero-slide" data-slide="3">
             <div class="hero-wrapper hero-wrapper--centered">
                 <div class="hero-content hero-content--centered">
-                    <div class="edition-badge">Más de 30 años de scene</div>
-                    <h2 class="hero-title hero-title--medium">Una historia que empezó en {{ stats.first_year }}</h2>
+                    <div class="edition-badge">{% trans "More than 30 years of scene" %}</div>
+                    <h2 class="hero-title hero-title--medium">{% blocktrans with year=stats.first_year %}A story that began in {{ year }}{% endblocktrans %}</h2>
                     <div class="stats-grid">
                         <div class="stat">
                             <div class="stat-value">{{ stats.editions }}</div>
-                            <div class="stat-label">Ediciones{{ stats.editions|pluralize:",s" }}</div>
+                            <div class="stat-label">{% blocktrans count counter=stats.editions %}Edition{% plural %}Editions{% endblocktrans %}</div>
                         </div>
                         <div class="stat">
                             <div class="stat-value">{{ stats.productions }}</div>
-                            <div class="stat-label">Producciones</div>
+                            <div class="stat-label">{% trans "Productions" %}</div>
                         </div>
                         {% if stats.years_of_history %}
                         <div class="stat">
                             <div class="stat-value">{{ stats.years_of_history }}</div>
-                            <div class="stat-label">Años de historia</div>
+                            <div class="stat-label">{% trans "Years of history" %}</div>
                         </div>
                         {% endif %}
                     </div>
                     {% if past_posters %}
                     <div class="poster-strip">
                         {% for poster in past_posters %}
-                        <img src="{{ MEDIA_URL|default:'/media/' }}{{ poster }}" alt="Cartel edición anterior" class="poster-thumb">
+                        <img src="{{ MEDIA_URL|default:'/media/' }}{{ poster }}" alt="{% trans 'Previous edition poster' %}" class="poster-thumb">
                         {% endfor %}
                     </div>
                     {% endif %}
-                    <p class="hero-subtitle">Amiga Party Posadas lleva décadas siendo punto de encuentro de la demoscene española.</p>
+                    <p class="hero-subtitle">{% trans "Amiga Party Posadas has been a meeting point for the Spanish demoscene for decades." %}</p>
                 </div>
             </div>
         </div>
@@ -192,17 +192,15 @@
         <div class="hero-slide" data-slide="4">
             <div class="hero-wrapper hero-wrapper--centered">
                 <div class="hero-content hero-content--centered">
-                    <div class="edition-badge">¿Primera vez aquí?</div>
-                    <h2 class="hero-title hero-title--medium">Esto es una demo party</h2>
+                    <div class="edition-badge">{% trans "First time here?" %}</div>
+                    <h2 class="hero-title hero-title--medium">{% trans "This is a demo party" %}</h2>
                     <p class="hero-subtitle hero-subtitle--large">
-                        Un encuentro donde programadores, artistas y músicos compiten creando
-                        obras audiovisuales en tiempo real. Código, arte y comunidad alrededor
-                        de un mismo proyector.
+                        {% trans "A gathering where programmers, artists and musicians compete creating real-time audiovisual works. Code, art and community around a single projector." %}
                     </p>
-                    <p class="hero-tagline">Trae tu ordenador. Trae tus ideas. Vive la scene.</p>
+                    <p class="hero-tagline">{% trans "Bring your computer. Bring your ideas. Live the scene." %}</p>
                     <div class="cta-buttons">
-                        <a href="#que-es" class="btn btn-secondary">Saber más</a>
-                        <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">Apuntarme</a>
+                        <a href="#que-es" class="btn btn-secondary">{% trans "Learn more" %}</a>
+                        <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">{% trans "Sign me up" %}</a>
                     </div>
                 </div>
             </div>
@@ -211,12 +209,12 @@
     </div>
 
     <!-- Navigation arrows -->
-    <button class="hero-nav hero-nav--prev" id="hero-prev" aria-label="Slide anterior">
+    <button class="hero-nav hero-nav--prev" id="hero-prev" aria-label="{% trans 'Previous slide' %}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 18 9 12 15 6"/>
         </svg>
     </button>
-    <button class="hero-nav hero-nav--next" id="hero-next" aria-label="Slide siguiente">
+    <button class="hero-nav hero-nav--next" id="hero-next" aria-label="{% trans 'Next slide' %}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="9 18 15 12 9 6"/>
         </svg>
@@ -236,10 +234,9 @@
 <!-- Info Section -->
 <div class="info-section" id="que-es">
     <div class="container">
-        <h2>Demo Party</h2>
+        <h2>{% trans "Demo Party" %}</h2>
         <p class="section-description">
-            Una demo party es un encuentro de artistas digitales, programadores y creativos
-            de la escena demoscene donde se compite en distintas categorías.
+            {% trans "A demo party is a gathering of digital artists, programmers and creators from the demoscene who compete in different categories." %}
         </p>
 
         <div class="features">
@@ -253,8 +250,8 @@
                             <path d="M2 12l10 5 10-5"></path>
                         </svg>
                     </div>
-                    <h3>Competiciones</h3>
-                    <p>Demos, intros, musica, graficos, wild...</p>
+                    <h3>{% trans "Competitions" %}</h3>
+                    <p>{% trans "Demos, intros, music, graphics, wild..." %}</p>
                 </div>
             </div>
             <div class="feature feature--slideshow" data-slideshow="1">
@@ -265,8 +262,8 @@
                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                         </svg>
                     </div>
-                    <h3>Votación</h3>
-                    <p>Vota por tus producciones favoritas.</p>
+                    <h3>{% trans "Voting" %}</h3>
+                    <p>{% trans "Vote for your favourite productions." %}</p>
                 </div>
             </div>
             <div class="feature feature--slideshow" data-slideshow="2">
@@ -280,14 +277,14 @@
                             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                         </svg>
                     </div>
-                    <h3>Comunidad</h3>
-                    <p>Conecta con la escena demoscene.</p>
+                    <h3>{% trans "Community" %}</h3>
+                    <p>{% trans "Connect with the demoscene." %}</p>
                 </div>
             </div>
         </div>
 
         <div class="section-cta">
-            <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-large btn-glow">Unirse Ahora</a>
+            <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-large btn-glow">{% trans "Join now" %}</a>
         </div>
     </div>
 </div>
@@ -296,8 +293,8 @@
 {% if current_edition.travel_info or current_edition.contact_info or current_edition.what_to_bring %}
 <div class="info-section" id="info-evento">
     <div class="container">
-        <h2>Información del Evento</h2>
-        <p class="section-description">Todo lo que necesitas saber sobre {{ current_edition.title }}</p>
+        <h2>{% trans "Event information" %}</h2>
+        <p class="section-description">{% blocktrans with title=current_edition.title %}Everything you need to know about {{ title }}{% endblocktrans %}</p>
         <div class="features features--stacked">
             {% if current_edition.travel_info %}
             <div class="feature feature--detail">
@@ -307,7 +304,7 @@
                         <circle cx="12" cy="10" r="3"></circle>
                     </svg>
                 </div>
-                <h3>Cómo Llegar</h3>
+                <h3>{% trans "Getting there" %}</h3>
                 <div class="detail-content markdown-content">{{ current_edition.travel_info }}</div>
             </div>
             {% endif %}
@@ -319,7 +316,7 @@
                         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                     </svg>
                 </div>
-                <h3>Info Práctica</h3>
+                <h3>{% trans "Practical info" %}</h3>
                 <div class="detail-content markdown-content">{{ current_edition.what_to_bring }}</div>
             </div>
             {% endif %}
@@ -331,7 +328,7 @@
                         <polyline points="22,6 12,13 2,6"></polyline>
                     </svg>
                 </div>
-                <h3>Contacto</h3>
+                <h3>{% trans "Contact" %}</h3>
                 <div class="detail-content markdown-content">{{ current_edition.contact_info }}</div>
             </div>
             {% endif %}
@@ -344,9 +341,9 @@
 {% if sponsors %}
 <div class="sponsors-section" id="patrocinadores">
     <div class="container">
-        <h2>Patrocinadores</h2>
+        <h2>{% trans "Sponsors" %}</h2>
         <p class="section-description">
-            Gracias a nuestros patrocinadores por hacer posible este evento.
+            {% trans "Thanks to our sponsors for making this event possible." %}
         </p>
         <div class="sponsors-grid">
             {% for sponsor in sponsors %}
@@ -373,6 +370,7 @@
 
 {% block extra_js %}
 <script>
+var COUNTDOWN_ENDED_TEXT = '{% trans "Event in progress!" %}';
 // Slideshow on feature cards
 (function() {
     var MEDIA_URL = '{{ MEDIA_URL|default:"/media/" }}';
@@ -456,7 +454,7 @@ document.querySelectorAll('.markdown-content').forEach(function(el) {
         const diff = targetDate - now;
 
         if (diff <= 0) {
-            countdownEl.innerHTML = '<div class="countdown-ended">Evento en curso!</div>';
+            countdownEl.innerHTML = '<div class="countdown-ended">' + COUNTDOWN_ENDED_TEXT + '</div>';
             return;
         }
 

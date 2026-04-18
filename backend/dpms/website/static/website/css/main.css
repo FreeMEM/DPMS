@@ -118,6 +118,172 @@ main {
     color: var(--primary-color);
 }
 
+/* Language switcher */
+.lang-switcher {
+    position: relative;
+    margin-left: 0.5rem;
+}
+
+.lang-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.25s ease;
+}
+
+.lang-trigger:hover {
+    border-color: var(--primary-color);
+    background: rgba(255, 165, 0, 0.1);
+}
+
+.lang-code {
+    letter-spacing: 0.05em;
+}
+
+.lang-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 180px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+    padding: 0.4rem;
+    margin: 0;
+    list-style: none;
+    display: none;
+    z-index: 1000;
+}
+
+.lang-switcher.is-open .lang-menu,
+.lang-switcher:hover .lang-menu,
+.lang-switcher:focus-within .lang-menu {
+    display: block;
+}
+
+.lang-form {
+    margin: 0;
+}
+
+.lang-option {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.75rem;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-align: left;
+    transition: all 0.2s ease;
+}
+
+.lang-option:hover {
+    background: rgba(255, 165, 0, 0.15);
+    color: var(--primary-color);
+}
+
+.lang-option.is-active {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Flag icons (CSS-only) */
+.flag {
+    display: inline-block;
+    width: 22px;
+    height: 16px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Spain: red-yellow-red horizontal stripes */
+.flag-es {
+    background: linear-gradient(
+        to bottom,
+        #c60b1e 0 25%,
+        #ffc400 25% 75%,
+        #c60b1e 75% 100%
+    );
+}
+
+/* UK: approximate Union Jack via layered gradients */
+.flag-en {
+    background:
+        linear-gradient(45deg, transparent 45%, #ffffff 45% 55%, transparent 55%),
+        linear-gradient(-45deg, transparent 45%, #ffffff 45% 55%, transparent 55%),
+        linear-gradient(to bottom, transparent 44%, #ffffff 44% 56%, transparent 56%),
+        linear-gradient(to right, transparent 44%, #ffffff 44% 56%, transparent 56%),
+        linear-gradient(45deg, transparent 47%, #cf142b 47% 53%, transparent 53%),
+        linear-gradient(-45deg, transparent 47%, #cf142b 47% 53%, transparent 53%),
+        linear-gradient(to bottom, transparent 47%, #cf142b 47% 53%, transparent 53%),
+        linear-gradient(to right, transparent 47%, #cf142b 47% 53%, transparent 53%),
+        #00247d;
+}
+
+/* France: blue-white-red vertical stripes */
+.flag-fr {
+    background: linear-gradient(
+        to right,
+        #0055a4 0 33.3%,
+        #ffffff 33.3% 66.6%,
+        #ef4135 66.6% 100%
+    );
+}
+
+/* Portugal: green (40%) + red (60%) vertical */
+.flag-pt {
+    background:
+        radial-gradient(circle at 40% 50%, #ffcc00 2px, transparent 2.5px),
+        linear-gradient(
+            to right,
+            #046a38 0 40%,
+            #da291c 40% 100%
+        );
+}
+
+/* Germany: black-red-gold horizontal stripes */
+.flag-de {
+    background: linear-gradient(
+        to bottom,
+        #000000 0 33.3%,
+        #dd0000 33.3% 66.6%,
+        #ffcc00 66.6% 100%
+    );
+}
+
+/* Finland: blue Nordic cross on white */
+.flag-fi {
+    background:
+        linear-gradient(to bottom, transparent 40%, #003580 40% 60%, transparent 60%),
+        linear-gradient(to right, transparent 30%, #003580 30% 45%, transparent 45%),
+        #ffffff;
+}
+
+@media (max-width: 768px) {
+    .lang-menu {
+        right: auto;
+        left: 0;
+    }
+}
+
 /* Hero Section */
 .hero-section {
     min-height: 100vh;

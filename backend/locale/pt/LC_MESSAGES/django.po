@@ -1,0 +1,239 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: DPMS\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-18 09:00+0000\n"
+"PO-Revision-Date: 2026-04-18 09:00+0000\n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "email address"
+msgstr "endereço de e-mail"
+
+msgid "A user with that email already exists."
+msgstr "Já existe um utilizador com esse e-mail."
+
+msgid "Verified"
+msgstr "Verificado"
+
+msgid "Set to true when the user has verified their email address"
+msgstr "Ativado quando o utilizador verificou o seu endereço de e-mail"
+
+msgid "Concurrencia permitida"
+msgstr "Sessões simultâneas permitidas"
+
+msgid ""
+"Allows you to be logged in on several devices at the same time with the same "
+"user"
+msgstr ""
+"Permite iniciar sessão em vários dispositivos ao mesmo tempo com o mesmo "
+"utilizador"
+
+msgid "Demo party management system"
+msgstr "Sistema de gestão de demo parties"
+
+msgid "Home"
+msgstr "Início"
+
+msgid "What is it"
+msgstr "O que é"
+
+msgid "Event info"
+msgstr "Info do Evento"
+
+msgid "Sponsors"
+msgstr "Patrocinadores"
+
+msgid "Sign in"
+msgstr "Entrar"
+
+msgid "Language selector"
+msgstr "Seletor de idioma"
+
+msgid "Poster"
+msgstr "Cartaz"
+
+msgid "Starts in"
+msgstr "Começa em"
+
+msgid "Days"
+msgstr "Dias"
+
+msgid "Hours"
+msgstr "Horas"
+
+msgid "Min"
+msgstr "Min"
+
+msgid "Sec"
+msgstr "Seg"
+
+msgid "Register"
+msgstr "Registar"
+
+msgid "Open compos"
+msgstr "Compos abertas"
+
+msgid "competition waiting for your production"
+msgid_plural "competitions waiting for your production"
+msgstr[0] "competição à espera da tua produção"
+msgstr[1] "competições à espera da tua produção"
+
+msgid ""
+"Upload your demo, intro, graphic, music or wild. There's a category for "
+"whatever you're creating."
+msgstr ""
+"Envia a tua demo, intro, gráfico, música ou wild. Há uma categoria para o "
+"que estiveres a criar."
+
+msgid "Upload a production"
+msgstr "Enviar produção"
+
+msgid "I already have an account"
+msgstr "Já tenho conta"
+
+msgid "Join the scene"
+msgstr "Junta-te à scene"
+
+msgid "Why register?"
+msgstr "Porquê registar-se?"
+
+msgid "Upload your work"
+msgstr "Envia os teus trabalhos"
+
+msgid "Demos, intros, graphics, music... compete in any open category."
+msgstr "Demos, intros, gráficos, música... compete em qualquer categoria aberta."
+
+msgid "Vote live"
+msgstr "Vota ao vivo"
+
+msgid "Decide which works win during the party with your audience vote."
+msgstr "Decide que obras vencem durante a party com o teu voto de público."
+
+msgid "Connect with the scene"
+msgstr "Liga-te à scene"
+
+msgid "Get access to the Telegram channel and the community behind the party."
+msgstr "Acede ao canal de Telegram e à comunidade que organiza a party."
+
+msgid "Historical archive"
+msgstr "Arquivo histórico"
+
+msgid "Download and enjoy productions from previous editions."
+msgstr "Descarrega e desfruta das produções de edições anteriores."
+
+msgid "Create a free account"
+msgstr "Criar conta gratuita"
+
+msgid "More than 30 years of scene"
+msgstr "Mais de 30 anos de scene"
+
+#, python-format
+msgid "A story that began in %(year)s"
+msgstr "Uma história que começou em %(year)s"
+
+msgid "Edition"
+msgid_plural "Editions"
+msgstr[0] "Edição"
+msgstr[1] "Edições"
+
+msgid "Productions"
+msgstr "Produções"
+
+msgid "Years of history"
+msgstr "Anos de história"
+
+msgid "Previous edition poster"
+msgstr "Cartaz de edição anterior"
+
+msgid ""
+"Amiga Party Posadas has been a meeting point for the Spanish demoscene for "
+"decades."
+msgstr ""
+"A Amiga Party Posadas é há décadas um ponto de encontro da demoscene "
+"espanhola."
+
+msgid "First time here?"
+msgstr "Primeira vez aqui?"
+
+msgid "This is a demo party"
+msgstr "Isto é uma demo party"
+
+msgid ""
+"A gathering where programmers, artists and musicians compete creating real-"
+"time audiovisual works. Code, art and community around a single projector."
+msgstr ""
+"Um encontro onde programadores, artistas e músicos competem criando obras "
+"audiovisuais em tempo real. Código, arte e comunidade à volta de um mesmo "
+"projetor."
+
+msgid "Bring your computer. Bring your ideas. Live the scene."
+msgstr "Traz o teu computador. Traz as tuas ideias. Vive a scene."
+
+msgid "Learn more"
+msgstr "Saber mais"
+
+msgid "Sign me up"
+msgstr "Inscrever-me"
+
+msgid "Previous slide"
+msgstr "Slide anterior"
+
+msgid "Next slide"
+msgstr "Slide seguinte"
+
+msgid "Demo Party"
+msgstr "Demo Party"
+
+msgid ""
+"A demo party is a gathering of digital artists, programmers and creators "
+"from the demoscene who compete in different categories."
+msgstr ""
+"Uma demo party é um encontro de artistas digitais, programadores e criativos "
+"da demoscene que competem em diferentes categorias."
+
+msgid "Competitions"
+msgstr "Competições"
+
+msgid "Demos, intros, music, graphics, wild..."
+msgstr "Demos, intros, música, gráficos, wild..."
+
+msgid "Voting"
+msgstr "Votação"
+
+msgid "Vote for your favourite productions."
+msgstr "Vota nas tuas produções favoritas."
+
+msgid "Community"
+msgstr "Comunidade"
+
+msgid "Connect with the demoscene."
+msgstr "Liga-te à demoscene."
+
+msgid "Join now"
+msgstr "Aderir agora"
+
+msgid "Event information"
+msgstr "Informação do evento"
+
+#, python-format
+msgid "Everything you need to know about %(title)s"
+msgstr "Tudo o que precisas de saber sobre %(title)s"
+
+msgid "Getting there"
+msgstr "Como chegar"
+
+msgid "Practical info"
+msgstr "Info prática"
+
+msgid "Contact"
+msgstr "Contacto"
+
+msgid "Thanks to our sponsors for making this event possible."
+msgstr "Obrigado aos nossos patrocinadores por tornarem este evento possível."
+
+msgid "Event in progress!"
+msgstr "Evento em curso!"

@@ -1,6 +1,6 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ LANGUAGE_CODE|default:'es' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,19 +8,19 @@
 
     {% block seo %}
     <title>{% block title %}{{ site_title|default:"DPMS - Demo Party Management System" }}{% endblock %}</title>
-    <meta name="description" content="{% block description %}Sistema de gestión de demo parties{% endblock %}">
+    <meta name="description" content="{% block description %}{% trans 'Demo party management system' %}{% endblock %}">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
     <meta property="og:title" content="{% block og_title %}{{ site_title|default:"DPMS" }}{% endblock %}">
-    <meta property="og:description" content="{% block og_description %}Sistema de gestión de demo parties{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{% trans 'Demo party management system' %}{% endblock %}">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="{{ request.build_absolute_uri }}">
     <meta property="twitter:title" content="{% block twitter_title %}{{ site_title|default:"DPMS" }}{% endblock %}">
-    <meta property="twitter:description" content="{% block twitter_description %}Sistema de gestión de demo parties{% endblock %}">
+    <meta property="twitter:description" content="{% block twitter_description %}{% trans 'Demo party management system' %}{% endblock %}">
     {% endblock seo %}
 
     <!-- CSS -->
@@ -53,15 +53,39 @@
                     </a>
                 </div>
                 <div class="navbar-menu">
-                    <a href="/">Inicio</a>
-                    <a href="/#que-es">Qué es</a>
+                    <a href="/">{% trans "Home" %}</a>
+                    <a href="/#que-es">{% trans "What is it" %}</a>
                     {% if current_edition.travel_info or current_edition.contact_info or current_edition.what_to_bring %}
-                    <a href="/#info-evento">Info del Evento</a>
+                    <a href="/#info-evento">{% trans "Event info" %}</a>
                     {% endif %}
                     {% if sponsors %}
-                    <a href="/#patrocinadores">Patrocinadores</a>
+                    <a href="/#patrocinadores">{% trans "Sponsors" %}</a>
                     {% endif %}
-                    <a href="{{ FRONTEND_URL }}/login">Acceder</a>
+                    <a href="{{ FRONTEND_URL }}/login">{% trans "Sign in" %}</a>
+
+                    {% get_current_language as CURRENT_LANG %}
+                    {% get_available_languages as AVAILABLE_LANGS %}
+                    <div class="lang-switcher" aria-label="{% trans 'Language selector' %}">
+                        <button type="button" class="lang-trigger" aria-haspopup="true" aria-expanded="false">
+                            <span class="flag flag-{{ CURRENT_LANG }}" aria-hidden="true"></span>
+                            <span class="lang-code">{{ CURRENT_LANG|upper }}</span>
+                        </button>
+                        <ul class="lang-menu" role="menu">
+                            {% for lang_code, lang_name in AVAILABLE_LANGS %}
+                            <li role="menuitem">
+                                <form action="{% url 'set_language' %}" method="post" class="lang-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <input type="hidden" name="language" value="{{ lang_code }}">
+                                    <button type="submit" class="lang-option {% if lang_code == CURRENT_LANG %}is-active{% endif %}">
+                                        <span class="flag flag-{{ lang_code }}" aria-hidden="true"></span>
+                                        <span>{{ lang_name }}</span>
+                                    </button>
+                                </form>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
             </div>
         </nav>
