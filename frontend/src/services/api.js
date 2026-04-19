@@ -98,3 +98,19 @@ export const votingAPI = {
 export const votingResultsAPI = {
   editionResults: (editionId) => getAxios().get('/api/voting-results/edition_results/', { params: { edition: editionId } }),
 };
+
+// Attendance API (RSVP)
+export const attendanceAPI = {
+  mine: (editionId) => getAxios().get('/api/attendances/me/', { params: { edition: editionId } }),
+  save: (data) => getAxios().post('/api/attendances/', data),
+  remove: (id) => getAxios().delete(`/api/attendances/${id}/`),
+  adminList: (editionId) => getAxios().get('/api/attendances/', { params: { edition: editionId } }),
+  count: (editionId) => getAxios().get('/api/attendances/count/', { params: { edition: editionId } }),
+};
+
+// Users API (admin-facing list including attendance flag)
+export const usersAPI = {
+  adminList: (editionId) => getAxios().get('/api/users/admin-list/', {
+    params: editionId ? { edition: editionId } : {},
+  }),
+};

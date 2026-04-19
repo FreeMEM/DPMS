@@ -54,13 +54,20 @@
                     </div>
                 </div>
                 {% endif %}
+
+                {% if attendance_count is not None %}
+                <div class="attendance-counter" aria-live="polite">
+                    <span class="attendance-counter-number">{{ attendance_count }}</span>
+                    <span class="attendance-counter-label">{% trans "people have already confirmed" %}</span>
+                </div>
+                {% endif %}
             {% else %}
                 <h1 class="hero-title">DPMS</h1>
                 <p class="hero-subtitle">Demo Party Management System</p>
             {% endif %}
 
             <div class="cta-buttons">
-                <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">{% trans "Confirm attendance" %}</a>
+                <a href="{{ FRONTEND_URL }}/attend" class="btn btn-primary btn-glow">{% trans "Confirm attendance" %}</a>
                 <a href="{{ FRONTEND_URL }}/signup" class="btn btn-secondary">{% trans "Upload a production" %}</a>
             </div>
             <p class="hero-signin-hint">
@@ -224,7 +231,7 @@
             </div>
         </div>
         <div class="section-cta cta-buttons">
-            <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-large btn-glow">{% trans "Confirm attendance" %}</a>
+            <a href="{{ FRONTEND_URL }}/attend" class="btn btn-primary btn-large btn-glow">{% trans "Confirm attendance" %}</a>
             <a href="{{ FRONTEND_URL }}/signup" class="btn btn-secondary btn-large">{% trans "Upload a production" %}</a>
         </div>
     </div>

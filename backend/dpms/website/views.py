@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.utils import timezone
-from dpms.compos.models import Edition, HasCompo, Sponsor, Production
+from dpms.compos.models import Attendance, Edition, HasCompo, Sponsor, Production
 
 
 def index(request):
@@ -90,6 +90,13 @@ def index(request):
             editions=current_edition
         ).order_by('display_order', 'name')
 
+    # Public attendance counter (only when the edition opts in).
+    attendance_count = None
+    if current_edition and current_edition.attendance_count_public:
+        attendance_count = Attendance.objects.filter(
+            edition=current_edition
+        ).count()
+
     # Get production screenshots for feature card slideshows
     screenshots = list(
         Production.objects.exclude(screenshot='').exclude(screenshot__isnull=True)
@@ -134,6 +141,7 @@ def index(request):
         'screenshots': screenshots,
         'stats': stats,
         'past_posters': past_posters,
+        'attendance_count': attendance_count,
         'is_authenticated': request.user.is_authenticated,
     }
     return render(request, 'website/index.html', context)

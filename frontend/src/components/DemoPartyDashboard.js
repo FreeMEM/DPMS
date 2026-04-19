@@ -27,6 +27,7 @@ import {
 import {
   EmojiEvents as TrophyIcon,
   CloudUpload as UploadIcon,
+  HowToReg as HowToRegIcon,
   Folder as FolderIcon,
   Timer as TimerIcon,
   Event as EventIcon,
@@ -506,6 +507,29 @@ const DemoPartyDashboard = () => {
                 {t("Quick Actions")}
               </Typography>
               <Grid container spacing={3}>
+                <Grid item xs={12} sm={6} md={3}>
+                  <Card
+                    sx={{
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 8px 24px rgba(255, 165, 0, 0.2)',
+                      },
+                    }}
+                    onClick={() => navigate('/attend')}
+                  >
+                    <CardContent sx={{ textAlign: 'center', py: 3 }}>
+                      <HowToRegIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
+                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                        {t("I'm going")}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {t('Confirm attendance')}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
                 <Grid item xs={12} sm={6} md={3}>
                   <Card
                     sx={{

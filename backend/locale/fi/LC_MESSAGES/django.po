@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DPMS\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-18 09:00+0000\n"
+"POT-Creation-Date: 2026-04-19 12:20+0200\n"
 "PO-Revision-Date: 2026-04-18 09:00+0000\n"
 "Language: fi\n"
 "MIME-Version: 1.0\n"
@@ -10,21 +10,27 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#: dpms/users/models/users.py:19
 msgid "email address"
 msgstr "sähköpostiosoite"
 
+#: dpms/users/models/users.py:21
 msgid "A user with that email already exists."
 msgstr "Tällä sähköpostilla on jo käyttäjä."
 
+#: dpms/users/models/users.py:28
 msgid "Verified"
 msgstr "Vahvistettu"
 
+#: dpms/users/models/users.py:30
 msgid "Set to true when the user has verified their email address"
 msgstr "Asetetaan todeksi, kun käyttäjä on vahvistanut sähköpostiosoitteensa"
 
+#: dpms/users/models/users.py:34
 msgid "Concurrencia permitida"
 msgstr "Samanaikaiset istunnot sallittu"
 
+#: dpms/users/models/users.py:37
 msgid ""
 "Allows you to be logged in on several devices at the same time with the same "
 "user"
@@ -32,62 +38,200 @@ msgstr ""
 "Mahdollistaa kirjautumisen useille laitteille samanaikaisesti samalla "
 "käyttäjällä"
 
+#: dpms/website/templates/website/base.html:11
+#: dpms/website/templates/website/base.html:17
+#: dpms/website/templates/website/base.html:23
 msgid "Demo party management system"
 msgstr "Demopartyjen hallintajärjestelmä"
 
+#: dpms/website/templates/website/base.html:55
+msgid "Menu"
+msgstr ""
+
+#: dpms/website/templates/website/base.html:61
 msgid "Home"
 msgstr "Etusivu"
 
+#: dpms/website/templates/website/base.html:62
 msgid "What is it"
 msgstr "Mikä se on"
 
-msgid "Event info"
-msgstr "Tapahtumatiedot"
-
-msgid "Sponsors"
-msgstr "Sponsorit"
-
-msgid "Sign in"
-msgstr "Kirjaudu sisään"
-
-msgid "Confirm attendance"
-msgstr "Vahvista osallistuminen"
-
-msgid "Already have an account?"
-msgstr "Onko sinulla jo tili?"
-
-msgid "Language selector"
-msgstr "Kielivalinta"
-
-msgid "Poster"
-msgstr "Juliste"
-
-msgid "Starts in"
-msgstr "Alkaa"
-
-msgid "Days"
-msgstr "Päivää"
-
-msgid "Hours"
-msgstr "Tuntia"
-
-msgid "Min"
-msgstr "Min"
-
-msgid "Sec"
-msgstr "Sek"
-
-msgid "Register"
-msgstr "Rekisteröidy"
-
+#: dpms/website/templates/website/base.html:64
+#: dpms/website/templates/website/index.html:175
 msgid "Open compos"
 msgstr "Avoimet kilpailut"
 
+#: dpms/website/templates/website/base.html:67
+msgid "Event info"
+msgstr "Tapahtumatiedot"
+
+#: dpms/website/templates/website/base.html:70
+#: dpms/website/templates/website/index.html:328
+msgid "Sponsors"
+msgstr "Sponsorit"
+
+#: dpms/website/templates/website/base.html:72
+#: dpms/website/templates/website/index.html:75
+msgid "Sign in"
+msgstr "Kirjaudu sisään"
+
+#: dpms/website/templates/website/base.html:76
+msgid "Language selector"
+msgstr "Kielivalinta"
+
+#: dpms/website/templates/website/index.html:13
+msgid "Poster"
+msgstr "Juliste"
+
+#: dpms/website/templates/website/index.html:32
+msgid "Starts in"
+msgstr "Alkaa"
+
+#: dpms/website/templates/website/index.html:37
+msgid "Days"
+msgstr "Päivää"
+
+#: dpms/website/templates/website/index.html:42
+msgid "Hours"
+msgstr "Tuntia"
+
+#: dpms/website/templates/website/index.html:47
+msgid "Min"
+msgstr "Min"
+
+#: dpms/website/templates/website/index.html:52
+msgid "Sec"
+msgstr "Sek"
+
+#: dpms/website/templates/website/index.html:61
+msgid "people have already confirmed"
+msgstr "henkilöä ovat jo vahvistaneet"
+
+#: dpms/website/templates/website/index.html:70
+#: dpms/website/templates/website/index.html:235
+msgid "Confirm attendance"
+msgstr "Vahvista osallistuminen"
+
+#: dpms/website/templates/website/index.html:71
+#: dpms/website/templates/website/index.html:189
+#: dpms/website/templates/website/index.html:236
+msgid "Upload a production"
+msgstr "Lataa tuotanto"
+
+#: dpms/website/templates/website/index.html:74
+msgid "Already have an account?"
+msgstr "Onko sinulla jo tili?"
+
+#: dpms/website/templates/website/index.html:84
+msgid "What Posadas Party is"
+msgstr "Mikä Posadas Party on"
+
+#: dpms/website/templates/website/index.html:86
+msgid ""
+"Posadas Party is a demo party: a gathering where coders, graphics artists "
+"and musicians compete creating real-time audiovisual works. Demos, intros, "
+"chiptunes and pixel art are projected live on the big screen while the "
+"audience decides who walks away with the applause."
+msgstr ""
+"Posadas Party on demoparty: tapahtuma, jossa koodarit, graafikot ja muusikot "
+"kilpailevat luomalla reaaliaikaisia audiovisuaalisia teoksia. Demot, introt, "
+"chiptunet ja pixel art näytetään suoraan isolta valkokankaalta, ja yleisö "
+"päättää, kuka ansaitsee aplodit."
+
+#: dpms/website/templates/website/index.html:89
+msgid ""
+"The demoscene was recognised by UNESCO as intangible cultural heritage in "
+"2021 — a decades-old underground art form where the limits of the machine "
+"are part of the canvas."
+msgstr ""
+"UNESCO tunnusti demoscenen aineettomaksi kulttuuriperinnöksi vuonna 2021 — "
+"kyseessä on vuosikymmeniä vanha undergroundin taidemuoto, jossa koneen rajat "
+"ovat osa maalausalustaa."
+
+#: dpms/website/templates/website/index.html:103
+msgid "Competitions"
+msgstr "Kilpailut"
+
+#: dpms/website/templates/website/index.html:104
+msgid ""
+"Demos, intros, tracked and executable music, pixel graphics, wild compos and "
+"more. Each category has its own rules and technical limits that push "
+"creativity to the edge."
+msgstr ""
+"Demot, introt, musiikki (tracked ja executable), pikseligrafiikka, wild-"
+"kilpailut ja paljon muuta. Jokaisella kategorialla on omat sääntönsä ja "
+"tekniset rajoituksensa, jotka vievät luovuuden äärirajoille."
+
+#: dpms/website/templates/website/index.html:133
+msgid "Community"
+msgstr "Yhteisö"
+
+#: dpms/website/templates/website/index.html:134
+msgid ""
+"Sceners, coders and collectors get together to share code, tricks, hardware "
+"and friendship around a single projector."
+msgstr ""
+"Scenerit, koodarit ja keräilijät kokoontuvat jakamaan koodia, kikkoja, "
+"rautaa ja ystävyyttä saman projektorin ääreen."
+
+#: dpms/website/templates/website/index.html:140
+msgid "Posadas Party, since 1995"
+msgstr "Posadas Party, vuodesta 1995"
+
+#: dpms/website/templates/website/index.html:142
+#, fuzzy
+#| msgid ""
+#| "The first Posadas Amiga Party was held in July 1995 to celebrate the "
+#| "tenth anniversary of the Commodore Amiga. Legendary Spanish scene groups "
+#| "like Batman Group, Nivel7, Frame or Necropolis showed up, and the winning "
+#| "demo \"Batman Vuelve\" is still quoted as one of the finest Amiga 500 "
+#| "demos ever made."
+msgid ""
+"The first Posadas Amiga Party was held in July 1995 to celebrate the tenth "
+"anniversary of the Commodore Amiga. Legendary Spanish scene groups like "
+"Batman Group, Nivel7, Frame or Necropolis showed up, and the winning demo \\"
+msgstr ""
+"Ensimmäinen Posadas Amiga Party järjestettiin heinäkuussa 1995 juhlistamaan "
+"Commodore Amigan kymmenvuotisjuhlaa. Legendaariset espanjalaiset scene-"
+"ryhmät kuten Batman Group, Nivel7, Frame ja Necropolis olivat paikalla, ja "
+"voittanut demo \"Batman Vuelve\" siteerataan yhä yhtenä kaikkien aikojen "
+"parhaista Amiga 500 -demoista."
+
+#: dpms/website/templates/website/index.html:145
+msgid ""
+"After a 22-year hiatus, the event came back in 2017 as Posadas Party 2 — "
+"Megablast and has been running every year since. Today it's the only active "
+"demoscene gathering in Spain with a dedicated focus on Amiga OCS and AGA, "
+"while welcoming wild compos from every platform."
+msgstr ""
+"22 vuoden tauon jälkeen tapahtuma palasi vuonna 2017 nimellä Posadas Party 2 "
+"— Megablast ja on järjestetty vuosittain siitä lähtien. Se on nykyään "
+"Espanjan ainoa aktiivinen demoscene-tapahtuma, joka keskittyy Amiga OCS:ään "
+"ja AGA:han, mutta ottaa vastaan wild-kilpailuja kaikilta alustoilta."
+
+#: dpms/website/templates/website/index.html:151
+msgid "First edition"
+msgstr "Ensimmäinen tapahtuma"
+
+#: dpms/website/templates/website/index.html:155
+msgid "OCS &amp; AGA focus"
+msgstr "Painopisteenä OCS ja AGA"
+
+#: dpms/website/templates/website/index.html:159
+msgid "Free entry with registration"
+msgstr "Ilmainen sisäänpääsy ilmoittautumalla"
+
+#: dpms/website/templates/website/index.html:163
+msgid "Demoscene cultural heritage"
+msgstr "Demoscene, kulttuuriperintö"
+
+#: dpms/website/templates/website/index.html:178
 msgid "competition waiting for your production"
 msgid_plural "competitions waiting for your production"
 msgstr[0] "kilpailu odottaa tuotantoasi"
 msgstr[1] "kilpailua odottaa tuotantoasi"
 
+#: dpms/website/templates/website/index.html:187
 msgid ""
 "Upload your demo, intro, graphic, music or wild. There's a category for "
 "whatever you're creating."
@@ -95,72 +239,97 @@ msgstr ""
 "Lataa demosi, introsi, grafiikkasi, musiikkisi tai wildisi. Luomallesi "
 "löytyy kategoria."
 
-msgid "Upload a production"
-msgstr "Lataa tuotanto"
-
+#: dpms/website/templates/website/index.html:190
 msgid "I already have an account"
 msgstr "Minulla on jo tili"
 
+#: dpms/website/templates/website/index.html:199
 msgid "Join the scene"
 msgstr "Liity sceneen"
 
+#: dpms/website/templates/website/index.html:200
 msgid "Why register?"
 msgstr "Miksi rekisteröityä?"
 
+#: dpms/website/templates/website/index.html:210
 msgid "Upload your work"
 msgstr "Lataa teoksesi"
 
+#: dpms/website/templates/website/index.html:211
 msgid "Demos, intros, graphics, music... compete in any open category."
-msgstr "Demot, introt, grafiikat, musiikki... kilpaile missä tahansa avoimessa kategoriassa."
+msgstr ""
+"Demot, introt, grafiikat, musiikki... kilpaile missä tahansa avoimessa "
+"kategoriassa."
 
-msgid "Vote live"
-msgstr "Äänestä livenä"
-
-msgid "Decide which works win during the party with your audience vote."
-msgstr "Päätä yleisöäänelläsi, mitkä teokset voittavat partyn aikana."
-
-msgid "Connect with the scene"
-msgstr "Liity sceneen"
-
-msgid "Get access to the Telegram channel and the community behind the party."
-msgstr "Pääset käsiksi Telegram-kanavalle ja partyn järjestävään yhteisöön."
-
+#: dpms/website/templates/website/index.html:219
 msgid "Your place in the scene"
 msgstr "Sinun paikkasi scenessä"
 
-msgid "Create your profile with nickname and group. Discover other people's work and follow what's brewing in every edition."
-msgstr "Luo profiilisi nimimerkillä ja ryhmällä. Tutustu muiden töihin ja seuraa, mitä jokaisessa tapahtumassa on tekeillä."
+#: dpms/website/templates/website/index.html:220
+msgid ""
+"Create your profile with nickname and group. Discover other people's work "
+"and follow what's brewing in every edition."
+msgstr ""
+"Luo profiilisi nimimerkillä ja ryhmällä. Tutustu muiden töihin ja seuraa, "
+"mitä jokaisessa tapahtumassa on tekeillä."
 
+#: dpms/website/templates/website/index.html:230
 msgid "Historical archive"
 msgstr "Historia-arkisto"
 
+#: dpms/website/templates/website/index.html:231
 msgid "Download and enjoy productions from previous editions."
 msgstr "Lataa ja nauti aiempien vuosien tuotannoista."
 
-msgid "Create a free account"
-msgstr "Luo ilmainen tili"
+#: dpms/website/templates/website/index.html:245
+msgid "Event information"
+msgstr "Tapahtumatiedot"
 
+#: dpms/website/templates/website/index.html:246
+#, python-format
+msgid "Everything you need to know about %(title)s"
+msgstr "Kaikki mitä sinun tulee tietää tapahtumasta %(title)s"
+
+#: dpms/website/templates/website/index.html:256
+msgid "Getting there"
+msgstr "Saapuminen"
+
+#: dpms/website/templates/website/index.html:268
+msgid "Practical info"
+msgstr "Käytännön tiedot"
+
+#: dpms/website/templates/website/index.html:280
+msgid "Contact"
+msgstr "Yhteystiedot"
+
+#: dpms/website/templates/website/index.html:294
 msgid "More than 30 years of scene"
 msgstr "Yli 30 vuotta sceneä"
 
+#: dpms/website/templates/website/index.html:295
 #, python-format
 msgid "A story that began in %(year)s"
 msgstr "Tarina, joka alkoi vuonna %(year)s"
 
+#: dpms/website/templates/website/index.html:299
 msgid "Edition"
 msgid_plural "Editions"
 msgstr[0] "Tapahtuma"
 msgstr[1] "Tapahtumaa"
 
+#: dpms/website/templates/website/index.html:303
 msgid "Productions"
 msgstr "Tuotantoja"
 
+#: dpms/website/templates/website/index.html:308
 msgid "Years of history"
 msgstr "Vuotta historiaa"
 
+#: dpms/website/templates/website/index.html:315
 msgid "Previous edition poster"
 msgstr "Aiemman tapahtuman juliste"
 
+#: dpms/website/templates/website/index.html:319
 msgid ""
 "Amiga Party Posadas has been a meeting point for the Spanish demoscene for "
 "decades."
@@ -168,126 +337,103 @@ msgstr ""
 "Amiga Party Posadas on ollut Espanjan demoscenen kohtaamispaikka jo "
 "vuosikymmenten ajan."
 
-msgid "First time here?"
-msgstr "Ensimmäistä kertaa täällä?"
-
-msgid "This is a demo party"
-msgstr "Tämä on demoparty"
-
-msgid ""
-"A gathering where programmers, artists and musicians compete creating real-"
-"time audiovisual works. Code, art and community around a single projector."
-msgstr ""
-"Tapahtuma, jossa ohjelmoijat, taiteilijat ja muusikot kilpailevat luomalla "
-"reaaliaikaisia audiovisuaalisia teoksia. Koodia, taidetta ja yhteisöä saman "
-"projektorin ympärillä."
-
-msgid "Bring your computer. Bring your ideas. Live the scene."
-msgstr "Tuo tietokoneesi. Tuo ideasi. Elä sceneä."
-
-msgid "Learn more"
-msgstr "Lue lisää"
-
-msgid "Sign me up"
-msgstr "Ilmoittaudu"
-
-msgid "Previous slide"
-msgstr "Edellinen dia"
-
-msgid "Next slide"
-msgstr "Seuraava dia"
-
-msgid "Demo Party"
-msgstr "Demoparty"
-
-msgid ""
-"A demo party is a gathering of digital artists, programmers and creators "
-"from the demoscene who compete in different categories."
-msgstr ""
-"Demoparty on digitaalisten taiteilijoiden, ohjelmoijien ja demoscenen "
-"tekijöiden tapaaminen, jossa kilpaillaan eri kategorioissa."
-
-msgid "Competitions"
-msgstr "Kilpailut"
-
-msgid "Demos, intros, music, graphics, wild..."
-msgstr "Demot, introt, musiikki, grafiikat, wild..."
-
-msgid "Voting"
-msgstr "Äänestys"
-
-msgid "Vote for your favourite productions."
-msgstr "Äänestä suosikkituotantojasi."
-
-msgid "Community"
-msgstr "Yhteisö"
-
-msgid "Connect with the demoscene."
-msgstr "Liity demosceneen."
-
-msgid "Join now"
-msgstr "Liity nyt"
-
-msgid "Event information"
-msgstr "Tapahtumatiedot"
-
-#, python-format
-msgid "Everything you need to know about %(title)s"
-msgstr "Kaikki mitä sinun tulee tietää tapahtumasta %(title)s"
-
-msgid "Getting there"
-msgstr "Saapuminen"
-
-msgid "Practical info"
-msgstr "Käytännön tiedot"
-
-msgid "Contact"
-msgstr "Yhteystiedot"
-
+#: dpms/website/templates/website/index.html:330
 msgid "Thanks to our sponsors for making this event possible."
 msgstr "Kiitos sponsoreillemme tämän tapahtuman mahdollistamisesta."
 
+#: dpms/website/templates/website/index.html:357
 msgid "Event in progress!"
 msgstr "Tapahtuma käynnissä!"
 
-msgid "A demo party is a gathering where coders, graphics artists and musicians compete creating real-time audiovisual works: demos, intros, chiptunes and pixel art shown live on the big screen."
-msgstr "Demoparty on tapahtuma, jossa koodarit, graafikot ja muusikot kilpailevat luomalla reaaliaikaisia audiovisuaalisia teoksia: demoja, introja, chiptuneja ja pikseligrafiikkaa, jotka näytetään suoraan isolta valkokankaalta."
+#~ msgid "Register"
+#~ msgstr "Rekisteröidy"
 
-msgid "The demoscene was recognised by UNESCO as intangible cultural heritage in 2021 — a decades-old underground art form where the limits of the machine are part of the canvas."
-msgstr "UNESCO tunnusti demoscenen aineettomaksi kulttuuriperinnöksi vuonna 2021 — kyseessä on vuosikymmeniä vanha undergroundin taidemuoto, jossa koneen rajat ovat osa maalausalustaa."
+#~ msgid "Vote live"
+#~ msgstr "Äänestä livenä"
 
-msgid "Demos, intros, tracked and executable music, pixel graphics, wild compos and more. Each category has its own rules and technical limits that push creativity to the edge."
-msgstr "Demot, introt, musiikki (tracked ja executable), pikseligrafiikka, wild-kilpailut ja paljon muuta. Jokaisella kategorialla on omat sääntönsä ja tekniset rajoituksensa, jotka vievät luovuuden äärirajoille."
+#~ msgid "Decide which works win during the party with your audience vote."
+#~ msgstr "Päätä yleisöäänelläsi, mitkä teokset voittavat partyn aikana."
 
-msgid "The audience decides the winners. Voting happens live during the screening session, creating a unique atmosphere of cheers, surprises and reveals."
-msgstr "Yleisö päättää voittajista. Äänestys tapahtuu livenä näytöksen aikana, mikä luo ainutlaatuisen tunnelman täynnä hurraahuutoja, yllätyksiä ja paljastuksia."
+#~ msgid "Connect with the scene"
+#~ msgstr "Liity sceneen"
 
-msgid "Sceners, coders and collectors get together to share code, tricks, hardware and friendship around a single projector."
-msgstr "Scenerit, koodarit ja keräilijät kokoontuvat jakamaan koodia, kikkoja, rautaa ja ystävyyttä saman projektorin ääreen."
+#~ msgid ""
+#~ "Get access to the Telegram channel and the community behind the party."
+#~ msgstr "Pääset käsiksi Telegram-kanavalle ja partyn järjestävään yhteisöön."
 
-msgid "Posadas Party, since 1995"
-msgstr "Posadas Party, vuodesta 1995"
+#~ msgid "Create a free account"
+#~ msgstr "Luo ilmainen tili"
 
-msgid "The first Posadas Amiga Party was held in July 1995 to celebrate the tenth anniversary of the Commodore Amiga. Legendary Spanish scene groups like Batman Group, Nivel7, Frame or Necropolis showed up, and the winning demo \"Batman Vuelve\" is still quoted as one of the finest Amiga 500 demos ever made."
-msgstr "Ensimmäinen Posadas Amiga Party järjestettiin heinäkuussa 1995 juhlistamaan Commodore Amigan kymmenvuotisjuhlaa. Legendaariset espanjalaiset scene-ryhmät kuten Batman Group, Nivel7, Frame ja Necropolis olivat paikalla, ja voittanut demo \"Batman Vuelve\" siteerataan yhä yhtenä kaikkien aikojen parhaista Amiga 500 -demoista."
+#~ msgid "First time here?"
+#~ msgstr "Ensimmäistä kertaa täällä?"
 
-msgid "After a 22-year hiatus, the event came back in 2017 as Posadas Party 2 — Megablast and has been running every year since. Today it's the only active demoscene gathering in Spain with a dedicated focus on Amiga OCS and AGA, while welcoming wild compos from every platform."
-msgstr "22 vuoden tauon jälkeen tapahtuma palasi vuonna 2017 nimellä Posadas Party 2 — Megablast ja on järjestetty vuosittain siitä lähtien. Se on nykyään Espanjan ainoa aktiivinen demoscene-tapahtuma, joka keskittyy Amiga OCS:ään ja AGA:han, mutta ottaa vastaan wild-kilpailuja kaikilta alustoilta."
+#~ msgid "This is a demo party"
+#~ msgstr "Tämä on demoparty"
 
-msgid "First edition"
-msgstr "Ensimmäinen tapahtuma"
+#~ msgid ""
+#~ "A gathering where programmers, artists and musicians compete creating "
+#~ "real-time audiovisual works. Code, art and community around a single "
+#~ "projector."
+#~ msgstr ""
+#~ "Tapahtuma, jossa ohjelmoijat, taiteilijat ja muusikot kilpailevat "
+#~ "luomalla reaaliaikaisia audiovisuaalisia teoksia. Koodia, taidetta ja "
+#~ "yhteisöä saman projektorin ympärillä."
 
-msgid "OCS &amp; AGA focus"
-msgstr "Painopisteenä OCS ja AGA"
+#~ msgid "Bring your computer. Bring your ideas. Live the scene."
+#~ msgstr "Tuo tietokoneesi. Tuo ideasi. Elä sceneä."
 
-msgid "Free entry with registration"
-msgstr "Ilmainen sisäänpääsy ilmoittautumalla"
+#~ msgid "Learn more"
+#~ msgstr "Lue lisää"
 
-msgid "Demoscene cultural heritage"
-msgstr "Demoscene, kulttuuriperintö"
+#~ msgid "Sign me up"
+#~ msgstr "Ilmoittaudu"
 
-msgid "What Posadas Party is"
-msgstr "Mikä Posadas Party on"
+#~ msgid "Previous slide"
+#~ msgstr "Edellinen dia"
 
-msgid "Posadas Party is a demo party: a gathering where coders, graphics artists and musicians compete creating real-time audiovisual works. Demos, intros, chiptunes and pixel art are projected live on the big screen while the audience decides who walks away with the applause."
-msgstr "Posadas Party on demoparty: tapahtuma, jossa koodarit, graafikot ja muusikot kilpailevat luomalla reaaliaikaisia audiovisuaalisia teoksia. Demot, introt, chiptunet ja pixel art näytetään suoraan isolta valkokankaalta, ja yleisö päättää, kuka ansaitsee aplodit."
+#~ msgid "Next slide"
+#~ msgstr "Seuraava dia"
+
+#~ msgid "Demo Party"
+#~ msgstr "Demoparty"
+
+#~ msgid ""
+#~ "A demo party is a gathering of digital artists, programmers and creators "
+#~ "from the demoscene who compete in different categories."
+#~ msgstr ""
+#~ "Demoparty on digitaalisten taiteilijoiden, ohjelmoijien ja demoscenen "
+#~ "tekijöiden tapaaminen, jossa kilpaillaan eri kategorioissa."
+
+#~ msgid "Demos, intros, music, graphics, wild..."
+#~ msgstr "Demot, introt, musiikki, grafiikat, wild..."
+
+#~ msgid "Voting"
+#~ msgstr "Äänestys"
+
+#~ msgid "Vote for your favourite productions."
+#~ msgstr "Äänestä suosikkituotantojasi."
+
+#~ msgid "Connect with the demoscene."
+#~ msgstr "Liity demosceneen."
+
+#~ msgid "Join now"
+#~ msgstr "Liity nyt"
+
+#~ msgid ""
+#~ "A demo party is a gathering where coders, graphics artists and musicians "
+#~ "compete creating real-time audiovisual works: demos, intros, chiptunes "
+#~ "and pixel art shown live on the big screen."
+#~ msgstr ""
+#~ "Demoparty on tapahtuma, jossa koodarit, graafikot ja muusikot kilpailevat "
+#~ "luomalla reaaliaikaisia audiovisuaalisia teoksia: demoja, introja, "
+#~ "chiptuneja ja pikseligrafiikkaa, jotka näytetään suoraan isolta "
+#~ "valkokankaalta."
+
+#~ msgid ""
+#~ "The audience decides the winners. Voting happens live during the "
+#~ "screening session, creating a unique atmosphere of cheers, surprises and "
+#~ "reveals."
+#~ msgstr ""
+#~ "Yleisö päättää voittajista. Äänestys tapahtuu livenä näytöksen aikana, "
+#~ "mikä luo ainutlaatuisen tunnelman täynnä hurraahuutoja, yllätyksiä ja "
+#~ "paljastuksia."

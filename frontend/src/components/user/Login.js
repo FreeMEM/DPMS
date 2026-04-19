@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { AuthContext } from "../../AuthContext";
 import ModalForgotPassword from "./ModalForgotPassword";
 import { Box, Button, TextField, Typography, Paper, FormControl, FormLabel, Divider } from "@mui/material";
@@ -28,15 +28,22 @@ const Login = () => {
   const [edition, setEdition] = useState(null);
   const [editionLoaded, setEditionLoaded] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const nextParam = searchParams.get("next");
+  // Sólo permitimos rutas internas para evitar open-redirect vía ?next=.
+  const safeNext = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//")
+    ? nextParam
+    : null;
+  const postAuthTarget = safeNext || "/";
   const { t } = useTranslation();
   const theme = useTheme();
 
-  // Si ya está autenticado, redirigir al dashboard
+  // Si ya está autenticado, redirigir al destino (o al dashboard por defecto)
   useEffect(() => {
     if (!loading && isAuthenticated) {
-      navigate("/", { replace: true });
+      navigate(postAuthTarget, { replace: true });
     }
-  }, [loading, isAuthenticated, navigate]);
+  }, [loading, isAuthenticated, navigate, postAuthTarget]);
 
   // Cargar edición actual (la primera edición pública)
   useEffect(() => {
@@ -86,7 +93,7 @@ const Login = () => {
     if (validateInputs()) {
       try {
         await login(email, password);
-        navigate("/");
+        navigate(postAuthTarget);
       } catch (error) {
         console.error("Login failed", error);
         if (error.response && error.response.status === 401) {
@@ -246,7 +253,10 @@ const Login = () => {
           <Box mt={2}>
             <Typography sx={{ textAlign: "center" }}>
               {t("Don't have an account?")}{" "}
-              <Link to="/signup" style={{ textDecoration: "none", color: theme.palette.primary.main }}>
+              <Link
+                to={safeNext ? `/signup?next=${encodeURIComponent(safeNext)}` : "/signup"}
+                style={{ textDecoration: "none", color: theme.palette.primary.main }}
+              >
                 {t("Sign Up")}
               </Link>
             </Typography>

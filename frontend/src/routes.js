@@ -1,5 +1,5 @@
 import { useContext, lazy, Suspense } from "react";
-import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
@@ -41,6 +41,7 @@ const SlideEditorPage = lazy(() => import("./pages/admin/stagerunner").then(m =>
 const LiveControlPage = lazy(() => import("./pages/admin/stagerunner").then(m => ({ default: m.LiveControlPage })));
 const StageRunnerViewer = lazy(() => import("./pages/stagerunner/StageRunnerViewer"));
 const VotingPage = lazy(() => import("./pages/VotingPage"));
+const AttendPage = lazy(() => import("./pages/AttendPage"));
 const ProfilePage = lazy(() => import("./components/user/ProfilePage"));
 const Gallery = lazy(() => import("./components/gallery/Gallery"));
 const RulesPage = lazy(() => import("./pages/RulesPage"));
@@ -54,12 +55,18 @@ const LazyFallback = () => (
 
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useContext(AuthContext);
+  const location = useLocation();
 
   if (loading) {
     return <LazyFallback />;
   }
 
-  return isAuthenticated ? children : <Navigate to="/login" />;
+  if (!isAuthenticated) {
+    const target = `${location.pathname}${location.search}`;
+    const suffix = target && target !== "/" ? `?next=${encodeURIComponent(target)}` : "";
+    return <Navigate to={`/login${suffix}`} replace />;
+  }
+  return children;
 };
 
 const AppRoutes = () => {
@@ -283,6 +290,14 @@ const AppRoutes = () => {
           element={
             <PrivateRoute>
               <VotingPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/attend"
+          element={
+            <PrivateRoute>
+              <AttendPage />
             </PrivateRoute>
           }
         />
