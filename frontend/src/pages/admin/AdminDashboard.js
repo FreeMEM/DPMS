@@ -14,6 +14,7 @@ import {
   EmojiEvents as TrophyIcon,
   CloudUpload as UploadIcon,
   HowToVote as VoteIcon,
+  HowToReg as HowToRegIcon,
   Settings as SettingsIcon,
   Category as CategoryIcon,
   Schedule as ScheduleIcon,
@@ -46,14 +47,15 @@ const AdminDashboard = () => {
       const client = axiosWrapper();
 
       // Fetch basic stats - only use endpoints that exist
-      const [editionsRes, productionsRes, votesRes] = await Promise.all([
+      const [editionsRes, productionsRes, votesRes, usersRes] = await Promise.all([
         client.get('/api/editions/').catch(() => ({ data: [] })),
         client.get('/api/productions/').catch(() => ({ data: [] })),
         client.get('/api/votes/').catch(() => ({ data: [] })),
+        client.get('/api/users/admin-list/').catch(() => ({ data: {} })),
       ]);
 
       setStats({
-        totalUsers: 0, // TODO: Implement users endpoint
+        totalUsers: usersRes.data?.total_count || 0,
         totalEditions: editionsRes.data?.length || 0,
         totalProductions: productionsRes.data?.length || 0,
         totalVotes: votesRes.data?.length || 0,
@@ -181,6 +183,48 @@ const AdminDashboard = () => {
                 startIcon={<ScheduleIcon />}
               >
                 {t("Voting Periods")}
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={4}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                <PeopleIcon color="primary" sx={{ fontSize: 40 }} />
+                <Typography variant="h6">{t("Users")}</Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary" paragraph>
+                {t("Browse registered users and see who has confirmed attendance.")}
+              </Typography>
+              <Button
+                variant="contained"
+                fullWidth
+                onClick={() => navigate('/admin/users')}
+              >
+                {t("Manage Users")}
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={4}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                <HowToRegIcon color="primary" sx={{ fontSize: 40 }} />
+                <Typography variant="h6">{t("Attendance confirmations")}</Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary" paragraph>
+                {t("Review attendance RSVPs, sleep arrangements and gear.")}
+              </Typography>
+              <Button
+                variant="contained"
+                fullWidth
+                onClick={() => navigate('/admin/attendance-confirmations')}
+              >
+                {t("View Confirmations")}
               </Button>
             </CardContent>
           </Card>

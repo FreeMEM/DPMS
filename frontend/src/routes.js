@@ -32,6 +32,8 @@ const ProductionDetailPage = lazy(() => import("./pages/admin/ProductionDetailPa
 const VotingConfigPage = lazy(() => import("./pages/admin/VotingConfigPage"));
 const VotingPeriodsPage = lazy(() => import("./pages/admin/VotingPeriodsPage"));
 const AttendanceCodesPage = lazy(() => import("./pages/admin/AttendanceCodesPage"));
+const AttendanceConfirmationsPage = lazy(() => import("./pages/admin/AttendanceConfirmationsPage"));
+const UsersPage = lazy(() => import("./pages/admin/UsersPage"));
 const JuryManagementPage = lazy(() => import("./pages/admin/JuryManagementPage"));
 const SponsorsPage = lazy(() => import("./pages/admin/SponsorsPage"));
 const SponsorFormPage = lazy(() => import("./pages/admin/SponsorFormPage"));
@@ -199,6 +201,22 @@ const AppRoutes = () => {
           element={
             <AdminRoute>
               <AttendanceCodesPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/attendance-confirmations"
+          element={
+            <AdminRoute>
+              <AttendanceConfirmationsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <AdminRoute>
+              <UsersPage />
             </AdminRoute>
           }
         />
