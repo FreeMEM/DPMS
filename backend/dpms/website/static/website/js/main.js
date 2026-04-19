@@ -1,6 +1,38 @@
 // Main JavaScript for DPMS Landing Page
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Mobile navbar toggle. Hamburger flips `is-open` on the menu and
+    // `aria-expanded` on itself; any tap on a link inside the menu closes it.
+    (function initNavbarToggle() {
+        const toggle = document.querySelector('.navbar-toggle');
+        const menu = document.getElementById('navbar-menu');
+        if (!toggle || !menu) return;
+
+        function setOpen(open) {
+            menu.classList.toggle('is-open', open);
+            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+
+        toggle.addEventListener('click', () => {
+            const open = menu.classList.contains('is-open');
+            setOpen(!open);
+        });
+
+        menu.querySelectorAll('a').forEach(a => {
+            a.addEventListener('click', () => setOpen(false));
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!menu.classList.contains('is-open')) return;
+            if (menu.contains(e.target) || toggle.contains(e.target)) return;
+            setOpen(false);
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) setOpen(false);
+        });
+    })();
+
     // Smooth scroll for any link whose href contains a hash (both "#id" and
     // "/#id" are covered — the latter is emitted by navbar items that also
     // serve as the "Home" route).
@@ -100,6 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
             current = (index + slides.length) % slides.length;
             slides.forEach((s, i) => s.classList.toggle('is-active', i === current));
             dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
+            animateCountersIn(slides[current]);
             if (manual) restart();
         }
 
@@ -160,6 +193,79 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (dx < 0) go(current + 1, true); else prev();
             }
         });
+
+        // Animate counters inside the slide that just became active. Each
+        // animation runs once per slide to avoid distracting loops.
+        function animateCountersIn(slideEl) {
+            if (!slideEl) return;
+            const targets = slideEl.querySelectorAll('[data-count-to]');
+            targets.forEach(el => {
+                if (el.dataset.counted === '1') return;
+                const end = parseInt(el.dataset.countTo, 10);
+                if (isNaN(end)) return;
+                el.dataset.counted = '1';
+                const duration = 1100;
+                const startTime = performance.now();
+                function frame(now) {
+                    const t = Math.min(1, (now - startTime) / duration);
+                    const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+                    el.textContent = Math.round(end * eased);
+                    if (t < 1) requestAnimationFrame(frame);
+                }
+                el.textContent = '0';
+                requestAnimationFrame(frame);
+            });
+        }
+
+        // Kick off counters that are visible in the initial slide.
+        animateCountersIn(slides[current]);
+
+        // Production screenshot mosaic as a live background for slides that
+        // use .slide-bg-mosaic. Tiles get filled once and then one tile swaps
+        // its image every couple of seconds.
+        (function initSlideMosaics() {
+            const shots = window.__DPMS_SCREENSHOTS || [];
+            const media = window.__DPMS_MEDIA_URL || '/media/';
+            if (!shots.length) return;
+            const containers = slider.querySelectorAll('.slide-bg-mosaic');
+            if (!containers.length) return;
+            const tilesPerSlide = 24;
+
+            function pick() {
+                return shots[Math.floor(Math.random() * shots.length)];
+            }
+
+            containers.forEach(container => {
+                // Build an inner wrapper so the zoom animation can scale just
+                // the tiles without affecting the dark overlay.
+                const inner = document.createElement('div');
+                inner.className = 'slide-bg-mosaic-inner';
+                container.appendChild(inner);
+
+                for (let i = 0; i < tilesPerSlide; i++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'slide-bg-tile';
+                    tile.style.backgroundImage = 'url(' + media + pick() + ')';
+                    inner.appendChild(tile);
+                }
+                const tiles = Array.from(inner.querySelectorAll('.slide-bg-tile'));
+
+                function swap() {
+                    // Only animate when the parent slide is visible, so we
+                    // don't burn cycles behind the scenes.
+                    const slide = container.closest('.hero-slide');
+                    if (!slide || !slide.classList.contains('is-active')) return;
+                    const tile = tiles[Math.floor(Math.random() * tiles.length)];
+                    tile.classList.add('is-swapping');
+                    setTimeout(() => {
+                        tile.style.backgroundImage = 'url(' + media + pick() + ')';
+                        tile.classList.remove('is-swapping');
+                    }, 700);
+                }
+
+                setInterval(swap, 1800);
+            });
+        })();
 
         start();
     })();

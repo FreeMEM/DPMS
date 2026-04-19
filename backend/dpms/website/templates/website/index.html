@@ -77,7 +77,7 @@
                 <div class="hero-content hero-content--centered">
                     <div class="edition-badge">{% trans "Open compos" %}</div>
                     <h2 class="hero-title hero-title--large-number">
-                        <span class="hero-big-number">{{ open_compos_count }}</span>
+                        <span class="hero-big-number" data-count-to="{{ open_compos_count }}">{{ open_compos_count }}</span>
                         <span class="hero-big-label">{% blocktrans count counter=open_compos_count %}competition waiting for your production{% plural %}competitions waiting for your production{% endblocktrans %}</span>
                     </h2>
                     {% if open_compos %}
@@ -99,6 +99,7 @@
 
         <!-- Slide 3: Por qué registrarse -->
         <div class="hero-slide" data-slide="2">
+            <div class="slide-bg-mosaic" aria-hidden="true"></div>
             <div class="hero-wrapper hero-wrapper--centered">
                 <div class="hero-content hero-content--centered">
                     <div class="edition-badge">{% trans "Join the scene" %}</div>
@@ -155,22 +156,23 @@
         <!-- Slide 4: Historia / Retrospectiva -->
         {% if stats.editions > 0 %}
         <div class="hero-slide" data-slide="3">
+            <div class="slide-bg-mosaic" aria-hidden="true"></div>
             <div class="hero-wrapper hero-wrapper--centered">
                 <div class="hero-content hero-content--centered">
                     <div class="edition-badge">{% trans "More than 30 years of scene" %}</div>
                     <h2 class="hero-title hero-title--medium">{% blocktrans with year=stats.first_year %}A story that began in {{ year }}{% endblocktrans %}</h2>
                     <div class="stats-grid">
                         <div class="stat">
-                            <div class="stat-value">{{ stats.editions }}</div>
+                            <div class="stat-value" data-count-to="{{ stats.editions }}">{{ stats.editions }}</div>
                             <div class="stat-label">{% blocktrans count counter=stats.editions %}Edition{% plural %}Editions{% endblocktrans %}</div>
                         </div>
                         <div class="stat">
-                            <div class="stat-value">{{ stats.productions }}</div>
+                            <div class="stat-value" data-count-to="{{ stats.productions }}">{{ stats.productions }}</div>
                             <div class="stat-label">{% trans "Productions" %}</div>
                         </div>
                         {% if stats.years_of_history %}
                         <div class="stat">
-                            <div class="stat-value">{{ stats.years_of_history }}</div>
+                            <div class="stat-value" data-count-to="{{ stats.years_of_history }}">{{ stats.years_of_history }}</div>
                             <div class="stat-label">{% trans "Years of history" %}</div>
                         </div>
                         {% endif %}
@@ -190,6 +192,7 @@
 
         <!-- Slide 5: Cultura demoscene -->
         <div class="hero-slide" data-slide="4">
+            <div class="slide-bg-mosaic" aria-hidden="true"></div>
             <div class="hero-wrapper hero-wrapper--centered">
                 <div class="hero-content hero-content--centered">
                     <div class="edition-badge">{% trans "First time here?" %}</div>
@@ -404,12 +407,14 @@
 {% block extra_js %}
 <script>
 var COUNTDOWN_ENDED_TEXT = '{% trans "Event in progress!" %}';
+window.__DPMS_MEDIA_URL = '{{ MEDIA_URL|default:"/media/" }}';
+window.__DPMS_SCREENSHOTS = [
+    {% for s in screenshots %}'{{ s }}'{% if not forloop.last %},{% endif %}{% endfor %}
+];
 // Slideshow on feature cards
 (function() {
-    var MEDIA_URL = '{{ MEDIA_URL|default:"/media/" }}';
-    var allScreenshots = [
-        {% for s in screenshots %}'{{ s }}'{% if not forloop.last %},{% endif %}{% endfor %}
-    ];
+    var MEDIA_URL = window.__DPMS_MEDIA_URL;
+    var allScreenshots = window.__DPMS_SCREENSHOTS;
 
     if (allScreenshots.length === 0) return;
 

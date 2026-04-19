@@ -52,7 +52,12 @@
                         {% endif %}
                     </a>
                 </div>
-                <div class="navbar-menu">
+                <button type="button" class="navbar-toggle" aria-label="{% trans 'Menu' %}" aria-expanded="false" aria-controls="navbar-menu">
+                    <span class="navbar-toggle-bar"></span>
+                    <span class="navbar-toggle-bar"></span>
+                    <span class="navbar-toggle-bar"></span>
+                </button>
+                <div class="navbar-menu" id="navbar-menu">
                     <a href="/">{% trans "Home" %}</a>
                     <a href="/#que-es">{% trans "What is it" %}</a>
                     {% if current_edition.travel_info or current_edition.contact_info or current_edition.what_to_bring %}
