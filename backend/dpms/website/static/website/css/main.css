@@ -786,11 +786,50 @@ main {
 }
 
 @media (max-width: 768px) {
+    /* On mobile the slider becomes a vertical stack so users can scroll
+       through all slides naturally — the carousel was confusing on small
+       screens. All slides are permanently visible; dots, arrows and the
+       entrance boom are disabled since there are no slide transitions. */
+    .hero-section {
+        min-height: auto;
+        overflow: visible;
+        padding: 80px 15px 40px;
+    }
+
+    .hero-slider {
+        flex-direction: column;
+        align-items: stretch;
+        min-height: 0;
+        gap: 2.5rem;
+    }
+
+    .hero-slide {
+        position: relative;
+        inset: auto;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        pointer-events: auto;
+        min-height: auto;
+        padding: 2.5rem 0;
+        transition: none;
+    }
+
+    .hero-slide.is-active .slide-bg-mosaic {
+        animation: none;
+    }
+
+    .hero-slide.is-active .slide-bg-mosaic-inner,
+    .hero-slide:not(.is-active) .slide-bg-mosaic-inner {
+        animation: mosaic-zoom 18s ease-in-out infinite alternate;
+        animation-play-state: running;
+    }
+
+    .hero-dots { display: none; }
     .hero-nav { display: none; }
     .perks-grid { grid-template-columns: 1fr; }
     .stats-grid { gap: 1.5rem; }
     .poster-thumb { width: 60px; height: 82px; }
-    .hero-dots { bottom: 30px; }
 }
 
 .hero-wrapper {

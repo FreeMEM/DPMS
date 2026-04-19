@@ -99,12 +99,17 @@ document.addEventListener('DOMContentLoaded', function() {
         update();
     })();
 
-    // Hero Slider
+    // Hero Slider (desktop carousel, stacked-scroll fallback on mobile)
     (function initHeroSlider() {
         const slider = document.getElementById('hero-slider');
         if (!slider) return;
         const slides = Array.from(slider.querySelectorAll('.hero-slide'));
         if (slides.length <= 1) return;
+
+        // On mobile the slider is flattened into a vertical scroll of all
+        // slides (see CSS @media). Skip autoplay, dots and swipe, but still
+        // mark every slide active so counters fire and mosaics swap tiles.
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
         const prevBtn = document.getElementById('hero-prev');
         const nextBtn = document.getElementById('hero-next');
@@ -117,7 +122,8 @@ document.addEventListener('DOMContentLoaded', function() {
         let timer = null;
         let paused = false;
 
-        // Build dots
+        // Build dots (hidden on mobile via CSS, but we still need the array
+        // so go() can toggle the active dot on desktop).
         slides.forEach((_, i) => {
             const dot = document.createElement('button');
             dot.type = 'button';
@@ -149,50 +155,52 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         function restart() { start(); }
 
-        if (prevBtn) prevBtn.addEventListener('click', prev);
-        if (nextBtn) nextBtn.addEventListener('click', () => go(current + 1, true));
+        if (!isMobile) {
+            if (prevBtn) prevBtn.addEventListener('click', prev);
+            if (nextBtn) nextBtn.addEventListener('click', () => go(current + 1, true));
 
-        // Pause autoplay only when hovering interactive controls. The hero
-        // text area is big enough that blanket-pausing made the rotation feel
-        // broken.
-        let hoverCount = 0;
-        const scope = slider.parentElement || document;
-        const pauseTargets = scope.querySelectorAll(
-            '.hero-nav, .hero-dots button, .cta-buttons a, .cta-buttons button, ' +
-            '.perk, .poster-thumb, .hero-poster img'
-        );
-        function setPaused(state) {
-            paused = state;
-            dotsContainer.classList.toggle('is-paused', state);
-        }
-        pauseTargets.forEach(el => {
-            el.addEventListener('mouseenter', () => {
-                hoverCount++;
-                setPaused(true);
-                stop();
+            // Pause autoplay only when hovering interactive controls. The hero
+            // text area is big enough that blanket-pausing made the rotation
+            // feel broken.
+            let hoverCount = 0;
+            const scope = slider.parentElement || document;
+            const pauseTargets = scope.querySelectorAll(
+                '.hero-nav, .hero-dots button, .cta-buttons a, .cta-buttons button, ' +
+                '.perk, .poster-thumb, .hero-poster img'
+            );
+            function setPaused(state) {
+                paused = state;
+                dotsContainer.classList.toggle('is-paused', state);
+            }
+            pauseTargets.forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    hoverCount++;
+                    setPaused(true);
+                    stop();
+                });
+                el.addEventListener('mouseleave', () => {
+                    hoverCount = Math.max(0, hoverCount - 1);
+                    if (hoverCount === 0) {
+                        setPaused(false);
+                        start();
+                    }
+                });
             });
-            el.addEventListener('mouseleave', () => {
-                hoverCount = Math.max(0, hoverCount - 1);
-                if (hoverCount === 0) {
-                    setPaused(false);
-                    start();
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') prev();
+                if (e.key === 'ArrowRight') go(current + 1, true);
+            });
+
+            // Touch swipe
+            let touchStartX = 0;
+            slider.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+            slider.addEventListener('touchend', (e) => {
+                const dx = e.changedTouches[0].screenX - touchStartX;
+                if (Math.abs(dx) > 50) {
+                    if (dx < 0) go(current + 1, true); else prev();
                 }
             });
-        });
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') prev();
-            if (e.key === 'ArrowRight') go(current + 1, true);
-        });
-
-        // Touch swipe
-        let touchStartX = 0;
-        slider.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
-        slider.addEventListener('touchend', (e) => {
-            const dx = e.changedTouches[0].screenX - touchStartX;
-            if (Math.abs(dx) > 50) {
-                if (dx < 0) go(current + 1, true); else prev();
-            }
-        });
+        }
 
         // Animate counters inside the slide that just became active. Each
         // animation runs once per slide to avoid distracting loops.
@@ -217,8 +225,30 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Kick off counters that are visible in the initial slide.
-        animateCountersIn(slides[current]);
+        if (isMobile) {
+            // Stacked view: every slide is permanently active so the mosaic
+            // swap loop keeps going and counters don't stall waiting for a
+            // slide change that will never happen.
+            slides.forEach(s => s.classList.add('is-active'));
+            // Trigger counters the first time a slide scrolls into view,
+            // so the animation feels alive while the user scrolls.
+            if ('IntersectionObserver' in window) {
+                const io = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            animateCountersIn(entry.target);
+                            io.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.3 });
+                slides.forEach(s => io.observe(s));
+            } else {
+                slides.forEach(s => animateCountersIn(s));
+            }
+        } else {
+            // Kick off counters that are visible in the initial slide.
+            animateCountersIn(slides[current]);
+        }
 
         // Production screenshot mosaic as a live background for slides that
         // use .slide-bg-mosaic. Tiles get filled once and then one tile swaps
@@ -267,7 +297,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         })();
 
-        start();
+        if (!isMobile) start();
     })();
 
     // Detectar scroll y añadir clase a navbar
