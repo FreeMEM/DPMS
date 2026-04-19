@@ -70,15 +70,29 @@ jobs:
 
       - name: Restart services
         run: |
+          RESTARTED="false"
+
           if [ "${{ steps.changes.outputs.need_backend_build }}" = "true" ] || [ "${{ steps.changes.outputs.need_frontend_build }}" = "true" ]; then
-            # Full restart when images were rebuilt
+            # Full `up -d` recrea los contenedores con imagen nueva.
             docker compose -f production.yml up -d
-          elif [ "${{ steps.changes.outputs.need_backend_restart }}" = "true" ]; then
-            # Only restart backend (code changes, migrations, etc.)
-            docker compose -f production.yml restart backend_party
-          elif [ "${{ steps.changes.outputs.need_nginx_restart }}" = "true" ]; then
-            docker compose -f production.yml restart nginx
+            RESTARTED="true"
           else
+            # Sin rebuild, reiniciamos sólo lo que haya cambiado. Los servicios
+            # son independientes (backend y nginx), así que ambos pueden
+            # necesitar reinicio en el mismo deploy.
+            if [ "${{ steps.changes.outputs.need_backend_restart }}" = "true" ]; then
+              docker compose -f production.yml restart backend_party
+              RESTARTED="true"
+            fi
+            if [ "${{ steps.changes.outputs.need_nginx_restart }}" = "true" ]; then
+              # Reload en caliente para aplicar site.conf sin downtime.
+              docker compose -f production.yml exec -T nginx nginx -t
+              docker compose -f production.yml exec -T nginx nginx -s reload
+              RESTARTED="true"
+            fi
+          fi
+
+          if [ "$RESTARTED" = "false" ]; then
             echo "No restart needed"
           fi
 
