@@ -60,6 +60,9 @@
                 <div class="navbar-menu" id="navbar-menu">
                     <a href="/">{% trans "Home" %}</a>
                     <a href="/#que-es">{% trans "What is it" %}</a>
+                    {% if open_compos_count %}
+                    <a href="/#compos">{% trans "Open compos" %}</a>
+                    {% endif %}
                     {% if current_edition.travel_info or current_edition.contact_info or current_edition.what_to_bring %}
                     <a href="/#info-evento">{% trans "Event info" %}</a>
                     {% endif %}

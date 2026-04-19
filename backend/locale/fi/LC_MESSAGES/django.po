@@ -50,6 +50,12 @@ msgstr "Sponsorit"
 msgid "Sign in"
 msgstr "Kirjaudu sisään"
 
+msgid "Confirm attendance"
+msgstr "Vahvista osallistuminen"
+
+msgid "Already have an account?"
+msgstr "Onko sinulla jo tili?"
+
 msgid "Language selector"
 msgstr "Kielivalinta"
 

@@ -61,9 +61,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!navLinks.length) return;
 
         const sections = [
-            { key: '',             selector: '.hero-section' },
-            { key: 'que-es',       selector: '#que-es' },
-            { key: 'info-evento',  selector: '#info-evento' },
+            { key: '',               selector: '#inicio' },
+            { key: 'que-es',         selector: '#que-es' },
+            { key: 'compos',         selector: '#compos' },
+            { key: 'por-que',        selector: '#por-que' },
+            { key: 'info-evento',    selector: '#info-evento' },
+            { key: 'historia',       selector: '#historia' },
             { key: 'patrocinadores', selector: '#patrocinadores' },
         ]
         .map(s => ({ key: s.key, el: document.querySelector(s.selector) }))
@@ -99,205 +102,82 @@ document.addEventListener('DOMContentLoaded', function() {
         update();
     })();
 
-    // Hero Slider (desktop carousel, stacked-scroll fallback on mobile)
-    (function initHeroSlider() {
-        const slider = document.getElementById('hero-slider');
-        if (!slider) return;
-        const slides = Array.from(slider.querySelectorAll('.hero-slide'));
-        if (slides.length <= 1) return;
+    // Animated counters — fire once per element the first time it enters
+    // the viewport so stats feel alive as the user scrolls.
+    (function initCounters() {
+        const targets = Array.from(document.querySelectorAll('[data-count-to]'));
+        if (!targets.length) return;
 
-        // On mobile the slider is flattened into a vertical scroll of all
-        // slides (see CSS @media). Skip autoplay, dots and swipe, but still
-        // mark every slide active so counters fire and mosaics swap tiles.
-        const isMobile = window.matchMedia('(max-width: 768px)').matches;
-
-        const prevBtn = document.getElementById('hero-prev');
-        const nextBtn = document.getElementById('hero-next');
-        const dotsContainer = document.getElementById('hero-dots');
-        const AUTOPLAY_MS = 7000;
-        // Expose duration to CSS so the progress bar in the active dot
-        // stays in sync with the JS timer.
-        slider.style.setProperty('--slider-duration', AUTOPLAY_MS + 'ms');
-        let current = 0;
-        let timer = null;
-        let paused = false;
-
-        // Build dots (hidden on mobile via CSS, but we still need the array
-        // so go() can toggle the active dot on desktop).
-        slides.forEach((_, i) => {
-            const dot = document.createElement('button');
-            dot.type = 'button';
-            dot.setAttribute('aria-label', 'Ir al slide ' + (i + 1));
-            if (i === 0) dot.classList.add('is-active');
-            dot.addEventListener('click', () => go(i, true));
-            dotsContainer.appendChild(dot);
-        });
-        const dots = Array.from(dotsContainer.querySelectorAll('button'));
-
-        function go(index, manual) {
-            current = (index + slides.length) % slides.length;
-            slides.forEach((s, i) => s.classList.toggle('is-active', i === current));
-            dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
-            animateCountersIn(slides[current]);
-            if (manual) restart();
-        }
-
-        function next() { go(current + 1); }
-        function prev() { go(current - 1, true); }
-
-        function start() {
-            stop();
-            if (paused) return;
-            timer = setInterval(next, AUTOPLAY_MS);
-        }
-        function stop() {
-            if (timer) { clearInterval(timer); timer = null; }
-        }
-        function restart() { start(); }
-
-        if (!isMobile) {
-            if (prevBtn) prevBtn.addEventListener('click', prev);
-            if (nextBtn) nextBtn.addEventListener('click', () => go(current + 1, true));
-
-            // Pause autoplay only when hovering interactive controls. The hero
-            // text area is big enough that blanket-pausing made the rotation
-            // feel broken.
-            let hoverCount = 0;
-            const scope = slider.parentElement || document;
-            const pauseTargets = scope.querySelectorAll(
-                '.hero-nav, .hero-dots button, .cta-buttons a, .cta-buttons button, ' +
-                '.perk, .poster-thumb, .hero-poster img'
-            );
-            function setPaused(state) {
-                paused = state;
-                dotsContainer.classList.toggle('is-paused', state);
+        function animate(el) {
+            if (el.dataset.counted === '1') return;
+            const end = parseInt(el.dataset.countTo, 10);
+            if (isNaN(end)) return;
+            el.dataset.counted = '1';
+            const duration = 1100;
+            const startTime = performance.now();
+            function frame(now) {
+                const t = Math.min(1, (now - startTime) / duration);
+                const eased = 1 - Math.pow(1 - t, 3);
+                el.textContent = Math.round(end * eased);
+                if (t < 1) requestAnimationFrame(frame);
             }
-            pauseTargets.forEach(el => {
-                el.addEventListener('mouseenter', () => {
-                    hoverCount++;
-                    setPaused(true);
-                    stop();
-                });
-                el.addEventListener('mouseleave', () => {
-                    hoverCount = Math.max(0, hoverCount - 1);
-                    if (hoverCount === 0) {
-                        setPaused(false);
-                        start();
+            el.textContent = '0';
+            requestAnimationFrame(frame);
+        }
+
+        if ('IntersectionObserver' in window) {
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        animate(entry.target);
+                        io.unobserve(entry.target);
                     }
                 });
-            });
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowLeft') prev();
-                if (e.key === 'ArrowRight') go(current + 1, true);
-            });
-
-            // Touch swipe
-            let touchStartX = 0;
-            slider.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
-            slider.addEventListener('touchend', (e) => {
-                const dx = e.changedTouches[0].screenX - touchStartX;
-                if (Math.abs(dx) > 50) {
-                    if (dx < 0) go(current + 1, true); else prev();
-                }
-            });
-        }
-
-        // Animate counters inside the slide that just became active. Each
-        // animation runs once per slide to avoid distracting loops.
-        function animateCountersIn(slideEl) {
-            if (!slideEl) return;
-            const targets = slideEl.querySelectorAll('[data-count-to]');
-            targets.forEach(el => {
-                if (el.dataset.counted === '1') return;
-                const end = parseInt(el.dataset.countTo, 10);
-                if (isNaN(end)) return;
-                el.dataset.counted = '1';
-                const duration = 1100;
-                const startTime = performance.now();
-                function frame(now) {
-                    const t = Math.min(1, (now - startTime) / duration);
-                    const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
-                    el.textContent = Math.round(end * eased);
-                    if (t < 1) requestAnimationFrame(frame);
-                }
-                el.textContent = '0';
-                requestAnimationFrame(frame);
-            });
-        }
-
-        if (isMobile) {
-            // Stacked view: every slide is permanently active so the mosaic
-            // swap loop keeps going and counters don't stall waiting for a
-            // slide change that will never happen.
-            slides.forEach(s => s.classList.add('is-active'));
-            // Trigger counters the first time a slide scrolls into view,
-            // so the animation feels alive while the user scrolls.
-            if ('IntersectionObserver' in window) {
-                const io = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            animateCountersIn(entry.target);
-                            io.unobserve(entry.target);
-                        }
-                    });
-                }, { threshold: 0.3 });
-                slides.forEach(s => io.observe(s));
-            } else {
-                slides.forEach(s => animateCountersIn(s));
-            }
+            }, { threshold: 0.4 });
+            targets.forEach(el => io.observe(el));
         } else {
-            // Kick off counters that are visible in the initial slide.
-            animateCountersIn(slides[current]);
+            targets.forEach(animate);
+        }
+    })();
+
+    // Production screenshot mosaic as a decorative backdrop for sections
+    // that include .slide-bg-mosaic. Tiles swap one image every couple of
+    // seconds to keep the background alive.
+    (function initSectionMosaics() {
+        const containers = document.querySelectorAll('.slide-bg-mosaic');
+        if (!containers.length) return;
+        const shots = window.__DPMS_SCREENSHOTS || [];
+        const media = window.__DPMS_MEDIA_URL || '/media/';
+        if (!shots.length) return;
+        const tilesPerSection = 24;
+
+        function pick() {
+            return shots[Math.floor(Math.random() * shots.length)];
         }
 
-        // Production screenshot mosaic as a live background for slides that
-        // use .slide-bg-mosaic. Tiles get filled once and then one tile swaps
-        // its image every couple of seconds.
-        (function initSlideMosaics() {
-            const shots = window.__DPMS_SCREENSHOTS || [];
-            const media = window.__DPMS_MEDIA_URL || '/media/';
-            if (!shots.length) return;
-            const containers = slider.querySelectorAll('.slide-bg-mosaic');
-            if (!containers.length) return;
-            const tilesPerSlide = 24;
+        containers.forEach(container => {
+            const inner = document.createElement('div');
+            inner.className = 'slide-bg-mosaic-inner';
+            container.appendChild(inner);
 
-            function pick() {
-                return shots[Math.floor(Math.random() * shots.length)];
+            for (let i = 0; i < tilesPerSection; i++) {
+                const tile = document.createElement('div');
+                tile.className = 'slide-bg-tile';
+                tile.style.backgroundImage = 'url(' + media + pick() + ')';
+                inner.appendChild(tile);
             }
+            const tiles = Array.from(inner.querySelectorAll('.slide-bg-tile'));
 
-            containers.forEach(container => {
-                // Build an inner wrapper so the zoom animation can scale just
-                // the tiles without affecting the dark overlay.
-                const inner = document.createElement('div');
-                inner.className = 'slide-bg-mosaic-inner';
-                container.appendChild(inner);
-
-                for (let i = 0; i < tilesPerSlide; i++) {
-                    const tile = document.createElement('div');
-                    tile.className = 'slide-bg-tile';
+            function swap() {
+                const tile = tiles[Math.floor(Math.random() * tiles.length)];
+                tile.classList.add('is-swapping');
+                setTimeout(() => {
                     tile.style.backgroundImage = 'url(' + media + pick() + ')';
-                    inner.appendChild(tile);
-                }
-                const tiles = Array.from(inner.querySelectorAll('.slide-bg-tile'));
-
-                function swap() {
-                    // Only animate when the parent slide is visible, so we
-                    // don't burn cycles behind the scenes.
-                    const slide = container.closest('.hero-slide');
-                    if (!slide || !slide.classList.contains('is-active')) return;
-                    const tile = tiles[Math.floor(Math.random() * tiles.length)];
-                    tile.classList.add('is-swapping');
-                    setTimeout(() => {
-                        tile.style.backgroundImage = 'url(' + media + pick() + ')';
-                        tile.classList.remove('is-swapping');
-                    }, 700);
-                }
-
-                setInterval(swap, 1800);
-            });
-        })();
-
-        if (!isMobile) start();
+                    tile.classList.remove('is-swapping');
+                }, 700);
+            }
+            setInterval(swap, 1800);
+        });
     })();
 
     // Detectar scroll y añadir clase a navbar

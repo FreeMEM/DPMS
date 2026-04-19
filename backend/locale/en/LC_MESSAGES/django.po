@@ -50,6 +50,12 @@ msgstr "Sponsors"
 msgid "Sign in"
 msgstr "Sign in"
 
+msgid "Confirm attendance"
+msgstr "Confirm attendance"
+
+msgid "Already have an account?"
+msgstr "Already have an account?"
+
 msgid "Language selector"
 msgstr "Language selector"
 

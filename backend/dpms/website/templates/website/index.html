@@ -4,238 +4,75 @@
 {% block title %}{% if current_edition %}{{ current_edition.title }} - {% endif %}DPMS Demo Party{% endblock %}
 
 {% block content %}
-<!-- Hero Section - Full Screen Landing with Slider -->
-<div class="hero-section">
-    <div class="hero-slider" id="hero-slider">
 
-        <!-- Slide 1: Edición actual -->
-        <div class="hero-slide is-active" data-slide="0">
-            <div class="hero-wrapper">
-                {% if current_edition and current_edition.poster %}
-                <div class="hero-poster">
-                    <img src="{{ current_edition.poster.url }}" alt="{{ current_edition.title }} - {% trans 'Poster' %}"
-                         class="poster-image"
-                         {% if current_edition.logo_border_width > 0 %}
-                         style="box-shadow: 0 0 {{ current_edition.logo_border_width|add:20 }}px {{ current_edition.logo_border_color }};"
-                         {% endif %}
-                    >
-                </div>
+<!-- Hero: edición actual -->
+<section class="hero-section" id="inicio">
+    <div class="hero-wrapper">
+        {% if current_edition and current_edition.poster %}
+        <div class="hero-poster">
+            <img src="{{ current_edition.poster.url }}" alt="{{ current_edition.title }} - {% trans 'Poster' %}"
+                 class="poster-image"
+                 {% if current_edition.logo_border_width > 0 %}
+                 style="box-shadow: 0 0 {{ current_edition.logo_border_width|add:20 }}px {{ current_edition.logo_border_color }};"
+                 {% endif %}
+            >
+        </div>
+        {% endif %}
+
+        <div class="hero-content {% if current_edition and current_edition.poster %}with-poster{% endif %}">
+            {% if current_edition %}
+                <div class="edition-badge">{{ event_date_range|default:"Demo Party" }}</div>
+                <h1 class="hero-title">{{ current_edition.title }}</h1>
+                {% if current_edition.description %}
+                    <p class="hero-subtitle">{{ current_edition.description }}</p>
                 {% endif %}
 
-                <div class="hero-content {% if current_edition and current_edition.poster %}with-poster{% endif %}">
-                    {% if current_edition %}
-                        <div class="edition-badge">{{ event_date_range|default:"Demo Party" }}</div>
-                        <h1 class="hero-title">{{ current_edition.title }}</h1>
-                        {% if current_edition.description %}
-                            <p class="hero-subtitle">{{ current_edition.description }}</p>
-                        {% endif %}
-
-                        {% if countdown_data %}
-                        <div class="countdown-container">
-                            <div class="countdown-label">{% trans "Starts in" %}</div>
-                            <div class="countdown-timer" id="countdown"
-                                 data-target="{{ countdown_data.target_date }}">
-                                <div class="countdown-item">
-                                    <span class="countdown-value" id="days">{{ countdown_data.days }}</span>
-                                    <span class="countdown-unit">{% trans "Days" %}</span>
-                                </div>
-                                <div class="countdown-separator">:</div>
-                                <div class="countdown-item">
-                                    <span class="countdown-value" id="hours">{{ countdown_data.hours|stringformat:"02d" }}</span>
-                                    <span class="countdown-unit">{% trans "Hours" %}</span>
-                                </div>
-                                <div class="countdown-separator">:</div>
-                                <div class="countdown-item">
-                                    <span class="countdown-value" id="minutes">{{ countdown_data.minutes|stringformat:"02d" }}</span>
-                                    <span class="countdown-unit">{% trans "Min" %}</span>
-                                </div>
-                                <div class="countdown-separator">:</div>
-                                <div class="countdown-item">
-                                    <span class="countdown-value" id="seconds">{{ countdown_data.seconds|stringformat:"02d" }}</span>
-                                    <span class="countdown-unit">{% trans "Sec" %}</span>
-                                </div>
-                            </div>
+                {% if countdown_data %}
+                <div class="countdown-container">
+                    <div class="countdown-label">{% trans "Starts in" %}</div>
+                    <div class="countdown-timer" id="countdown"
+                         data-target="{{ countdown_data.target_date }}">
+                        <div class="countdown-item">
+                            <span class="countdown-value" id="days">{{ countdown_data.days }}</span>
+                            <span class="countdown-unit">{% trans "Days" %}</span>
                         </div>
-                        {% endif %}
-                    {% else %}
-                        <h1 class="hero-title">DPMS</h1>
-                        <p class="hero-subtitle">Demo Party Management System</p>
-                    {% endif %}
-
-                    <div class="cta-buttons">
-                        <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">{% trans "Register" %}</a>
-                        <a href="{{ FRONTEND_URL }}/login" class="btn btn-secondary">{% trans "Sign in" %}</a>
+                        <div class="countdown-separator">:</div>
+                        <div class="countdown-item">
+                            <span class="countdown-value" id="hours">{{ countdown_data.hours|stringformat:"02d" }}</span>
+                            <span class="countdown-unit">{% trans "Hours" %}</span>
+                        </div>
+                        <div class="countdown-separator">:</div>
+                        <div class="countdown-item">
+                            <span class="countdown-value" id="minutes">{{ countdown_data.minutes|stringformat:"02d" }}</span>
+                            <span class="countdown-unit">{% trans "Min" %}</span>
+                        </div>
+                        <div class="countdown-separator">:</div>
+                        <div class="countdown-item">
+                            <span class="countdown-value" id="seconds">{{ countdown_data.seconds|stringformat:"02d" }}</span>
+                            <span class="countdown-unit">{% trans "Sec" %}</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
+                {% endif %}
+            {% else %}
+                <h1 class="hero-title">DPMS</h1>
+                <p class="hero-subtitle">Demo Party Management System</p>
+            {% endif %}
 
-        <!-- Slide 2: Compos abiertas -->
-        {% if open_compos_count > 0 %}
-        <div class="hero-slide" data-slide="1">
-            <div class="hero-wrapper hero-wrapper--centered">
-                <div class="hero-content hero-content--centered">
-                    <div class="edition-badge">{% trans "Open compos" %}</div>
-                    <h2 class="hero-title hero-title--large-number">
-                        <span class="hero-big-number" data-count-to="{{ open_compos_count }}">{{ open_compos_count }}</span>
-                        <span class="hero-big-label">{% blocktrans count counter=open_compos_count %}competition waiting for your production{% plural %}competitions waiting for your production{% endblocktrans %}</span>
-                    </h2>
-                    {% if open_compos %}
-                    <div class="compos-chips">
-                        {% for compo in open_compos %}
-                        <span class="compo-chip">{{ compo.name }}</span>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                    <p class="hero-subtitle">{% trans "Upload your demo, intro, graphic, music or wild. There's a category for whatever you're creating." %}</p>
-                    <div class="cta-buttons">
-                        <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">{% trans "Upload a production" %}</a>
-                        <a href="{{ FRONTEND_URL }}/login" class="btn btn-secondary">{% trans "I already have an account" %}</a>
-                    </div>
-                </div>
+            <div class="cta-buttons">
+                <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">{% trans "Confirm attendance" %}</a>
+                <a href="{{ FRONTEND_URL }}/signup" class="btn btn-secondary">{% trans "Upload a production" %}</a>
             </div>
+            <p class="hero-signin-hint">
+                {% trans "Already have an account?" %}
+                <a href="{{ FRONTEND_URL }}/login">{% trans "Sign in" %}</a>
+            </p>
         </div>
-        {% endif %}
-
-        <!-- Slide 3: Por qué registrarse -->
-        <div class="hero-slide" data-slide="2">
-            <div class="slide-bg-mosaic" aria-hidden="true"></div>
-            <div class="hero-wrapper hero-wrapper--centered">
-                <div class="hero-content hero-content--centered">
-                    <div class="edition-badge">{% trans "Join the scene" %}</div>
-                    <h2 class="hero-title hero-title--medium">{% trans "Why register?" %}</h2>
-                    <div class="perks-grid">
-                        <div class="perk">
-                            <div class="perk-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                    <polyline points="17 8 12 3 7 8"/>
-                                    <line x1="12" y1="3" x2="12" y2="15"/>
-                                </svg>
-                            </div>
-                            <h3>{% trans "Upload your work" %}</h3>
-                            <p>{% trans "Demos, intros, graphics, music... compete in any open category." %}</p>
-                        </div>
-                        <div class="perk">
-                            <div class="perk-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                                </svg>
-                            </div>
-                            <h3>{% trans "Vote live" %}</h3>
-                            <p>{% trans "Decide which works win during the party with your audience vote." %}</p>
-                        </div>
-                        <div class="perk">
-                            <div class="perk-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                                </svg>
-                            </div>
-                            <h3>{% trans "Your place in the scene" %}</h3>
-                            <p>{% trans "Create your profile with nickname and group. Discover other people's work and follow what's brewing in every edition." %}</p>
-                        </div>
-                        <div class="perk">
-                            <div class="perk-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                                    <circle cx="8.5" cy="8.5" r="1.5"/>
-                                    <polyline points="21 15 16 10 5 21"/>
-                                </svg>
-                            </div>
-                            <h3>{% trans "Historical archive" %}</h3>
-                            <p>{% trans "Download and enjoy productions from previous editions." %}</p>
-                        </div>
-                    </div>
-                    <div class="cta-buttons">
-                        <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">{% trans "Create a free account" %}</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 4: Historia / Retrospectiva -->
-        {% if stats.editions > 0 %}
-        <div class="hero-slide" data-slide="3">
-            <div class="slide-bg-mosaic" aria-hidden="true"></div>
-            <div class="hero-wrapper hero-wrapper--centered">
-                <div class="hero-content hero-content--centered">
-                    <div class="edition-badge">{% trans "More than 30 years of scene" %}</div>
-                    <h2 class="hero-title hero-title--medium">{% blocktrans with year=stats.first_year %}A story that began in {{ year }}{% endblocktrans %}</h2>
-                    <div class="stats-grid">
-                        <div class="stat">
-                            <div class="stat-value" data-count-to="{{ stats.editions }}">{{ stats.editions }}</div>
-                            <div class="stat-label">{% blocktrans count counter=stats.editions %}Edition{% plural %}Editions{% endblocktrans %}</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value" data-count-to="{{ stats.productions }}">{{ stats.productions }}</div>
-                            <div class="stat-label">{% trans "Productions" %}</div>
-                        </div>
-                        {% if stats.years_of_history %}
-                        <div class="stat">
-                            <div class="stat-value" data-count-to="{{ stats.years_of_history }}">{{ stats.years_of_history }}</div>
-                            <div class="stat-label">{% trans "Years of history" %}</div>
-                        </div>
-                        {% endif %}
-                    </div>
-                    {% if past_posters %}
-                    <div class="poster-strip">
-                        {% for poster in past_posters %}
-                        <img src="{{ MEDIA_URL|default:'/media/' }}{{ poster }}" alt="{% trans 'Previous edition poster' %}" class="poster-thumb">
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                    <p class="hero-subtitle">{% trans "Amiga Party Posadas has been a meeting point for the Spanish demoscene for decades." %}</p>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- Slide 5: Cultura demoscene -->
-        <div class="hero-slide" data-slide="4">
-            <div class="slide-bg-mosaic" aria-hidden="true"></div>
-            <div class="hero-wrapper hero-wrapper--centered">
-                <div class="hero-content hero-content--centered">
-                    <div class="edition-badge">{% trans "First time here?" %}</div>
-                    <h2 class="hero-title hero-title--medium">{% trans "This is a demo party" %}</h2>
-                    <p class="hero-subtitle hero-subtitle--large">
-                        {% trans "A gathering where programmers, artists and musicians compete creating real-time audiovisual works. Code, art and community around a single projector." %}
-                    </p>
-                    <p class="hero-tagline">{% trans "Bring your computer. Bring your ideas. Live the scene." %}</p>
-                    <div class="cta-buttons">
-                        <a href="#que-es" class="btn btn-secondary">{% trans "Learn more" %}</a>
-                        <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">{% trans "Sign me up" %}</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
+</section>
 
-    <!-- Navigation arrows -->
-    <button class="hero-nav hero-nav--prev" id="hero-prev" aria-label="{% trans 'Previous slide' %}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="15 18 9 12 15 6"/>
-        </svg>
-    </button>
-    <button class="hero-nav hero-nav--next" id="hero-next" aria-label="{% trans 'Next slide' %}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="9 18 15 12 9 6"/>
-        </svg>
-    </button>
-
-    <!-- Dots indicator -->
-    <div class="hero-dots" id="hero-dots"></div>
-
-    <!-- Scroll indicator -->
-    <div class="scroll-indicator">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 5v14M19 12l-7 7-7-7"/>
-        </svg>
-    </div>
-</div>
-
-<!-- Info Section -->
-<div class="info-section" id="que-es">
+<!-- ¿Qué es la Posadas Party? -->
+<section class="info-section" id="que-es">
     <div class="container">
         <h2>{% trans "What Posadas Party is" %}</h2>
         <p class="section-description">
@@ -260,6 +97,7 @@
                     <p>{% trans "Demos, intros, tracked and executable music, pixel graphics, wild compos and more. Each category has its own rules and technical limits that push creativity to the edge." %}</p>
                 </div>
             </div>
+            {% comment %}Feature "Voting" temporarily disabled — kept here in case we bring it back.
             <div class="feature feature--slideshow" data-slideshow="1">
                 <div class="feature-slideshow"></div>
                 <div class="feature-content">
@@ -272,6 +110,7 @@
                     <p>{% trans "The audience decides the winners. Voting happens live during the screening session, creating a unique atmosphere of cheers, surprises and reveals." %}</p>
                 </div>
             </div>
+            {% endcomment %}
             <div class="feature feature--slideshow" data-slideshow="2">
                 <div class="feature-slideshow"></div>
                 <div class="feature-content">
@@ -289,7 +128,6 @@
             </div>
         </div>
 
-        <!-- Posadas Party story -->
         <div class="story-block">
             <h3 class="story-title">{% trans "Posadas Party, since 1995" %}</h3>
             <p class="story-lead">
@@ -318,16 +156,83 @@
                 </div>
             </div>
         </div>
+    </div>
+</section>
 
-        <div class="section-cta">
-            <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-large btn-glow">{% trans "Join now" %}</a>
+<!-- Compos abiertas -->
+{% if open_compos_count > 0 %}
+<section class="compos-section" id="compos">
+    <div class="slide-bg-mosaic" aria-hidden="true"></div>
+    <div class="container container--centered">
+        <div class="edition-badge">{% trans "Open compos" %}</div>
+        <h2 class="hero-title hero-title--large-number">
+            <span class="hero-big-number" data-count-to="{{ open_compos_count }}">{{ open_compos_count }}</span>
+            <span class="hero-big-label">{% blocktrans count counter=open_compos_count %}competition waiting for your production{% plural %}competitions waiting for your production{% endblocktrans %}</span>
+        </h2>
+        {% if open_compos %}
+        <div class="compos-chips">
+            {% for compo in open_compos %}
+            <span class="compo-chip">{{ compo.name }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <p class="section-description">{% trans "Upload your demo, intro, graphic, music or wild. There's a category for whatever you're creating." %}</p>
+        <div class="cta-buttons">
+            <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-glow">{% trans "Upload a production" %}</a>
+            <a href="{{ FRONTEND_URL }}/login" class="btn btn-secondary">{% trans "I already have an account" %}</a>
         </div>
     </div>
-</div>
+</section>
+{% endif %}
 
-<!-- Event Details Section -->
+<!-- ¿Por qué registrarte? -->
+<section class="info-section info-section--compact" id="por-que">
+    <div class="container container--centered">
+        <div class="edition-badge">{% trans "Join the scene" %}</div>
+        <h2>{% trans "Why register?" %}</h2>
+        <div class="perks-grid">
+            <div class="perk">
+                <div class="perk-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                </div>
+                <h3>{% trans "Upload your work" %}</h3>
+                <p>{% trans "Demos, intros, graphics, music... compete in any open category." %}</p>
+            </div>
+            <div class="perk">
+                <div class="perk-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
+                <h3>{% trans "Your place in the scene" %}</h3>
+                <p>{% trans "Create your profile with nickname and group. Discover other people's work and follow what's brewing in every edition." %}</p>
+            </div>
+            <div class="perk">
+                <div class="perk-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                </div>
+                <h3>{% trans "Historical archive" %}</h3>
+                <p>{% trans "Download and enjoy productions from previous editions." %}</p>
+            </div>
+        </div>
+        <div class="section-cta cta-buttons">
+            <a href="{{ FRONTEND_URL }}/signup" class="btn btn-primary btn-large btn-glow">{% trans "Confirm attendance" %}</a>
+            <a href="{{ FRONTEND_URL }}/signup" class="btn btn-secondary btn-large">{% trans "Upload a production" %}</a>
+        </div>
+    </div>
+</section>
+
+<!-- Información práctica del evento -->
 {% if current_edition.travel_info or current_edition.contact_info or current_edition.what_to_bring %}
-<div class="info-section" id="info-evento">
+<section class="info-section" id="info-evento">
     <div class="container">
         <h2>{% trans "Event information" %}</h2>
         <p class="section-description">{% blocktrans with title=current_edition.title %}Everything you need to know about {{ title }}{% endblocktrans %}</p>
@@ -370,12 +275,47 @@
             {% endif %}
         </div>
     </div>
-</div>
+</section>
 {% endif %}
 
-<!-- Sponsors Section -->
+<!-- Retrospectiva / stats -->
+{% if stats.editions > 0 %}
+<section class="info-section info-section--retrospective" id="historia">
+    <div class="slide-bg-mosaic" aria-hidden="true"></div>
+    <div class="container container--centered">
+        <div class="edition-badge">{% trans "More than 30 years of scene" %}</div>
+        <h2>{% blocktrans with year=stats.first_year %}A story that began in {{ year }}{% endblocktrans %}</h2>
+        <div class="stats-grid">
+            <div class="stat">
+                <div class="stat-value" data-count-to="{{ stats.editions }}">{{ stats.editions }}</div>
+                <div class="stat-label">{% blocktrans count counter=stats.editions %}Edition{% plural %}Editions{% endblocktrans %}</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" data-count-to="{{ stats.productions }}">{{ stats.productions }}</div>
+                <div class="stat-label">{% trans "Productions" %}</div>
+            </div>
+            {% if stats.years_of_history %}
+            <div class="stat">
+                <div class="stat-value" data-count-to="{{ stats.years_of_history }}">{{ stats.years_of_history }}</div>
+                <div class="stat-label">{% trans "Years of history" %}</div>
+            </div>
+            {% endif %}
+        </div>
+        {% if past_posters %}
+        <div class="poster-strip">
+            {% for poster in past_posters %}
+            <img src="{{ MEDIA_URL|default:'/media/' }}{{ poster }}" alt="{% trans 'Previous edition poster' %}" class="poster-thumb">
+            {% endfor %}
+        </div>
+        {% endif %}
+        <p class="section-description">{% trans "Amiga Party Posadas has been a meeting point for the Spanish demoscene for decades." %}</p>
+    </div>
+</section>
+{% endif %}
+
+<!-- Sponsors -->
 {% if sponsors %}
-<div class="sponsors-section" id="patrocinadores">
+<section class="sponsors-section" id="patrocinadores">
     <div class="container">
         <h2>{% trans "Sponsors" %}</h2>
         <p class="section-description">
@@ -399,7 +339,7 @@
             {% endfor %}
         </div>
     </div>
-</div>
+</section>
 {% endif %}
 
 {% endblock %}
@@ -411,6 +351,7 @@ window.__DPMS_MEDIA_URL = '{{ MEDIA_URL|default:"/media/" }}';
 window.__DPMS_SCREENSHOTS = [
     {% for s in screenshots %}'{{ s }}'{% if not forloop.last %},{% endif %}{% endfor %}
 ];
+
 // Slideshow on feature cards
 (function() {
     var MEDIA_URL = window.__DPMS_MEDIA_URL;
@@ -438,7 +379,6 @@ window.__DPMS_SCREENSHOTS = [
         var current = 0;
         var interval = null;
 
-        // Preload images
         images.forEach(function(src) {
             var img = new Image();
             img.src = MEDIA_URL + src;

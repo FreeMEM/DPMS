@@ -50,6 +50,12 @@ msgstr "Sponsoren"
 msgid "Sign in"
 msgstr "Anmelden"
 
+msgid "Confirm attendance"
+msgstr "Teilnahme bestätigen"
+
+msgid "Already have an account?"
+msgstr "Schon ein Konto?"
+
 msgid "Language selector"
 msgstr "Sprachauswahl"
 

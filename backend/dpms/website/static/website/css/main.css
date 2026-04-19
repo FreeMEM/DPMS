@@ -331,51 +331,20 @@ main {
     }
 }
 
-/* Hero Section */
+/* Hero Section (first viewport: poster + title + countdown + CTAs) */
 .hero-section {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 100px 20px 60px;
+    padding: 120px 20px 60px;
     position: relative;
     overflow: hidden;
 }
 
-/* Hero Slider */
-.hero-slider {
-    position: relative;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: calc(100vh - 160px);
-}
-
-.hero-slide {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(20px);
-    transition: opacity 0.6s ease, transform 0.6s ease, visibility 0s 0.6s;
-    pointer-events: none;
-}
-
-.hero-slide.is-active {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-    transition: opacity 0.6s ease, transform 0.6s ease, visibility 0s;
-    pointer-events: auto;
-    position: relative;
-}
-
-/* Production screenshots mosaic behind informational slides */
+/* Production screenshots mosaic — decorative backdrop for information
+   sections. Positioned absolute inside its parent section. */
 .slide-bg-mosaic {
     position: absolute;
     inset: 0;
@@ -386,22 +355,6 @@ main {
     contain: strict;
     will-change: transform, filter, opacity;
     transform: translateZ(0);
-}
-
-.hero-slide.is-active .slide-bg-mosaic {
-    animation: mosaic-boom 1200ms cubic-bezier(0.16, 0.8, 0.2, 1) 180ms both;
-}
-
-.hero-slide.is-active .slide-bg-mosaic-inner {
-    animation:
-        mosaic-zoom 18s ease-in-out infinite alternate,
-        mosaic-push 1200ms cubic-bezier(0.16, 0.8, 0.2, 1) 180ms backwards;
-}
-
-/* Pause the Ken Burns zoom on inactive slides so the browser isn't compositing
-   three heavy mosaics at once. Saves paint cycles for the Three.js background. */
-.hero-slide:not(.is-active) .slide-bg-mosaic-inner {
-    animation-play-state: paused;
 }
 
 .slide-bg-mosaic-inner {
@@ -483,7 +436,8 @@ main {
     opacity: 0;
 }
 
-.hero-slide .hero-wrapper {
+.compos-section .container--centered,
+.info-section--retrospective .container--centered {
     position: relative;
     z-index: 1;
 }
@@ -616,18 +570,26 @@ main {
     to   { transform: scaleX(1); }
 }
 
-/* Perks grid (slide 3) */
+/* Perks grid. Flex-wrap with centered orphans so removing a card doesn't
+   leave a hole — each card is ~280–340px; three fit comfortably side by
+   side, fewer get centered on the row. */
 .perks-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 1.5rem;
-    margin: 2rem 0;
-    max-width: 720px;
+    margin: 2rem auto;
+    max-width: 1000px;
     width: 100%;
 }
 
+.perks-grid .perk {
+    flex: 1 1 280px;
+    max-width: 340px;
+}
+
 @media (max-width: 600px) {
-    .perks-grid { grid-template-columns: 1fr; }
+    .perks-grid .perk { flex-basis: 100%; max-width: 100%; }
 }
 
 .perk {
@@ -786,48 +748,11 @@ main {
 }
 
 @media (max-width: 768px) {
-    /* On mobile the slider becomes a vertical stack so users can scroll
-       through all slides naturally — the carousel was confusing on small
-       screens. All slides are permanently visible; dots, arrows and the
-       entrance boom are disabled since there are no slide transitions. */
     .hero-section {
         min-height: auto;
-        overflow: visible;
-        padding: 80px 15px 40px;
+        padding: 90px 15px 40px;
     }
 
-    .hero-slider {
-        flex-direction: column;
-        align-items: stretch;
-        min-height: 0;
-        gap: 2.5rem;
-    }
-
-    .hero-slide {
-        position: relative;
-        inset: auto;
-        opacity: 1;
-        visibility: visible;
-        transform: none;
-        pointer-events: auto;
-        min-height: auto;
-        padding: 2.5rem 0;
-        transition: none;
-    }
-
-    .hero-slide.is-active .slide-bg-mosaic {
-        animation: none;
-    }
-
-    .hero-slide.is-active .slide-bg-mosaic-inner,
-    .hero-slide:not(.is-active) .slide-bg-mosaic-inner {
-        animation: mosaic-zoom 18s ease-in-out infinite alternate;
-        animation-play-state: running;
-    }
-
-    .hero-dots { display: none; }
-    .hero-nav { display: none; }
-    .perks-grid { grid-template-columns: 1fr; }
     .stats-grid { gap: 1.5rem; }
     .poster-thumb { width: 60px; height: 82px; }
 }
@@ -923,6 +848,23 @@ main {
     color: var(--text-secondary);
     margin-bottom: 2rem;
     font-weight: 300;
+}
+
+.hero-signin-hint {
+    margin-top: 1.25rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.hero-signin-hint a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    margin-left: 0.3rem;
+}
+
+.hero-signin-hint a:hover {
+    text-decoration: underline;
 }
 
 /* Countdown Timer */
@@ -1113,6 +1055,34 @@ section, .info-section, .compos-section, .editions-section, .cta-final {
 .info-section {
     background: rgba(15, 15, 15, 0.7);
     backdrop-filter: blur(5px);
+}
+
+/* Tighter padding for "secondary" info sections like "Why register?" */
+.info-section--compact {
+    padding: 4rem 0;
+}
+
+/* Retrospective section uses a darker backdrop and hosts the mosaic */
+.info-section--retrospective {
+    background: rgba(10, 12, 18, 0.75);
+    overflow: hidden;
+}
+
+.info-section--retrospective .container--centered,
+.info-section--compact .container--centered {
+    text-align: center;
+}
+
+.container--centered {
+    text-align: center;
+}
+
+.container--centered .edition-badge {
+    margin-bottom: 1rem;
+}
+
+.container--centered h2 {
+    margin-bottom: 1rem;
 }
 
 .info-section h2,
