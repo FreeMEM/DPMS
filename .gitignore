@@ -4,6 +4,10 @@ certbot/
 # Deploy marker (tracks last-deployed SHA for the self-hosted workflow)
 .last-deployed-sha
 
+# Database dumps / backups kept locally on the server
+*.sql
+*.sql.gz
+
 # Claude Code documentation
 CLAUDE.md
 
