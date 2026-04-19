@@ -63,8 +63,18 @@ SECURE_CONTENT_TYPE_NOSNIFF = env.bool(
 #     "CacheControl": f"max-age={_AWS_EXPIRY}, s-maxage={_AWS_EXPIRY}, must-revalidate",
 # }
 
-# Static  files
-# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# Static files — ManifestStaticFilesStorage añade un hash al nombre de cada
+# fichero tras `collectstatic`, de modo que los recursos pueden servirse con
+# `Cache-Control: immutable` sin riesgo de servir versiones viejas tras un
+# despliegue (cada build produce URLs distintas).
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
+    },
+}
 
 # Media
 # DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
