@@ -4,6 +4,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from dpms.compos.views import (
+    AttendanceViewSet,
     EditionViewSet,
     CompoViewSet,
     HasCompoViewSet,
@@ -34,6 +35,7 @@ router.register(r'productions', ProductionViewSet, basename='productions')
 router.register(r'files', FileViewSet, basename='files')
 router.register(r'gallery', GalleryImageViewSet, basename='gallery')
 router.register(r'sponsors', SponsorViewSet, basename='sponsors')
+router.register(r'attendances', AttendanceViewSet, basename='attendances')
 
 # StageRunner routes
 router.register(r'stagerunner-config', StageRunnerConfigViewSet, basename='stagerunner-config')

@@ -1,3 +1,4 @@
+from .attendance import AttendanceSerializer, AttendanceAdminSerializer
 from .editions import EditionSerializer, EditionDetailSerializer, EditionListSerializer, ContactFormSerializer
 from .compos import CompoSerializer, CompoDetailSerializer, HasCompoSerializer
 from .productions import ProductionSerializer, ProductionDetailSerializer, ProductionCreateSerializer
@@ -50,6 +51,8 @@ from .voting import (
 )
 
 __all__ = [
+    'AttendanceSerializer',
+    'AttendanceAdminSerializer',
     'EditionSerializer',
     'EditionDetailSerializer',
     'EditionListSerializer',

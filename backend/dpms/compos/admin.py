@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.db.models import Count
 from modeltranslation.admin import TranslationAdmin
 from .models import (
+    Attendance,
     Edition,
     Compo,
     HasCompo,
@@ -2425,3 +2426,31 @@ class PresentationSlideAdmin(admin.ModelAdmin):
         return obj.created.strftime("%Y-%m-%d %H:%M")
     created_display.short_description = "Created"
     created_display.admin_order_field = "created"
+
+
+@admin.register(Attendance)
+class AttendanceAdmin(admin.ModelAdmin):
+    """RSVP confirmations — who's coming to which edition."""
+
+    list_display = (
+        "id",
+        "user",
+        "edition",
+        "sleeps_at",
+        "days_count",
+        "created",
+    )
+    list_filter = ("edition", "sleeps_at", "created")
+    search_fields = ("user__email", "user__username", "equipment")
+    autocomplete_fields = ("user", "edition")
+    readonly_fields = ("created", "modified")
+
+    fieldsets = (
+        ("Confirmation", {"fields": ("user", "edition", "sleeps_at", "days")}),
+        ("Equipment", {"fields": ("equipment",)}),
+        ("Timestamps", {"fields": ("created", "modified"), "classes": ("collapse",)}),
+    )
+
+    def days_count(self, obj):
+        return len(obj.days or [])
+    days_count.short_description = "# días"

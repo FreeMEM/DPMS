@@ -116,6 +116,11 @@ class Edition(BaseModel):
         default=False,
         help_text="Enable the public contact form for this edition"
     )
+    attendance_count_public = models.BooleanField(
+        "Attendance Count Public",
+        default=False,
+        help_text="Publish the confirmed-attendance counter on the landing page."
+    )
     contact_email = models.EmailField(
         "Contact Email",
         blank=True, default='',

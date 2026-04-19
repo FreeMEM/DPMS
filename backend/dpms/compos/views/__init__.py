@@ -1,3 +1,4 @@
+from .attendance import AttendanceViewSet
 from .editions import EditionViewSet
 from .compos import CompoViewSet, HasCompoViewSet
 from .productions import ProductionViewSet
@@ -23,6 +24,7 @@ from .voting import (
 )
 
 __all__ = [
+    'AttendanceViewSet',
     'EditionViewSet',
     'CompoViewSet',
     'HasCompoViewSet',

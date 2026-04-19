@@ -79,6 +79,58 @@ class UserViewSet(
 
         return [permission() for permission in permissions]
 
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="admin-list",
+        permission_classes=[IsDPMSAdmin],
+    )
+    def admin_list(self, request):
+        """
+        Flat list of active users for admin panels.
+
+        If `?edition=<id>` is provided, each row gets an `attends` boolean
+        (whether the user has confirmed attendance for that edition) and the
+        response includes `confirmed_count` / `total_count` totals for the
+        "X/Y confirmados" header. Admin-only.
+        """
+        from dpms.compos.models import Attendance
+
+        edition_id = request.query_params.get("edition")
+        users = (
+            User.objects.filter(is_active=True)
+            .select_related("profile")
+            .order_by("-date_joined")
+        )
+
+        attending_ids = set()
+        if edition_id:
+            attending_ids = set(
+                Attendance.objects.filter(edition_id=edition_id)
+                .values_list("user_id", flat=True)
+            )
+
+        rows = [
+            {
+                "id": u.id,
+                "email": u.email,
+                "username": u.username,
+                "first_name": u.first_name,
+                "last_name": u.last_name,
+                "nickname": getattr(u.profile, "nickname", "") if hasattr(u, "profile") else "",
+                "is_verified": u.is_verified,
+                "date_joined": u.date_joined,
+                "attends": (u.id in attending_ids) if edition_id else None,
+            }
+            for u in users
+        ]
+
+        return Response({
+            "total_count": len(rows),
+            "confirmed_count": len(attending_ids) if edition_id else None,
+            "results": rows,
+        })
+
     @action(detail=False, methods=["get"], permission_classes=[IsDPMSAdmin])
     def search(self, request):
         """Search users by email or nickname. Admin only."""
