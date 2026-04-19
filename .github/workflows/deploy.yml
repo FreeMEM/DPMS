@@ -28,13 +28,44 @@ jobs:
         id: changes
         run: |
           cd /var/www/DPMS
-          OLD_HEAD=$(git -c safe.directory=/var/www/DPMS rev-parse HEAD)
-          echo "old_head=$OLD_HEAD" >> $GITHUB_OUTPUT
 
-          # Fetch and check what changed
+          # Resolve the target SHA from the remote before pulling.
           git -c safe.directory=/var/www/DPMS fetch origin main
-          CHANGED=$(git -c safe.directory=/var/www/DPMS diff --name-only $OLD_HEAD origin/main)
-          echo "Changed files:"
+          TARGET=$(git -c safe.directory=/var/www/DPMS rev-parse origin/main)
+          echo "target=$TARGET" >> $GITHUB_OUTPUT
+
+          # We can't use `git rev-parse HEAD` as the "previous" state: the
+          # self-hosted runner lives on the same server as the repo, so pushes
+          # made from this box leave local HEAD already aligned with
+          # origin/main, turning the diff into a no-op. Track the last
+          # successful deploy via a marker file instead (ignored by git).
+          MARKER=/var/www/DPMS/.last-deployed-sha
+          if [ -f "$MARKER" ]; then
+            LAST_DEPLOYED=$(cat "$MARKER")
+          else
+            LAST_DEPLOYED=""
+          fi
+
+          if [ -z "$LAST_DEPLOYED" ]; then
+            echo "No deploy marker found — forcing full restart."
+            echo "need_backend_build=true" >> $GITHUB_OUTPUT
+            echo "need_frontend_build=true" >> $GITHUB_OUTPUT
+            echo "need_backend_restart=true" >> $GITHUB_OUTPUT
+            echo "need_nginx_restart=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          if [ "$LAST_DEPLOYED" = "$TARGET" ]; then
+            echo "Already deployed $TARGET, nothing to do."
+            echo "need_backend_build=false" >> $GITHUB_OUTPUT
+            echo "need_frontend_build=false" >> $GITHUB_OUTPUT
+            echo "need_backend_restart=false" >> $GITHUB_OUTPUT
+            echo "need_nginx_restart=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          CHANGED=$(git -c safe.directory=/var/www/DPMS diff --name-only "$LAST_DEPLOYED" "$TARGET")
+          echo "Changed files (from $LAST_DEPLOYED to $TARGET):"
           echo "$CHANGED"
 
           # Detect what needs rebuild
@@ -85,9 +116,11 @@ jobs:
               RESTARTED="true"
             fi
             if [ "${{ steps.changes.outputs.need_nginx_restart }}" = "true" ]; then
-              # Reload en caliente para aplicar site.conf sin downtime.
-              docker compose -f production.yml exec -T nginx nginx -t
-              docker compose -f production.yml exec -T nginx nginx -s reload
+              # `restart` (no `reload`) porque el `git reset --hard` del paso
+              # anterior reescribe site.conf con un inode nuevo; un bind mount
+              # sigue apuntando al inode viejo hasta que el contenedor vuelve
+              # a arrancar y Docker re-resuelve la ruta del host.
+              docker compose -f production.yml restart nginx
               RESTARTED="true"
             fi
           fi
@@ -124,6 +157,12 @@ jobs:
           fi
 
           echo "Deploy successful! (HTTP $HTTP_CODE)"
+
+      - name: Update deploy marker
+        run: |
+          # Only mark as deployed after the health check passed so a failed
+          # deploy replays next time instead of being silently skipped.
+          echo "${{ steps.changes.outputs.target }}" > /var/www/DPMS/.last-deployed-sha
 
       - name: Cleanup old Docker images
         run: docker image prune -f

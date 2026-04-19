@@ -1,6 +1,9 @@
 .certbot
 certbot/
 
+# Deploy marker (tracks last-deployed SHA for the self-hosted workflow)
+.last-deployed-sha
+
 # Claude Code documentation
 CLAUDE.md
 
