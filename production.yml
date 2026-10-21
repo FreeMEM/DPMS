@@ -38,7 +38,15 @@ services:
       - backend
 
   nginx:
-    image: owasp/modsecurity-crs:nginx-alpine
+    # Versión LTS fija del CRS 4; actualizar con `docker compose pull nginx`.
+    image: owasp/modsecurity-crs:4.25-nginx-alpine-lts
+    # Registro de auditoría a la salida del contenedor (la ruta del volumen no
+    # la podía crear el usuario de nginx y no se escribía nada), con rotación.
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
     restart: unless-stopped
     depends_on:
       - backend_party
@@ -46,10 +54,12 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      # Solo para el balanceador, con PROXY protocol (ver nginx/site.conf)
+      - "9443:9443"
     environment:
       # ModSecurity
       - MODSEC_RULE_ENGINE=On
-      - MODSEC_AUDIT_LOG=/var/log/modsecurity/audit.log
+      - MODSEC_AUDIT_LOG=/dev/stdout
       - BLOCKING_PARANOIA=1
       # Ajustes para API REST
       - ALLOWED_METHODS=GET HEAD POST OPTIONS PUT PATCH DELETE
